@@ -27,7 +27,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .topbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
     padding: 12px 16px;
     background: var(--glass-bg);
@@ -37,19 +36,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     z-index: 100;
     flex-wrap: wrap;
     flex-shrink: 0;
+    justify-content: space-between;
 }
 .topbar-left { display: flex; align-items: center; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 8px; }
 .brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: background 0.3s; flex-shrink: 0; }
 #project-selector { font-weight: 700; font-size: 15px; color: #1a1a1a; border: none; background: transparent; outline: none; cursor: pointer; max-width: 150px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
 
-.filters { display: flex; gap: 6px; overflow-x: auto; flex: 1; padding: 2px 0; scrollbar-width: none; -ms-overflow-style: none; }
-.filters::-webkit-scrollbar { display: none; }
-.fbtn { padding: 7px 16px; border: 1px solid #ddd; border-radius: 20px; background: rgba(255,255,255,0.8); color: #666; font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-weight: 500; }
-.fbtn:hover { background: #fff; border-color: #ccc; }
-.fbtn.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); font-weight: 700; }
-
-.top-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+.top-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
 .topbtn { height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; background: rgba(255,255,255,0.8); font-size: 12px; white-space: nowrap; cursor: pointer; transition: all 0.2s; outline: none; color: #444; }
 .export-btn { height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid #1D9E75; border-radius: 8px; background: #E1F5EE; color: #085041; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 
@@ -88,13 +82,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 /* BOARD */
 .board-wrap{flex:1;overflow-x:auto;overflow-y:hidden;display:flex}
-.board{display:flex;gap:12px;padding:14px 16px;align-items:flex-start;height:100%}
+.board{display:flex;gap:12px;padding:14px 16px 24px 16px;align-items:stretch;height:100%}
 
-.col{width:270px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;max-height:100%; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+.col{width:270px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;height:100%; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
 .col-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); box-shadow:0 2px 5px rgba(0,0,0,0.02)}
 .col-lbl{font-size:12px;font-weight:600;flex:1;color:#333;}
 .col-cnt{font-size:11px;color:#888;background:rgba(0,0,0,0.05); padding:2px 8px;border-radius:10px; font-weight: 500;}
-.col-body{overflow-y:auto;display:flex;flex-direction:column;gap:8px;flex:1; padding-bottom: 80px;} 
+.col-body{overflow-y:auto;display:flex;flex-direction:column;gap:8px;flex:1; padding:10px 10px 80px 10px; background:rgba(255,255,255,0.25); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.4); border-radius:12px; box-shadow:inset 0 4px 15px rgba(0,0,0,0.02);} 
 .col-body::-webkit-scrollbar{width:4px;}
 .col-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:4px;}
 
@@ -185,7 +179,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* FIX RESPONSIVE MOBILE */
 @media (max-width: 800px) { 
   .topbar { flex-direction: column; align-items: stretch; padding: 12px; gap: 10px; }
-  .filters { width: 100%; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px; }
   .top-actions { width: 100%; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 4px; scrollbar-width: none; }
   .top-actions::-webkit-scrollbar { display: none; }
   
@@ -210,32 +203,48 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
     </div>
 
-    <div class="filters">
-      <button class="fbtn active" onclick="setTF('semua',this)">Semua</button>
-      <button class="fbtn" onclick="setTF('Video',this)">Video</button>
-      <button class="fbtn" onclick="setTF('Feed',this)">Feed</button>
-      <button class="fbtn" onclick="setTF('Story',this)">Story</button>
-      <button class="fbtn" onclick="setTF('Catatan',this)">Catatan</button>
-    </div>
-
+    <!-- PENGURUTAN LOGIS BERDASARKAN WORKFLOW (KIRI KE KANAN) -->
     <div class="top-actions">
-      <button class="topbtn" onclick="openThemeModal()" style="font-weight:600;">🎨 Tema</button>
-      <select id="sort-by" class="topbtn" onchange="renderBoard()" title="Urutkan Konten">
-        <option value="manual">↕️ Urutan Bebas</option>
-        <option value="newest">✨ Baru Ditambahkan</option>
-        <option value="date-asc">📅 Tanggal Terdekat</option>
-        <option value="date-desc">📆 Tanggal Terjauh</option>
-        <option value="type">🏷️ Jenis Konten</option>
-      </select>
+      <!-- 1. WAKTU -->
       <input type="month" id="filter-month" class="topbtn" onchange="renderBoard()" title="Filter Bulan">
+      
       <select id="filter-week" class="topbtn" onchange="renderBoard()" title="Filter Pekan">
-        <option value="all">Semua Pekan</option>
+        <option value="all">🗓️ Pekan</option>
         <option value="1">Pekan 1</option>
         <option value="2">Pekan 2</option>
         <option value="3">Pekan 3</option>
         <option value="4">Pekan 4</option>
         <option value="5">Pekan 5</option>
       </select>
+      
+      <!-- 2. KATEGORI & KONTEKS -->
+      <select id="filter-type" class="topbtn" onchange="renderBoard()" title="Filter Jenis Konten">
+        <option value="semua">📑 Jenis</option>
+        <option value="Video">📹 Video</option>
+        <option value="Feed">🖼️ Feed</option>
+        <option value="Story">📱 Story</option>
+        <option value="Catatan">📝 Catatan</option>
+      </select>
+
+      <select id="filter-urgency" class="topbtn" onchange="renderBoard()" title="Filter Prioritas">
+        <option value="all">🎯 Prioritas</option>
+        <option value="high">🔥 Mendesak</option>
+        <option value="med">⚡ Penting</option>
+        <option value="normal">⚪ Normal</option>
+        <option value="low">🐢 Santai</option>
+      </select>
+
+      <!-- 3. TAMPILAN -->
+      <select id="sort-by" class="topbtn" onchange="renderBoard()" title="Urutkan Konten">
+        <option value="manual">↕️ Urutkan</option>
+        <option value="newest">✨ Baru Ditambahkan</option>
+        <option value="date-asc">📅 Tanggal Terdekat</option>
+        <option value="date-desc">📆 Tanggal Terjauh</option>
+        <option value="type">🏷️ Jenis Konten</option>
+      </select>
+      
+      <!-- 4. AKSI GLOBAL -->
+      <button class="topbtn" onclick="openThemeModal()">🎨 Tema</button>
       <button class="export-btn" onclick="exportToPDF()">📑 PDF</button>
     </div>
   </div>
@@ -261,7 +270,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="dp-body">
     <div class="dp-field"><span class="dp-fl">Judul</span><div class="dp-fv"><input type="text" id="dp-ftitle" onblur="dps('title',this.value)"/></div></div>
     
-    <div class="dp-field"><span class="dp-fl">Urgensi</span>
+    <div class="dp-field"><span class="dp-fl">Prioritas</span>
       <div class="dp-fv">
         <select id="dp-furgency" onchange="dps('urgency',this.value)">
           <option value="normal">⚪ Normal</option>
@@ -325,7 +334,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <select class="fi" id="m-week" style="flex:1; margin-bottom:0;" title="Pekan Ke">
             <option value="1">Pekan 1</option><option value="2">Pekan 2</option><option value="3">Pekan 3</option><option value="4">Pekan 4</option><option value="5">Pekan 5</option>
           </select>
-          <select class="fi" id="m-urgency" style="flex:1; margin-bottom:0;" title="Tingkat Urgensi">
+          <select class="fi" id="m-urgency" style="flex:1; margin-bottom:0;" title="Prioritas">
             <option value="normal">⚪ Normal</option><option value="low">🐢 Santai</option><option value="med">⚡ Penting</option><option value="high">🔥 Mendesak</option>
           </select>
         </div>
@@ -467,7 +476,7 @@ const storage = getStorage(app);
 
 // Global State
 let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '' };
-let aB='all', tF='semua', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
+let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
 
 // Workspace Logic
 let workspaces = [];
@@ -653,12 +662,27 @@ window.renderTabs = () => {
 };
 
 window.renderBoard = () => {
-  const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, sortBy = document.getElementById('sort-by').value || 'manual';
+  const fMonth = document.getElementById('filter-month').value, 
+        fWeek = document.getElementById('filter-week').value, 
+        fUrg = document.getElementById('filter-urgency').value,
+        fType = document.getElementById('filter-type').value,
+        sortBy = document.getElementById('sort-by').value || 'manual';
+        
   const vis = cards.filter(c => {
-    let mB = (aB==='all' || c.bId===aB), mT = (tF==='semua' || c.type===tF), mM = true, mW = true;
-    if (c.type !== 'Catatan') { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); }
-    return mB && mT && mM && mW;
+    let mB = (aB==='all' || c.bId===aB), 
+        mT = (fType==='semua' || c.type===fType), 
+        mM = true, 
+        mW = true,
+        mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg);
+        
+    if (c.type !== 'Catatan') { 
+        if (fMonth && c.date) mM = c.date.startsWith(fMonth); 
+        else if (fMonth && !c.date) mM = false; 
+        mW = (fWeek === 'all' || c.week === fWeek); 
+    }
+    return mB && mT && mM && mW && mU;
   });
+  
   document.getElementById('board').innerHTML = columns.map((col, idx) => {
     let cc = vis.filter(c => c.status===col.id);
     if (sortBy !== 'manual') {
@@ -669,8 +693,8 @@ window.renderBoard = () => {
             return a.type.localeCompare(b.type);
         });
     }
-    if(col.collapsed) return `<div class="col collapsed" ondragover="e=>e.preventDefault()" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="margin-top:auto; transform:rotate(90deg); margin-bottom:12px;">${cc.length}</span></div></div>`;
-    return `<div class="col" ondragover="e=>e.preventDefault()" ondrop="dropCard(event, '${col.id}')"><div class="col-head" style="border-top:3px solid ${col.c}" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle" onclick="toggleCol('${col.id}')">▼</button><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><div style="display:flex;gap:2px;margin-left:auto;"><button class="ca" onclick="mvCol(${idx},-1)" ${idx===0?'disabled':''}>◀</button><button class="ca" onclick="mvCol(${idx},1)" ${idx===columns.length-1?'disabled':''}>▶</button></div></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div><button class="add-col-btn" onclick="openAdd('${col.id}')">+ Tambah</button></div>`;
+    if(col.collapsed) return `<div class="col collapsed" ondragover="event.preventDefault()" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="margin-top:auto; transform:rotate(90deg); margin-bottom:12px;">${cc.length}</span></div></div>`;
+    return `<div class="col" ondragover="event.preventDefault()" ondrop="dropCard(event, '${col.id}')"><div class="col-head" style="border-top:3px solid ${col.c}" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle" onclick="toggleCol('${col.id}')">▼</button><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><div style="display:flex;gap:2px;margin-left:auto;"><button class="ca" onclick="mvCol(${idx},-1)" ${idx===0?'disabled':''}>◀</button><button class="ca" onclick="mvCol(${idx},1)" ${idx===columns.length-1?'disabled':''}>▶</button></div></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`;
   }).join('') + `<div class="col" style="justify-content:center; width:270px; min-width:270px;"><button class="add-col-btn" style="height:100px; border:2px dashed #ccc; font-weight:bold; font-size:13px;" onclick="openCol()">+ Tambah Status Baru</button></div>`;
 };
 
@@ -695,9 +719,15 @@ window.cardH = (c) => {
 
 // Minimal Logic
 window.setB = (id) => { aB=id; renderAll(); };
-window.setTF = (f,b) => { tF=f; document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderBoard(); };
 window.toggleCol = (id) => { const col = columns.find(c=>c.id===id); if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } };
-window.openAdd = (s) => { document.getElementById('add-ov').classList.add('show'); selType(tF==='Catatan'?'Catatan':'Video'); renderMStatus('Video',s||columns[0].id); document.getElementById('m-date').value=new Date().toISOString().split('T')[0]; document.getElementById('m-title').value=''; };
+window.openAdd = (s) => { 
+    document.getElementById('add-ov').classList.add('show'); 
+    const curType = document.getElementById('filter-type').value;
+    selType(curType === 'Catatan' || curType === 'semua' ? 'Video' : curType); 
+    renderMStatus('Video', s || columns[0].id); 
+    document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; 
+    document.getElementById('m-title').value = ''; 
+};
 window.closeAdd = () => document.getElementById('add-ov').classList.remove('show');
 window.selType = (t) => { mType=t; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); document.getElementById('btn-'+t[0].toLowerCase()).style.background='var(--primary-light)'; document.getElementById('m-datetime-container').style.display=t==='Catatan'?'none':'block'; renderMStatus(t,''); };
 window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; };
@@ -798,10 +828,27 @@ window.dropCard = (e, colId) => { e.preventDefault(); const id = e.dataTransfer.
 window.exportToPDF=()=>{
   try {
       const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Abdi", 14, 20);
-      const fMonth = document.getElementById('filter-month').value; const fWeek = document.getElementById('filter-week').value; const sortBy = document.getElementById('sort-by').value || 'manual';
-      const filterText = `Filter: Brand (${brands.find(b=>b.id===aB)?.n || 'Semua'}), Jenis (${tF}), Bulan (${fMonth||'Semua'}), Pekan (${fWeek==='all'?'Semua':fWeek})`;
+      const fMonth = document.getElementById('filter-month').value; 
+      const fWeek = document.getElementById('filter-week').value; 
+      const fUrg = document.getElementById('filter-urgency').value;
+      const fType = document.getElementById('filter-type').value;
+      const sortBy = document.getElementById('sort-by').value || 'manual';
+      
+      const urgText = fUrg === 'all' ? 'Semua' : (fUrg === 'high' ? 'Mendesak' : (fUrg === 'med' ? 'Penting' : (fUrg === 'low' ? 'Santai' : 'Normal')));
+      const typeText = fType === 'semua' ? 'Semua Jenis' : fType;
+      
+      const filterText = `Filter: Brand (${brands.find(b=>b.id===aB)?.n || 'Semua'}), Jenis (${typeText}), Bulan (${fMonth||'Semua'}), Pekan (${fWeek==='all'?'Semua':fWeek}), Prioritas (${urgText})`;
+      
       doc.setFontSize(10); doc.text(filterText, 14, 28);
-      let vis = cards.filter(c => { let mB = (aB==='all' || c.bId===aB); let mT = (tF==='semua' || c.type===tF); let mM = fMonth ? (c.date && c.date.startsWith(fMonth)) : true; let mW = fWeek==='all' ? true : c.week === fWeek; if (c.type === 'Catatan') { mM = true; mW = true; } return mB && mT && mM && mW; });
+      let vis = cards.filter(c => { 
+          let mB = (aB==='all' || c.bId===aB); 
+          let mT = (fType==='semua' || c.type===fType); 
+          let mM = fMonth ? (c.date && c.date.startsWith(fMonth)) : true; 
+          let mW = fWeek==='all' ? true : c.week === fWeek; 
+          let mU = fUrg === 'all' ? true : (c.urgency || 'normal') === fUrg;
+          if (c.type === 'Catatan') { mM = true; mW = true; } 
+          return mB && mT && mM && mW && mU; 
+      });
       if (sortBy !== 'manual') { vis.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); }
       const data=vis.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, `Pekan ${c.week||'-'}`, columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') + (c.time ? ` ${c.time}` : '') ]);
       doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Pekan','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } });
