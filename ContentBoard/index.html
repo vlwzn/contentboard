@@ -631,13 +631,9 @@ function applyTheme() {
 }
 
 // INTEGRASI GEMINI API (LLM) UNTUK FITUR AI
-const geminiApiKey = ""; // Kunci API disediakan oleh environment eksekusi
+const geminiApiKey = "AIzaSyC58X399dnmJ2f3raSMxDcK7cHfU2N7lq8"; // Kunci API disediakan oleh environment eksekusi
 
 window.fetchGemini = async (prompt) => {
-    if (!geminiApiKey) {
-        console.warn("API Key Gemini tidak ditemukan.");
-        return null;
-    }
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`;
     const payload = { contents: [{ parts: [{ text: prompt }] }] };
     
@@ -656,7 +652,7 @@ window.fetchGemini = async (prompt) => {
             return result.candidates?.[0]?.content?.parts?.[0]?.text || "";
         } catch (error) {
             if (retries === 4) {
-                showMsg("Gagal terhubung ke AI. Silakan coba lagi nanti.");
+                showMsg("Gagal terhubung ke AI. Jika Anda menggunakan GitHub, pastikan API Key Gemini sudah diisi di dalam kode.");
                 return null;
             }
             await new Promise(res => setTimeout(res, delays[retries]));
