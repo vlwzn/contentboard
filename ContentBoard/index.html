@@ -236,6 +236,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <option value="Catatan">📝 Catatan</option>
       </select>
 
+      <!-- DROPDOWN JALUR/OBJEKTIF -->
+      <select id="filter-objective" class="topbtn" onchange="renderBoard()" title="Filter Jalur Distribusi">
+        <option value="all">📢 Jalur</option>
+        <option value="Konten">🪴 Konten Organik</option>
+        <option value="Boost">🚀 Boost</option>
+        <option value="Campaign">🎪 Campaign</option>
+        <option value="Ads">📢 Ads</option>
+      </select>
+
       <select id="filter-urgency" class="topbtn" onchange="renderBoard()" title="Filter Prioritas">
         <option value="all">🎯 Prioritas</option>
         <option value="high">🔥 Mendesak</option>
@@ -268,7 +277,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- OVERLAY UNTUK PANEL -->
 <div id="dp-ov" onclick="closeDP()"></div>
 
-<!-- DETAIL PANEL -->
+<!-- DETAIL PANEL DENGAN FITUR AI -->
 <div class="dp" id="dp">
   <div class="dp-pull-indicator"></div>
   <div class="dp-head" style="padding:16px 20px; border-bottom:1px solid #f0f0ee; display:flex; align-items:center;">
@@ -298,17 +307,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
 
     <div class="dp-field"><span class="dp-fl">Jenis</span><div class="dp-fv"><select id="dp-ftype" onchange="dpChType(this.value)"><option value="Video">Video</option><option value="Feed">Feed</option><option value="Story">Story</option><option value="Catatan">Catatan</option></select></div></div>
+    
+    <div class="dp-field"><span class="dp-fl">Jalur</span>
+      <div class="dp-fv">
+        <select id="dp-fobjective" onchange="dps('objective',this.value)">
+          <option value="Konten">🪴 Konten Organik</option>
+          <option value="Boost">🚀 Boost</option>
+          <option value="Campaign">🎪 Campaign</option>
+          <option value="Ads">📢 Ads</option>
+        </select>
+      </div>
+    </div>
+
     <div class="dp-field"><span class="dp-fl">Brand</span><div class="dp-fv"><select id="dp-fbrand" onchange="dps('bId',this.value)"></select></div></div>
     <div class="dp-field"><span class="dp-fl">Status</span><div class="dp-fv"><select id="dp-fstatus" onchange="dps('status',this.value)"></select></div></div>
     
-    <div style="margin-top:20px; font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">SUB-TASK / CHECKLIST</div>
+    <!-- AI INTEGRATION: SUB-TASK -->
+    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">SUB-TASK / CHECKLIST</div>
+        <button id="btn-ai-subtask" onclick="generateSubtasks()" style="background:var(--primary-light); color:var(--primary); border:none; padding:4px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer; transition: opacity 0.2s;" title="Gunakan AI untuk memecah tugas">✨ Auto Sub-task</button>
+    </div>
+    
     <div id="dp-steps-list" style="margin-top:8px;"></div>
     <div style="display:flex; gap:6px; margin-top:8px;">
         <input type="text" id="new-step-input" class="fi" style="margin-bottom:0; padding:8px 12px;" placeholder="Tambah tugas baru..." onkeypress="if(event.key==='Enter') addStep()">
         <button class="btn-s" style="padding:8px 14px; font-size:16px; line-height:1;" onclick="addStep()">+</button>
     </div>
 
-    <div style="margin-top:20px; font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">CATATAN / SCRIPT</div>
+    <!-- AI INTEGRATION: CATATAN/SCRIPT -->
+    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">CATATAN / SCRIPT</div>
+        <button id="btn-ai-script" onclick="generateScript()" style="background:var(--primary-light); color:var(--primary); border:none; padding:4px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer; transition: opacity 0.2s;" title="Buat draft caption/script otomatis dengan AI">✨ Draft Script AI</button>
+    </div>
+
     <div id="dp-notes-display" style="width:100%; min-height:80px; margin-top:8px; border:1px solid #ddd; border-radius:8px; padding:10px; font-size:13px; background:rgba(255,255,255,0.5); white-space:pre-wrap; word-break:break-word; cursor:text; transition:border 0.2s; line-height:1.5;" onclick="editNotes()" title="Klik untuk mengedit"></div>
     <textarea id="dp-notes" style="display:none; width:100%; height:120px; margin-top:8px; border:1px solid var(--primary); border-radius:8px; padding:10px; outline:none; font-family:inherit; font-size:13px; resize:vertical; background:#fff; line-height:1.5;" onblur="saveNotes(this.value)" placeholder="Ketik catatan atau paste link di sini..."></textarea>
     
@@ -349,7 +380,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           </select>
         </div>
       </div>
-      <select class="fi" id="m-status" style="width:100%; margin-bottom:0;" title="Status"></select>
+      
+      <!-- JALUR DISTRIBUSI DI MODAL ADD & STATUS DIJADIKAN SATU BARIS -->
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <select class="fi" id="m-objective" style="flex:1; margin-bottom:0;" title="Jalur Distribusi">
+            <option value="Konten">🪴 Konten Organik</option>
+            <option value="Boost">🚀 Boost</option>
+            <option value="Campaign">🎪 Campaign</option>
+            <option value="Ads">📢 Ads</option>
+        </select>
+        <select class="fi" id="m-status" style="flex:1; margin-bottom:0;" title="Status"></select>
+      </div>
+
     </div>
     <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
       <button class="btn-c" onclick="closeAdd()">Batal</button>
@@ -588,6 +630,106 @@ function applyTheme() {
     }
 }
 
+// INTEGRASI GEMINI API (LLM) UNTUK FITUR AI
+const geminiApiKey = ""; // Kunci API disediakan oleh environment eksekusi
+
+window.fetchGemini = async (prompt) => {
+    if (!geminiApiKey) {
+        console.warn("API Key Gemini tidak ditemukan.");
+        return null;
+    }
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`;
+    const payload = { contents: [{ parts: [{ text: prompt }] }] };
+    
+    let retries = 0;
+    const delays = [1000, 2000, 4000, 8000, 16000];
+
+    while (retries < 5) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const result = await response.json();
+            return result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        } catch (error) {
+            if (retries === 4) {
+                showMsg("Gagal terhubung ke AI. Silakan coba lagi nanti.");
+                return null;
+            }
+            await new Promise(res => setTimeout(res, delays[retries]));
+            retries++;
+        }
+    }
+};
+
+window.generateSubtasks = async () => {
+    const c = cards.find(x => x.id === selId);
+    if (!c) return;
+
+    const btn = document.getElementById('btn-ai-subtask');
+    btn.textContent = "Sedang berpikir..."; 
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+
+    const prompt = `Saya sedang merencanakan konten sosial media berjudul "${c.title}" dengan format konten ${c.type}. Tolong berikan 3 sampai 5 langkah sub-task (checklist) praktis untuk memproduksi konten ini. 
+    Kembalikan HANYA teks langkah-langkahnya secara langsung, pisahkan tiap langkah dengan baris baru (newline). Jangan gunakan nomor urut, jangan gunakan bullet point, dan jangan ada teks pengantar/penutup.`;
+
+    const result = await window.fetchGemini(prompt);
+    
+    if (result) {
+        const lines = result.split('\n').filter(l => l.trim().length > 0);
+        if (!c.steps) c.steps = [];
+        lines.forEach(line => {
+            let cleanText = line.replace(/^[\d\.\-\*\s]+/, '').trim(); // Bersihkan peluru/nomor sisa AI
+            if(cleanText) c.steps.push({text: cleanText, done: false});
+        });
+        syncToFirebase();
+        renderSteps(c);
+        renderBoard();
+    }
+    
+    btn.textContent = "✨ Auto Sub-task"; 
+    btn.disabled = false;
+    btn.style.opacity = '1';
+};
+
+window.generateScript = async () => {
+    const c = cards.find(x => x.id === selId);
+    if (!c) return;
+    const b = brands.find(x => x.id === c.bId);
+    const brandName = b ? b.n : "Umum";
+
+    const btn = document.getElementById('btn-ai-script');
+    btn.textContent = "Sedang menulis..."; 
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+
+    const prompt = `Tolong buatkan sebuah draf singkat untuk ${c.type === 'Video' ? 'naskah (script) video' : 'caption sosial media'} dengan detail berikut:
+    - Judul/Topik: ${c.title}
+    - Brand: ${brandName}
+    - Jalur/Tujuan Distribusi: ${c.objective || 'Konten Organik'}
+    - Format: ${c.type}
+    
+    Buat dengan gaya bahasa yang profesional namun tetap engaging (menarik interaksi). Berikan langsung hasilnya tanpa teks pengantar.`;
+
+    const result = await window.fetchGemini(prompt);
+    
+    if (result) {
+        const divider = c.notes ? "\n\n--- Draft AI ---\n\n" : "";
+        const newNotes = (c.notes || "") + divider + result;
+        saveNotes(newNotes);
+        document.getElementById('dp-notes').value = newNotes;
+    }
+    
+    btn.textContent = "✨ Draft Script AI"; 
+    btn.disabled = false;
+    btn.style.opacity = '1';
+};
+
+
 // FAB & Modals
 window.openThemeModal = () => { 
     document.getElementById('bg-url-input').value = themeSettings.bg || '';
@@ -676,6 +818,7 @@ window.renderBoard = () => {
         fWeek = document.getElementById('filter-week').value, 
         fUrg = document.getElementById('filter-urgency').value,
         fType = document.getElementById('filter-type').value,
+        fObj = document.getElementById('filter-objective').value,
         sortBy = document.getElementById('sort-by').value || 'manual',
         sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
         
@@ -685,6 +828,7 @@ window.renderBoard = () => {
         mM = true, 
         mW = true,
         mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg),
+        mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj),
         mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true;
         
     if (c.type !== 'Catatan') { 
@@ -692,7 +836,7 @@ window.renderBoard = () => {
         else if (fMonth && !c.date) mM = false; 
         mW = (fWeek === 'all' || c.week === fWeek); 
     }
-    return mB && mT && mM && mW && mU && mS;
+    return mB && mT && mM && mW && mU && mObj && mS;
   });
   
   document.getElementById('board').innerHTML = columns.map((col, idx) => {
@@ -718,6 +862,14 @@ window.cardH = (c) => {
   else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;margin-left:4px;">⚡ Penting</span>`;
   else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;margin-left:4px;">🐢 Santai</span>`;
 
+  // BADGE UNTUK JALUR/OBJECTIVE
+  let objBadge = '';
+  const obj = c.objective || 'Konten';
+  if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;margin-left:4px;">📢 Ads</span>`;
+  else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;margin-left:4px;">🎪 Campaign</span>`;
+  else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;margin-left:4px;">🚀 Boost</span>`;
+  else objBadge = `<span class="tbadge" style="background:#F0F0F0;color:#666;margin-left:4px;">🪴 Organik</span>`;
+
   let dateStyle="color:#888;", alert="";
   if (c.type !== 'Catatan' && c.date && ci < cl.length-1) {
       const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5;
@@ -726,7 +878,9 @@ window.cardH = (c) => {
   }
   const dt = c.date ? `<div style="float:right;display:flex;align-items:center;">${c.week?`<span style="font-size:10px;background:var(--primary-light);color:var(--primary);padding:2px 6px;border-radius:4px;margin-right:6px;font-weight:600;">P${c.week}</span>`:''}<span style="font-size:10px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:10px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : '';
   const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Selesai</div>` : '';
-  return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${c.type==='Video'?'tv':c.type==='Feed'?'tf':c.type==='Catatan'?'tc':'ts'}">${c.type}</span>${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
+  
+  // Masukkan objBadge di samping typeBadge
+  return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${c.type==='Video'?'tv':c.type==='Feed'?'tf':c.type==='Catatan'?'tc':'ts'}">${c.type}</span>${objBadge}${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
 };
 
 // Minimal Logic
@@ -739,12 +893,52 @@ window.openAdd = (s) => {
     renderMStatus('Video', s || columns[0].id); 
     document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; 
     document.getElementById('m-title').value = ''; 
+    document.getElementById('m-objective').value = 'Konten'; // Reset default
 };
 window.closeAdd = () => document.getElementById('add-ov').classList.remove('show');
 window.selType = (t) => { mType=t; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); document.getElementById('btn-'+t[0].toLowerCase()).style.background='var(--primary-light)'; document.getElementById('m-datetime-container').style.display=t==='Catatan'?'none':'block'; renderMStatus(t,''); };
 window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; };
-window.saveCard = () => { const t=document.getElementById('m-title').value.trim(); if(!t)return; cards.unshift({id:'c'+Date.now(),title:t,bId:document.getElementById('m-brand').value,type:mType,date:mType==='Catatan'?'':document.getElementById('m-date').value,time:mType==='Catatan'?'':document.getElementById('m-time').value,week:mType==='Catatan'?'':document.getElementById('m-week').value,urgency:document.getElementById('m-urgency').value,status:document.getElementById('m-status').value,notes:'',images:[],steps:[]}); closeAdd(); syncToFirebase(); };
-window.selCard = (id) => { selId=id; const c=cards.find(x=>x.id===id); if(!c)return; document.getElementById('dp-title').textContent=c.title; document.getElementById('dp-ftitle').value=c.title; document.getElementById('dp-fdate').value=c.date||''; document.getElementById('dp-ftime').value=c.time||''; document.getElementById('dp-fweek').value=c.week||'1'; document.getElementById('dp-ftype').value=c.type; document.getElementById('dp-fbrand').value=c.bId; document.getElementById('dp-furgency').value=c.urgency||'normal'; const s=document.getElementById('dp-fstatus'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); s.value=c.status; document.getElementById('dp-notes').value=c.notes||''; document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; document.getElementById('dp-datetime-container').style.display=c.type==='Catatan'?'none':'block'; renderSteps(c); renderAtt(c.images); document.getElementById('dp').classList.add('open'); document.getElementById('dp-ov').classList.add('show'); };
+window.saveCard = () => { 
+    const t=document.getElementById('m-title').value.trim(); 
+    if(!t)return; 
+    cards.unshift({
+        id:'c'+Date.now(),
+        title:t,
+        bId:document.getElementById('m-brand').value,
+        type:mType,
+        date:mType==='Catatan'?'':document.getElementById('m-date').value,
+        time:mType==='Catatan'?'':document.getElementById('m-time').value,
+        week:mType==='Catatan'?'':document.getElementById('m-week').value,
+        urgency:document.getElementById('m-urgency').value,
+        objective:document.getElementById('m-objective').value, // Simpan objective
+        status:document.getElementById('m-status').value,
+        notes:'',images:[],steps:[]
+    }); 
+    closeAdd(); syncToFirebase(); 
+};
+window.selCard = (id) => { 
+    selId=id; 
+    const c=cards.find(x=>x.id===id); 
+    if(!c)return; 
+    document.getElementById('dp-title').textContent=c.title; 
+    document.getElementById('dp-ftitle').value=c.title; 
+    document.getElementById('dp-fdate').value=c.date||''; 
+    document.getElementById('dp-ftime').value=c.time||''; 
+    document.getElementById('dp-fweek').value=c.week||'1'; 
+    document.getElementById('dp-ftype').value=c.type; 
+    document.getElementById('dp-fbrand').value=c.bId; 
+    document.getElementById('dp-furgency').value=c.urgency||'normal'; 
+    document.getElementById('dp-fobjective').value=c.objective||'Konten'; // Tampilkan objective
+    const s=document.getElementById('dp-fstatus'); 
+    s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); 
+    s.value=c.status; 
+    document.getElementById('dp-notes').value=c.notes||''; 
+    document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; 
+    document.getElementById('dp-datetime-container').style.display=c.type==='Catatan'?'none':'block'; 
+    renderSteps(c); renderAtt(c.images); 
+    document.getElementById('dp').classList.add('open'); 
+    document.getElementById('dp-ov').classList.add('show'); 
+};
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
 window.dps = (f,v) => { const c=cards.find(x=>x.id===selId); if(c){c[f]=v; renderBoard(); syncToFirebase();} };
 window.dpChType = (v) => { const c=cards.find(x=>x.id===selId); if(c){c.type=v; if(v==='Catatan'){c.date='';c.time='';c.week='';} syncToFirebase(); selCard(selId);} };
@@ -909,12 +1103,14 @@ window.exportToPDF=()=>{
       const fWeek = document.getElementById('filter-week').value; 
       const fUrg = document.getElementById('filter-urgency').value;
       const fType = document.getElementById('filter-type').value;
+      const fObj = document.getElementById('filter-objective').value;
       const sortBy = document.getElementById('sort-by').value || 'manual';
       
       const urgText = fUrg === 'all' ? 'Semua' : (fUrg === 'high' ? 'Mendesak' : (fUrg === 'med' ? 'Penting' : (fUrg === 'low' ? 'Santai' : 'Normal')));
       const typeText = fType === 'semua' ? 'Semua Jenis' : fType;
+      const objText = fObj === 'all' ? 'Semua Jalur' : (fObj === 'Konten' ? 'Organik' : fObj);
       
-      const filterText = `Filter: Brand (${brands.find(b=>b.id===aB)?.n || 'Semua'}), Jenis (${typeText}), Bulan (${fMonth||'Semua'}), Pekan (${fWeek==='all'?'Semua':fWeek}), Prioritas (${urgText})`;
+      const filterText = `Filter: Brand (${brands.find(b=>b.id===aB)?.n || 'Semua'}), Jenis (${typeText}), Jalur (${objText}), Bulan (${fMonth||'Semua'}), Pekan (${fWeek==='all'?'Semua':fWeek}), Prioritas (${urgText})`;
       
       doc.setFontSize(10); doc.text(filterText, 14, 28);
       let vis = cards.filter(c => { 
@@ -923,12 +1119,15 @@ window.exportToPDF=()=>{
           let mM = fMonth ? (c.date && c.date.startsWith(fMonth)) : true; 
           let mW = fWeek==='all' ? true : c.week === fWeek; 
           let mU = fUrg === 'all' ? true : (c.urgency || 'normal') === fUrg;
+          let mObj = fObj === 'all' ? true : (c.objective || 'Konten') === fObj;
           if (c.type === 'Catatan') { mM = true; mW = true; } 
-          return mB && mT && mM && mW && mU; 
+          return mB && mT && mM && mW && mU && mObj; 
       });
       if (sortBy !== 'manual') { vis.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); }
-      const data=vis.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, `Pekan ${c.week||'-'}`, columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') + (c.time ? ` ${c.time}` : '') ]);
-      doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Pekan','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } });
+      
+      // Menambahkan kolom Jalur Distribusi (Tujuan) ke dalam tabel PDF
+      const data=vis.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective === 'Konten' ? 'Organik' : c.objective || 'Organik'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') + (c.time ? ` ${c.time}` : '') ]);
+      doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } });
       doc.save("Content_Plan_Abdi.pdf");
   } catch(err) { showMsg("Gagal membuat PDF."); }
 };
