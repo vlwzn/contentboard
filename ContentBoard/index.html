@@ -530,6 +530,18 @@ const storage = getStorage(app);
 let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '' };
 let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
 
+// FUNGSI PESAN ALERT / CONFIRM KUSTOM (Agar pop-up tidak error)
+window.showMsg = (txt, cb) => {
+    const msgText = document.getElementById('msg-text');
+    if(msgText) msgText.innerHTML = txt;
+    const ok = document.getElementById('msg-ok'), cancel = document.getElementById('msg-cancel');
+    if(cancel) cancel.style.display = cb ? 'block' : 'none';
+    const clean = () => { document.getElementById('msg-ov').classList.remove('show'); if(ok) ok.onclick = null; if(cancel) cancel.onclick = null; };
+    if(ok) ok.onclick = () => { clean(); if(cb) cb(); };
+    if(cancel) cancel.onclick = clean;
+    document.getElementById('msg-ov').classList.add('show');
+};
+
 // Workspace Logic
 let workspaces = [];
 let activeWsId = localStorage.getItem('cb_active_ws') || 'default';
@@ -634,7 +646,8 @@ function applyTheme() {
 const geminiApiKey = "AIzaSyC58X399dnmJ2f3raSMxDcK7cHfU2N7lq8"; // Kunci API disediakan oleh environment eksekusi
 
 window.fetchGemini = async (prompt) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`;
+    // Menggunakan model publik yang 100% didukung oleh Free API Key Anda
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
     const payload = { contents: [{ parts: [{ text: prompt }] }] };
     
     let retries = 0;
@@ -651,8 +664,9 @@ window.fetchGemini = async (prompt) => {
             const result = await response.json();
             return result.candidates?.[0]?.content?.parts?.[0]?.text || "";
         } catch (error) {
+            console.error("Error Gemini API:", error);
             if (retries === 4) {
-                showMsg("Gagal terhubung ke AI. Jika Anda menggunakan GitHub, pastikan API Key Gemini sudah diisi di dalam kode.");
+                showMsg("Gagal terhubung ke AI. Coba periksa koneksi internet Anda.");
                 return null;
             }
             await new Promise(res => setTimeout(res, delays[retries]));
@@ -673,23 +687,28 @@ window.generateSubtasks = async () => {
     const prompt = `Saya sedang merencanakan konten sosial media berjudul "${c.title}" dengan format konten ${c.type}. Tolong berikan 3 sampai 5 langkah sub-task (checklist) praktis untuk memproduksi konten ini. 
     Kembalikan HANYA teks langkah-langkahnya secara langsung, pisahkan tiap langkah dengan baris baru (newline). Jangan gunakan nomor urut, jangan gunakan bullet point, dan jangan ada teks pengantar/penutup.`;
 
-    const result = await window.fetchGemini(prompt);
-    
-    if (result) {
-        const lines = result.split('\n').filter(l => l.trim().length > 0);
-        if (!c.steps) c.steps = [];
-        lines.forEach(line => {
-            let cleanText = line.replace(/^[\d\.\-\*\s]+/, '').trim(); // Bersihkan peluru/nomor sisa AI
-            if(cleanText) c.steps.push({text: cleanText, done: false});
-        });
-        syncToFirebase();
-        renderSteps(c);
-        renderBoard();
+    try {
+        const result = await window.fetchGemini(prompt);
+        
+        if (result) {
+            const lines = result.split('\n').filter(l => l.trim().length > 0);
+            if (!c.steps) c.steps = [];
+            lines.forEach(line => {
+                let cleanText = line.replace(/^[\d\.\-\*\s]+/, '').trim(); // Bersihkan peluru/nomor sisa AI
+                if(cleanText) c.steps.push({text: cleanText, done: false});
+            });
+            syncToFirebase();
+            renderSteps(c);
+            renderBoard();
+        }
+    } catch(e) {
+        console.error("Gagal menjalankan AI:", e);
+    } finally {
+        // Apapun yang terjadi (berhasil/gagal), kembalikan tombol ke kondisi semula
+        btn.textContent = "✨ Auto Sub-task"; 
+        btn.disabled = false;
+        btn.style.opacity = '1';
     }
-    
-    btn.textContent = "✨ Auto Sub-task"; 
-    btn.disabled = false;
-    btn.style.opacity = '1';
 };
 
 window.generateScript = async () => {
@@ -711,18 +730,23 @@ window.generateScript = async () => {
     
     Buat dengan gaya bahasa yang profesional namun tetap engaging (menarik interaksi). Berikan langsung hasilnya tanpa teks pengantar.`;
 
-    const result = await window.fetchGemini(prompt);
-    
-    if (result) {
-        const divider = c.notes ? "\n\n--- Draft AI ---\n\n" : "";
-        const newNotes = (c.notes || "") + divider + result;
-        saveNotes(newNotes);
-        document.getElementById('dp-notes').value = newNotes;
+    try {
+        const result = await window.fetchGemini(prompt);
+        
+        if (result) {
+            const divider = c.notes ? "\n\n--- Draft AI ---\n\n" : "";
+            const newNotes = (c.notes || "") + divider + result;
+            saveNotes(newNotes);
+            document.getElementById('dp-notes').value = newNotes;
+        }
+    } catch(e) {
+        console.error("Gagal menjalankan AI:", e);
+    } finally {
+        // Apapun yang terjadi (berhasil/gagal), kembalikan tombol ke kondisi semula
+        btn.textContent = "✨ Draft Script AI"; 
+        btn.disabled = false;
+        btn.style.opacity = '1';
     }
-    
-    btn.textContent = "✨ Draft Script AI"; 
-    btn.disabled = false;
-    btn.style.opacity = '1';
 };
 
 
