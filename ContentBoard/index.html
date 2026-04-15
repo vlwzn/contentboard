@@ -47,6 +47,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .topbtn { height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; background: rgba(255,255,255,0.8); font-size: 12px; white-space: nowrap; cursor: pointer; transition: all 0.2s; outline: none; color: #444; }
 .export-btn { height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid #1D9E75; border-radius: 8px; background: #E1F5EE; color: #085041; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 
+/* PENCARIAN SEJAJAR DENGAN DROPDOWN */
+.search-input { width: 180px; padding-left: 32px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'); background-repeat: no-repeat; background-position: 10px center; cursor: text; }
+.search-input:focus { width: 240px; background-color: #fff; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
+.search-input::placeholder { color: #888; }
+
 /* FLOATING ACTION BUTTON (FAB) */
 .fab {
     position: fixed;
@@ -96,8 +101,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .add-col-btn:hover{background:#fff; color:#222; border-color:#aaa;}
 
 /* COLLAPSED COLUMN STYLES */
-.col.collapsed { width: 44px; align-items: center; background: transparent; }
-.collapsed-head { display:flex; flex-direction: column; height: 100%; width: 100%; cursor: pointer; justify-content: flex-start; align-items:center; padding: 12px 0; background: var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border: 1px solid var(--glass-border) !important; border-left: 4px solid var(--col-color) !important; border-radius: 8px; transition: background 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+.col.collapsed { width: 44px; align-items: center; background: transparent; height: max-content; align-self: flex-start; }
+.collapsed-head { display:flex; flex-direction: column; height: auto; min-height: 120px; width: 100%; cursor: pointer; justify-content: flex-start; align-items:center; padding: 12px 0; background: var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border: 1px solid var(--glass-border) !important; border-left: 4px solid var(--col-color) !important; border-radius: 8px; transition: background 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
 .col-toggle { background: none; border: none; cursor: pointer; color: #888; font-size: 11px; padding: 4px; display:flex; align-items:center; justify-content:center; }
 .col-lbl-vert { writing-mode: vertical-rl; transform: rotate(180deg); margin: 16px 0; font-size: 12px; font-weight: 600; color: #444; white-space: nowrap; letter-spacing: 0.5px;}
 
@@ -181,6 +186,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .topbar { flex-direction: column; align-items: stretch; padding: 12px; gap: 10px; }
   .top-actions { width: 100%; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 4px; scrollbar-width: none; }
   .top-actions::-webkit-scrollbar { display: none; }
+  .search-input { width: 150px; }
+  .search-input:focus { width: 180px; }
   
   /* UPDATE: SLIDE DARI BAWAH DI MOBILE */
   .dp { width: 100%; max-width: 100%; border-radius: 20px 20px 0 0; top: 40px; height: calc(100vh - 40px); border-left: none; transform: translateY(100%); }
@@ -205,6 +212,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
     <!-- PENGURUTAN LOGIS BERDASARKAN WORKFLOW (KIRI KE KANAN) -->
     <div class="top-actions">
+      <!-- 0. PENCARIAN SEJAJAR -->
+      <input type="text" id="search-input" class="topbtn search-input" placeholder="Cari konten..." oninput="renderBoard()">
+
       <!-- 1. WAKTU -->
       <input type="month" id="filter-month" class="topbtn" onchange="renderBoard()" title="Filter Bulan">
       
@@ -666,21 +676,23 @@ window.renderBoard = () => {
         fWeek = document.getElementById('filter-week').value, 
         fUrg = document.getElementById('filter-urgency').value,
         fType = document.getElementById('filter-type').value,
-        sortBy = document.getElementById('sort-by').value || 'manual';
+        sortBy = document.getElementById('sort-by').value || 'manual',
+        sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
         
   const vis = cards.filter(c => {
     let mB = (aB==='all' || c.bId===aB), 
         mT = (fType==='semua' || c.type===fType), 
         mM = true, 
         mW = true,
-        mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg);
+        mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg),
+        mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true;
         
     if (c.type !== 'Catatan') { 
         if (fMonth && c.date) mM = c.date.startsWith(fMonth); 
         else if (fMonth && !c.date) mM = false; 
         mW = (fWeek === 'all' || c.week === fWeek); 
     }
-    return mB && mT && mM && mW && mU;
+    return mB && mT && mM && mW && mU && mS;
   });
   
   document.getElementById('board').innerHTML = columns.map((col, idx) => {
@@ -693,7 +705,7 @@ window.renderBoard = () => {
             return a.type.localeCompare(b.type);
         });
     }
-    if(col.collapsed) return `<div class="col collapsed" ondragover="event.preventDefault()" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="margin-top:auto; transform:rotate(90deg); margin-bottom:12px;">${cc.length}</span></div></div>`;
+    if(col.collapsed) return `<div class="col collapsed" ondragover="event.preventDefault()" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`;
     return `<div class="col" ondragover="event.preventDefault()" ondrop="dropCard(event, '${col.id}')"><div class="col-head" style="border-top:3px solid ${col.c}" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle" onclick="toggleCol('${col.id}')">▼</button><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><div style="display:flex;gap:2px;margin-left:auto;"><button class="ca" onclick="mvCol(${idx},-1)" ${idx===0?'disabled':''}>◀</button><button class="ca" onclick="mvCol(${idx},1)" ${idx===columns.length-1?'disabled':''}>▶</button></div></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`;
   }).join('') + `<div class="col" style="justify-content:center; width:270px; min-width:270px;"><button class="add-col-btn" style="height:100px; border:2px dashed #ccc; font-weight:bold; font-size:13px;" onclick="openCol()">+ Tambah Status Baru</button></div>`;
 };
@@ -714,7 +726,7 @@ window.cardH = (c) => {
   }
   const dt = c.date ? `<div style="float:right;display:flex;align-items:center;">${c.week?`<span style="font-size:10px;background:var(--primary-light);color:var(--primary);padding:2px 6px;border-radius:4px;margin-right:6px;font-weight:600;">P${c.week}</span>`:''}<span style="font-size:10px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:10px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : '';
   const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Selesai</div>` : '';
-  return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${c.type==='Video'?'tv':c.type==='Feed'?'tf':c.type==='Catatan'?'tc':'ts'}">${c.type}</span>${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
+  return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${c.type==='Video'?'tv':c.type==='Feed'?'tf':c.type==='Catatan'?'tc':'ts'}">${c.type}</span>${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
 };
 
 // Minimal Logic
@@ -822,8 +834,73 @@ window.mv = (id, d) => {
   const cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status), ni = ci+d;
   if(ni>=0 && ni<cl.length) { c.status = cl[ni].id; renderBoard(); syncToFirebase(); }
 };
-window.dragCard = (e, id) => { e.dataTransfer.setData("text", id); };
-window.dropCard = (e, colId) => { e.preventDefault(); const id = e.dataTransfer.getData("text"); const c = cards.find(x=>x.id===id); if(c){ c.status=colId; renderBoard(); syncToFirebase(); } };
+
+// SISTEM DRAG & DROP BARU (BISA URUTAN)
+let draggedCardId = null;
+window.dragCard = (e, id) => { 
+    draggedCardId = id; 
+    e.dataTransfer.setData("text", id); 
+    setTimeout(() => { e.target.style.opacity = '0.5'; }, 0); 
+};
+window.dragEndCard = (e) => { 
+    e.target.style.opacity = '1'; 
+    draggedCardId = null; 
+    document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); 
+};
+window.dragOverCard = (e, id) => {
+    e.preventDefault(); e.stopPropagation();
+    if(!draggedCardId || draggedCardId === id) return;
+    const target = e.currentTarget;
+    const offset = target.getBoundingClientRect().y + (target.getBoundingClientRect().height / 2);
+    if (e.clientY - offset > 0) target.style.boxShadow = '0 4px 0 var(--primary)';
+    else target.style.boxShadow = '0 -4px 0 var(--primary)';
+};
+window.dragLeaveCard = (e) => { if(e.currentTarget) e.currentTarget.style.boxShadow = ''; };
+
+window.dropOnCard = (e, targetId) => {
+    e.preventDefault(); e.stopPropagation();
+    document.querySelectorAll('.card').forEach(c => c.style.boxShadow = '');
+    if (!draggedCardId || draggedCardId === targetId) return;
+
+    const cIdx = cards.findIndex(x => x.id === draggedCardId);
+    const tIdx = cards.findIndex(x => x.id === targetId);
+    if (cIdx === -1 || tIdx === -1) return;
+
+    const targetStatus = cards[tIdx].status;
+    const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + (e.currentTarget.getBoundingClientRect().height / 2)) > 0;
+
+    // Pindahkan kartu dari susunan array
+    const draggedCard = cards.splice(cIdx, 1)[0];
+    draggedCard.status = targetStatus; // Sesuaikan status dengan tempatnya mendarat
+
+    let newTargetIdx = cards.findIndex(x => x.id === targetId);
+    if (dropBelow) newTargetIdx++;
+
+    cards.splice(newTargetIdx, 0, draggedCard);
+    
+    // Otomatis pindah ke mode Urutan Bebas
+    document.getElementById('sort-by').value = 'manual'; 
+    draggedCardId = null;
+    
+    renderBoard(); syncToFirebase();
+};
+
+window.dropCard = (e, colId) => { 
+    e.preventDefault(); 
+    const id = e.dataTransfer.getData("text") || draggedCardId; 
+    if(!id) return;
+    
+    // Ini berjalan kalau dijatuhkan di kolom yang kosong (bukan di atas kartu lain)
+    const cIdx = cards.findIndex(x => x.id === id);
+    if(cIdx > -1) {
+        const card = cards.splice(cIdx, 1)[0];
+        card.status = colId;
+        cards.push(card); // Taruh di paling bawah
+        document.getElementById('sort-by').value = 'manual';
+        renderBoard(); syncToFirebase();
+    }
+    draggedCardId = null;
+};
 
 window.exportToPDF=()=>{
   try {
