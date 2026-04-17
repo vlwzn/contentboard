@@ -277,11 +277,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- OVERLAY UNTUK PANEL -->
 <div id="dp-ov" onclick="closeDP()"></div>
 
-<!-- DETAIL PANEL DENGAN FITUR AI -->
+<!-- DETAIL PANEL -->
 <div class="dp" id="dp">
   <div class="dp-pull-indicator"></div>
   <div class="dp-head" style="padding:16px 20px; border-bottom:1px solid #f0f0ee; display:flex; align-items:center;">
     <div class="dp-title" id="dp-title" style="flex:1; font-weight:700; font-size:15px; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+    <!-- NEW: TOMBOL GOOGLE CALENDAR -->
+    <button onclick="addToGCal()" style="border:none; background:none; cursor:pointer; color:#1D9E75; margin-right:12px; font-size:15px;" title="Tambahkan ke Google Calendar">📅</button>
     <button onclick="dupCard()" style="border:none; background:none; cursor:pointer; color:#185FA5; margin-right:12px; font-size:15px;" title="Duplikat Konten">📄</button>
     <button onclick="delCurCard()" style="border:none; background:none; cursor:pointer; color:#e24b4a; margin-right:12px; font-size:15px;" title="Hapus Konten">🗑️</button>
     <button onclick="closeDP()" style="border:none; background:none; cursor:pointer; font-size:24px; color:#888; line-height:1;">×</button>
@@ -322,11 +324,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="dp-field"><span class="dp-fl">Brand</span><div class="dp-fv"><select id="dp-fbrand" onchange="dps('bId',this.value)"></select></div></div>
     <div class="dp-field"><span class="dp-fl">Status</span><div class="dp-fv"><select id="dp-fstatus" onchange="dps('status',this.value)"></select></div></div>
     
-    <!-- AI INTEGRATION: SUB-TASK -->
-    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">SUB-TASK / CHECKLIST</div>
-        <button id="btn-ai-subtask" onclick="generateSubtasks()" style="background:var(--primary-light); color:var(--primary); border:none; padding:4px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer; transition: opacity 0.2s;" title="Gunakan AI untuk memecah tugas">✨ Auto Sub-task</button>
-    </div>
+    <div style="margin-top:20px; font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">SUB-TASK / CHECKLIST</div>
     
     <div id="dp-steps-list" style="margin-top:8px;"></div>
     <div style="display:flex; gap:6px; margin-top:8px;">
@@ -334,12 +332,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button class="btn-s" style="padding:8px 14px; font-size:16px; line-height:1;" onclick="addStep()">+</button>
     </div>
 
-    <!-- AI INTEGRATION: CATATAN/SCRIPT -->
-    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">CATATAN / SCRIPT</div>
-        <button id="btn-ai-script" onclick="generateScript()" style="background:var(--primary-light); color:var(--primary); border:none; padding:4px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer; transition: opacity 0.2s;" title="Buat draft caption/script otomatis dengan AI">✨ Draft Script AI</button>
-    </div>
-
+    <div style="margin-top:20px; font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">CATATAN / SCRIPT</div>
+    
     <div id="dp-notes-display" style="width:100%; min-height:80px; margin-top:8px; border:1px solid #ddd; border-radius:8px; padding:10px; font-size:13px; background:rgba(255,255,255,0.5); white-space:pre-wrap; word-break:break-word; cursor:text; transition:border 0.2s; line-height:1.5;" onclick="editNotes()" title="Klik untuk mengedit"></div>
     <textarea id="dp-notes" style="display:none; width:100%; height:120px; margin-top:8px; border:1px solid var(--primary); border-radius:8px; padding:10px; outline:none; font-family:inherit; font-size:13px; resize:vertical; background:#fff; line-height:1.5;" onblur="saveNotes(this.value)" placeholder="Ketik catatan atau paste link di sini..."></textarea>
     
@@ -407,8 +401,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="modal-body" style="padding:20px;">
       <input class="fi" type="text" id="bm-name" placeholder="Nama brand..."/>
       <div style="display:flex; align-items:center; gap:12px; background:#f9f9f9; padding:12px; border-radius:10px; border:1px solid #eee;">
-        <input type="color" id="bm-color-wheel" style="width:36px; height:36px; border:none; cursor:pointer; border-radius:50%;" oninput="syncColor(this.value, 'hex')">
-        <input type="text" id="bm-color-hex" style="flex:1; border:none; background:transparent; font-family:monospace; font-weight:700; font-size:14px; outline:none; color:#444;" maxlength="7" oninput="syncColor(this.value, 'wheel')">
+        <input type="color" id="bm-color-wheel" style="width:36px; height:36px; border:none; cursor:pointer; border-radius:50%;" oninput="syncColor(this.value, 'hex', 'bm')">
+        <input type="text" id="bm-color-hex" style="flex:1; border:none; background:transparent; font-family:monospace; font-weight:700; font-size:14px; outline:none; color:#444;" maxlength="7" oninput="syncColor(this.value, 'wheel', 'bm')">
       </div>
     </div>
     <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
@@ -642,113 +636,6 @@ function applyTheme() {
     }
 }
 
-// INTEGRASI GEMINI API (LLM) UNTUK FITUR AI
-const geminiApiKey = "AIzaSyC58X399dnmJ2f3raSMxDcK7cHfU2N7lq8"; // Kunci API disediakan oleh environment eksekusi
-
-window.fetchGemini = async (prompt) => {
-    // Menggunakan model publik yang 100% didukung oleh Free API Key Anda
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
-    const payload = { contents: [{ parts: [{ text: prompt }] }] };
-    
-    let retries = 0;
-    const delays = [1000, 2000, 4000, 8000, 16000];
-
-    while (retries < 5) {
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const result = await response.json();
-            return result.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        } catch (error) {
-            console.error("Error Gemini API:", error);
-            if (retries === 4) {
-                showMsg("Gagal terhubung ke AI. Coba periksa koneksi internet Anda.");
-                return null;
-            }
-            await new Promise(res => setTimeout(res, delays[retries]));
-            retries++;
-        }
-    }
-};
-
-window.generateSubtasks = async () => {
-    const c = cards.find(x => x.id === selId);
-    if (!c) return;
-
-    const btn = document.getElementById('btn-ai-subtask');
-    btn.textContent = "Sedang berpikir..."; 
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-
-    const prompt = `Saya sedang merencanakan konten sosial media berjudul "${c.title}" dengan format konten ${c.type}. Tolong berikan 3 sampai 5 langkah sub-task (checklist) praktis untuk memproduksi konten ini. 
-    Kembalikan HANYA teks langkah-langkahnya secara langsung, pisahkan tiap langkah dengan baris baru (newline). Jangan gunakan nomor urut, jangan gunakan bullet point, dan jangan ada teks pengantar/penutup.`;
-
-    try {
-        const result = await window.fetchGemini(prompt);
-        
-        if (result) {
-            const lines = result.split('\n').filter(l => l.trim().length > 0);
-            if (!c.steps) c.steps = [];
-            lines.forEach(line => {
-                let cleanText = line.replace(/^[\d\.\-\*\s]+/, '').trim(); // Bersihkan peluru/nomor sisa AI
-                if(cleanText) c.steps.push({text: cleanText, done: false});
-            });
-            syncToFirebase();
-            renderSteps(c);
-            renderBoard();
-        }
-    } catch(e) {
-        console.error("Gagal menjalankan AI:", e);
-    } finally {
-        // Apapun yang terjadi (berhasil/gagal), kembalikan tombol ke kondisi semula
-        btn.textContent = "✨ Auto Sub-task"; 
-        btn.disabled = false;
-        btn.style.opacity = '1';
-    }
-};
-
-window.generateScript = async () => {
-    const c = cards.find(x => x.id === selId);
-    if (!c) return;
-    const b = brands.find(x => x.id === c.bId);
-    const brandName = b ? b.n : "Umum";
-
-    const btn = document.getElementById('btn-ai-script');
-    btn.textContent = "Sedang menulis..."; 
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-
-    const prompt = `Tolong buatkan sebuah draf singkat untuk ${c.type === 'Video' ? 'naskah (script) video' : 'caption sosial media'} dengan detail berikut:
-    - Judul/Topik: ${c.title}
-    - Brand: ${brandName}
-    - Jalur/Tujuan Distribusi: ${c.objective || 'Konten Organik'}
-    - Format: ${c.type}
-    
-    Buat dengan gaya bahasa yang profesional namun tetap engaging (menarik interaksi). Berikan langsung hasilnya tanpa teks pengantar.`;
-
-    try {
-        const result = await window.fetchGemini(prompt);
-        
-        if (result) {
-            const divider = c.notes ? "\n\n--- Draft AI ---\n\n" : "";
-            const newNotes = (c.notes || "") + divider + result;
-            saveNotes(newNotes);
-            document.getElementById('dp-notes').value = newNotes;
-        }
-    } catch(e) {
-        console.error("Gagal menjalankan AI:", e);
-    } finally {
-        // Apapun yang terjadi (berhasil/gagal), kembalikan tombol ke kondisi semula
-        btn.textContent = "✨ Draft Script AI"; 
-        btn.disabled = false;
-        btn.style.opacity = '1';
-    }
-};
-
 
 // FAB & Modals
 window.openThemeModal = () => { 
@@ -827,7 +714,7 @@ window.cols = (t) => columns;
 window.renderAll = () => { renderTabs(); renderBoard(); };
 window.renderTabs = () => {
   document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua</div>`
-    + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="e=>e.preventDefault()" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('')
+    + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="event.preventDefault()" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('')
     + `<div class="add-btab" onclick="openBrand()">+</div>`;
   const opts = `<option value="">Tanpa Brand</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join('');
   document.getElementById('m-brand').innerHTML = opts; document.getElementById('dp-fbrand').innerHTML = opts;
@@ -903,6 +790,19 @@ window.cardH = (c) => {
   return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${c.type==='Video'?'tv':c.type==='Feed'?'tf':c.type==='Catatan'?'tc':'ts'}">${c.type}</span>${objBadge}${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
 };
 
+// FITUR DRAG N DROP BRAND (TABS)
+let draggedBrandIdx = null;
+window.dragB = (e, idx) => { draggedBrandIdx = idx; };
+window.dropB = (e, targetIdx) => {
+    e.preventDefault();
+    if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return;
+    const b = brands.splice(draggedBrandIdx, 1)[0];
+    brands.splice(targetIdx, 0, b);
+    syncToFirebase();
+    renderAll();
+    draggedBrandIdx = null;
+};
+
 // Minimal Logic
 window.setB = (id) => { aB=id; renderAll(); };
 window.toggleCol = (id) => { const col = columns.find(c=>c.id===id); if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } };
@@ -966,6 +866,34 @@ window.delCurCard = () => { showMsg("Hapus konten ini?",()=>{cards=cards.filter(
 window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" target="_blank" style="color:var(--primary);font-weight:600;">${u}</a>`);
 window.editNotes = () => { document.getElementById('dp-notes-display').style.display='none'; const ta=document.getElementById('dp-notes'); ta.style.display='block'; ta.focus(); };
 window.saveNotes = (v) => { dps('notes',v); document.getElementById('dp-notes-display').innerHTML=v?linkify(v):'Klik tambah catatan...'; document.getElementById('dp-notes-display').style.display='block'; document.getElementById('dp-notes').style.display='none'; };
+
+// INTEGRASI GOOGLE CALENDAR
+window.addToGCal = () => {
+    const c = cards.find(x => x.id === selId);
+    if(!c) return;
+    
+    const title = encodeURIComponent(`Konten: ${c.title}`);
+    let details = `Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}`;
+    if (c.notes) details += `\n\nCatatan:\n${c.notes}`;
+    details = encodeURIComponent(details);
+
+    let dates = "";
+    if (c.date) {
+        try {
+            // Setup Format Waktu (UTC/Universal agar aman di browser apapun)
+            const dt = new Date(c.date + 'T' + (c.time || '09:00') + ':00');
+            const start = dt.toISOString().replace(/-|:|\.\d\d\d/g, '');
+            const endDt = new Date(dt.getTime() + 60 * 60 * 1000); // Durasi otomatis 1 jam
+            const end = endDt.toISOString().replace(/-|:|\.\d\d\d/g, '');
+            dates = `&dates=${start}/${end}`;
+        } catch(e) { 
+            console.error("Format tanggal tidak valid", e); 
+        }
+    }
+    
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`;
+    window.open(url, '_blank');
+};
 
 // SISTEM RENDER & EDIT TASK INLINE
 window.renderSteps = (c) => { 
@@ -1032,14 +960,66 @@ window.uploadImage = async (input) => {
 
 window.renderAtt = (imgs) => { document.getElementById('dp-attachments').innerHTML=(imgs||[]).map((u,i)=>`<div class="att-item"><img src="${u}" onclick="window.open('${u}','_blank')"><button class="att-del" onclick="event.stopPropagation();delImg(${i})">×</button></div>`).join(''); };
 window.delImg = (i) => { const c=cards.find(x=>x.id===selId); c.images.splice(i,1); syncToFirebase(); renderAtt(c.images); };
-window.openBrand = () => { editBrandId=null; document.getElementById('bm-name').value=''; document.getElementById('brand-ov').classList.add('show'); };
-window.openEditBrand = (id) => { const b=brands.find(x=>x.id===id); editBrandId=id; document.getElementById('bm-name').value=b.n; document.getElementById('brand-ov').classList.add('show'); };
-window.saveBrand = () => { const n=document.getElementById('bm-name').value.trim(); if(!n)return; if(editBrandId){ const b=brands.find(x=>x.id===editBrandId); b.n=n; } else brands.push({id:'b'+Date.now(),n,c:bCol}); document.getElementById('brand-ov').classList.remove('show'); syncToFirebase(); };
+
+window.openBrand = () => { 
+    editBrandId=null; 
+    document.getElementById('bm-name').value=''; 
+    bCol = '#534AB7';
+    document.getElementById('bm-color-wheel').value = bCol;
+    document.getElementById('bm-color-hex').value = bCol;
+    document.getElementById('brand-ov').classList.add('show'); 
+};
+window.openEditBrand = (id) => { 
+    const b=brands.find(x=>x.id===id); 
+    editBrandId=id; 
+    document.getElementById('bm-name').value=b.n; 
+    bCol = b.c || '#534AB7';
+    document.getElementById('bm-color-wheel').value = bCol;
+    document.getElementById('bm-color-hex').value = bCol;
+    document.getElementById('brand-ov').classList.add('show'); 
+};
+window.saveBrand = () => { 
+    const n=document.getElementById('bm-name').value.trim(); 
+    if(!n)return; 
+    if(editBrandId){ 
+        const b=brands.find(x=>x.id===editBrandId); 
+        b.n=n; b.c=bCol; 
+    } else {
+        brands.push({id:'b'+Date.now(),n,c:bCol}); 
+    } 
+    document.getElementById('brand-ov').classList.remove('show'); 
+    syncToFirebase(); 
+};
 window.confirmDelBrand = (id) => { showMsg("Hapus brand?",()=>{brands=brands.filter(x=>x.id!==id); syncToFirebase();}); };
 
-window.openCol = (id) => { editColId=id; if(id){ const c=columns.find(x=>x.id===id); document.getElementById('cm-name').value=c.lbl; } else document.getElementById('cm-name').value=''; document.getElementById('col-ov').classList.add('show'); };
+window.openCol = (id) => { 
+    editColId=id; 
+    if(id){ 
+        const c=columns.find(x=>x.id===id); 
+        document.getElementById('cm-name').value=c.lbl; 
+        cCol = c.c || '#534AB7';
+    } else { 
+        document.getElementById('cm-name').value=''; 
+        cCol = '#534AB7';
+    } 
+    document.getElementById('cm-color-wheel').value = cCol;
+    document.getElementById('cm-color-hex').value = cCol;
+    document.getElementById('col-ov').classList.add('show'); 
+};
 window.closeCol = () => document.getElementById('col-ov').classList.remove('show');
-window.saveCol = () => { const n=document.getElementById('cm-name').value.trim(); if(!n)return; if(editColId){ const c=columns.find(x=>x.id===editColId); c.lbl=n; } else columns.push({id:'col'+Date.now(),lbl:n,c:cCol,collapsed:false}); document.getElementById('col-ov').classList.remove('show'); renderAll(); syncToFirebase(); };
+window.saveCol = () => { 
+    const n=document.getElementById('cm-name').value.trim(); 
+    if(!n)return; 
+    if(editColId){ 
+        const c=columns.find(x=>x.id===editColId); 
+        c.lbl=n; c.c=cCol; 
+    } else {
+        columns.push({id:'col'+Date.now(),lbl:n,c:cCol,collapsed:false}); 
+    } 
+    document.getElementById('col-ov').classList.remove('show'); 
+    renderAll(); 
+    syncToFirebase(); 
+};
 window.confirmDelCol = (id) => { if(columns.length<=1)return; showMsg("Hapus status?",()=>{const f=columns.find(x=>x.id!==id).id; cards.forEach(c=>{if(c.status===id)c.status=f;}); columns=columns.filter(x=>x.id!==id); renderAll(); syncToFirebase();}); };
 
 window.mvCol = (i,d) => { const n=i+d; if(n>=0&&n<columns.length){ const t=columns[i]; columns[i]=columns[n]; columns[n]=t; renderBoard(); syncToFirebase(); } };
@@ -1151,7 +1131,12 @@ window.exportToPDF=()=>{
       doc.save("Content_Plan_Abdi.pdf");
   } catch(err) { showMsg("Gagal membuat PDF."); }
 };
-window.syncColor = (v,t,p='bm') => { if(p==='bm')bCol=v; else cCol=v; };
+
+window.syncColor = (v, targetIdSuffix, p='bm') => { 
+    if(p==='bm') bCol=v; else cCol=v; 
+    const el = document.getElementById(p + '-color-' + targetIdSuffix);
+    if(el) el.value = v;
+};
 
 // AKSELERASI: SWIPE UNTUK MENUTUP PANEL
 let dpTouchStartX = 0;
