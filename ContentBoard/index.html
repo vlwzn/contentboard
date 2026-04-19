@@ -125,6 +125,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tf{background:#E1F5EE;color:#085041}
 .ts{background:#E6F1FB;color:#0C447C}
 .tc{background:#FFF3CD;color:#856404} 
+.tt{background:#E3F2FD;color:#1565C0} /* WARNA KHUSUS TO-DO */
 .card-title{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:10px; color:#222;}
 
 /* PROGRESS BAR */
@@ -202,7 +203,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .search-input { width: 150px; }
   .search-input:focus { width: 180px; }
   
-  /* UPDATE: SLIDE DARI BAWAH DI MOBILE */
   .dp { width: 100%; max-width: 100%; border-radius: 20px 20px 0 0; top: 40px; height: calc(100vh - 40px); border-left: none; transform: translateY(100%); }
   .dp.open { transform: translateY(0); }
   .dp-pull-indicator { display: block; }
@@ -211,7 +211,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
-<!-- AUTH OVERLAY (LOGIN / REGISTER) -->
+<!-- AUTH OVERLAY (LOGIN / REGISTER / RESET) -->
 <div class="overlay" id="login-ov" style="z-index: 9999; background: var(--bg-app);">
   <div class="modal" style="padding: 30px; text-align: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
     <div style="width: 60px; height: 60px; background: var(--primary); color: #fff; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; margin: 0 auto 16px;">C</div>
@@ -239,6 +239,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
             Masuk dengan Google
         </button>
+
         <div style="font-size: 12px; color: #666;">Belum punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('reg')">Daftar di sini</span></div>
     </div>
 
@@ -247,7 +248,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <input class="fi" type="text" id="reg-name" placeholder="Nama Lengkap" style="margin-bottom: 10px; text-align:left;">
         <input class="fi" type="email" id="reg-email" placeholder="Alamat Email" style="margin-bottom: 10px; text-align:left;">
         <input class="fi" type="password" id="reg-pass" placeholder="Kata Sandi (Min. 6 Karakter)" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') registerEmail()">
-        <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 20px; font-size: 14px;" onclick="registerEmail()">Daftar Akun Baru</button>
+        <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 12px; font-size: 14px;" onclick="registerEmail()">Daftar Akun Baru</button>
+        
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+            <hr style="flex:1; border:none; border-top:1px solid #ddd;">
+            <span style="font-size:11px; color:#888;">ATAU JALUR CEPAT</span>
+            <hr style="flex:1; border:none; border-top:1px solid #ddd;">
+        </div>
+
+        <button class="btn-c" style="width: 100%; padding: 10px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:8px; font-size: 13px;" onclick="loginGoogle()">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Lanjutkan dengan Google
+        </button>
+
         <div style="font-size: 12px; color: #666;">Sudah punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('log')">Masuk di sini</span></div>
     </div>
 
@@ -265,7 +278,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand">
-        
         <!-- MENU AKUN / LOGOUT -->
         <div style="position: relative;">
             <div class="brand-icon" id="user-avatar" onclick="toggleUserMenu(event)" title="Opsi Akun">A</div>
@@ -274,11 +286,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                     <div style="font-weight: 600; color: #222; font-size: 13px;" id="user-menu-name">Nama</div>
                     <div style="font-size: 11px; color: #888;" id="user-menu-email">user@email.com</div>
                 </div>
+                <button class="ctx-item" onclick="changeUsername()" style="width: 100%; justify-content: flex-start;">✏️ Ubah Nama</button>
                 <button class="ctx-item danger" onclick="showLogoutMenu()" style="width: 100%; justify-content: flex-start;">🚪 Keluar (Logout)</button>
             </div>
         </div>
         
-        <!-- PROJECT SELECTOR CUSTOM (BISA DRAG & DROP) -->
+        <!-- PROJECT SELECTOR CUSTOM -->
         <div style="position: relative;">
             <button id="project-btn" class="proj-selector-btn" onclick="toggleProjMenu(event)">Project Utama ▾</button>
             <div id="proj-menu" class="custom-dropdown" style="top: 36px; left: 0; min-width: 220px; max-height: 400px; overflow-y: auto;">
@@ -289,18 +302,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                 </div>
             </div>
         </div>
-
       </div>
     </div>
 
-    <!-- PENGURUTAN LOGIS BERDASARKAN WORKFLOW (KIRI KE KANAN) -->
     <div class="top-actions">
-      <!-- 0. PENCARIAN SEJAJAR -->
       <input type="text" id="search-input" class="topbtn search-input" placeholder="Cari konten..." oninput="renderBoard()">
-
-      <!-- 1. WAKTU -->
       <input type="month" id="filter-month" class="topbtn" onchange="renderBoard()" title="Filter Bulan">
-      
       <select id="filter-week" class="topbtn" onchange="renderBoard()" title="Filter Pekan">
         <option value="all">🗓️ Pekan</option>
         <option value="1">Pekan 1</option>
@@ -309,17 +316,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <option value="4">Pekan 4</option>
         <option value="5">Pekan 5</option>
       </select>
-      
-      <!-- 2. KATEGORI & KONTEKS -->
       <select id="filter-type" class="topbtn" onchange="renderBoard()" title="Filter Jenis Konten">
         <option value="semua">📑 Jenis</option>
         <option value="Video">📹 Video</option>
         <option value="Feed">🖼️ Feed</option>
         <option value="Story">📱 Story</option>
         <option value="Catatan">📝 Catatan</option>
+        <option value="To-Do">✅ To-Do</option>
       </select>
-
-      <!-- DROPDOWN JALUR/OBJEKTIF -->
       <select id="filter-objective" class="topbtn" onchange="renderBoard()" title="Filter Jalur Distribusi">
         <option value="all">📢 Jalur</option>
         <option value="Konten">🪴 Konten Organik</option>
@@ -327,7 +331,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <option value="Campaign">🎪 Campaign</option>
         <option value="Ads">📢 Ads</option>
       </select>
-
       <select id="filter-urgency" class="topbtn" onchange="renderBoard()" title="Filter Prioritas">
         <option value="all">🎯 Prioritas</option>
         <option value="high">🔥 Mendesak</option>
@@ -335,8 +338,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <option value="normal">⚪ Normal</option>
         <option value="low">🐢 Santai</option>
       </select>
-
-      <!-- 3. TAMPILAN -->
       <select id="sort-by" class="topbtn" onchange="renderBoard()" title="Urutkan Konten">
         <option value="manual">↕️ Urutkan</option>
         <option value="newest">✨ Baru Ditambahkan</option>
@@ -344,8 +345,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <option value="date-desc">📆 Tanggal Terjauh</option>
         <option value="type">🏷️ Jenis Konten</option>
       </select>
-      
-      <!-- 4. AKSI GLOBAL -->
       <button class="topbtn" onclick="openThemeModal()">🎨 Tema</button>
       <button class="export-btn" onclick="exportToPDF()">📑 PDF</button>
     </div>
@@ -358,7 +357,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="board" id="board"></div>
   </div>
 
-  <!-- EMPTY STATE (KOSONG) -->
+  <!-- EMPTY STATE -->
   <div id="empty-state" style="display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
     <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.8;">📦</div>
     <h3 style="color: #222; margin-bottom: 12px; font-size: 20px;">Ruang Kerja Kosong</h3>
@@ -369,7 +368,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- FLOATING ACTION BUTTON -->
 <button class="fab" id="fab-add" onclick="openAdd()" title="Buat Konten Baru">+</button>
 
 <!-- OVERLAY UNTUK PANEL -->
@@ -405,9 +403,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="dp-field"><span class="dp-fl">Pekan Ke</span><div class="dp-fv"><select id="dp-fweek" onchange="dps('week',this.value)"><option value="1">Pekan 1</option><option value="2">Pekan 2</option><option value="3">Pekan 3</option><option value="4">Pekan 4</option><option value="5">Pekan 5</option></select></div></div>
     </div>
 
-    <div class="dp-field"><span class="dp-fl">Jenis</span><div class="dp-fv"><select id="dp-ftype" onchange="dpChType(this.value)"><option value="Video">Video</option><option value="Feed">Feed</option><option value="Story">Story</option><option value="Catatan">Catatan</option></select></div></div>
+    <div class="dp-field"><span class="dp-fl">Jenis</span><div class="dp-fv"><select id="dp-ftype" onchange="dpChType(this.value)"><option value="Video">Video</option><option value="Feed">Feed</option><option value="Story">Story</option><option value="Catatan">Catatan</option><option value="To-Do">To-Do</option></select></div></div>
     
-    <div class="dp-field"><span class="dp-fl">Jalur</span>
+    <div class="dp-field" id="dp-obj-container"><span class="dp-fl">Jalur</span>
       <div class="dp-fv">
         <select id="dp-fobjective" onchange="dps('objective',this.value)">
           <option value="Konten">🪴 Konten Organik</option>
@@ -436,11 +434,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     
     <div style="margin-top:20px; font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">LAMPIRAN / REFERENSI</div>
     <div id="dp-attachments" class="att-list"></div>
-    <label class="add-col-btn" style="display:block; margin-top:12px; cursor:pointer;">
-      + Upload Gambar/Referensi
-      <input type="file" style="display:none" accept="image/*" onchange="uploadImage(this)">
-    </label>
-    <div id="upload-status" style="display:none; font-size:12px; color:var(--primary); margin-top:8px; text-align:center; font-weight:500;">Mengupload...</div>
+    <button class="add-col-btn" style="margin-top:12px;" onclick="addImageUrl()">
+      + Tambah Link Gambar (Gratis)
+    </button>
   </div>
 </div>
 
@@ -456,6 +452,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button class="fi" id="btn-f" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:500;" onclick="selType('Feed')">Feed</button>
         <button class="fi" id="btn-s" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:500;" onclick="selType('Story')">Story</button>
         <button class="fi" id="btn-c" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:500; min-width:80px;" onclick="selType('Catatan')">Catatan</button>
+        <button class="fi" id="btn-t" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:500; min-width:80px;" onclick="selType('To-Do')">To-Do</button>
       </div>
       <div id="m-datetime-container">
         <div style="display:flex; gap:8px; margin-bottom:12px;">
@@ -471,8 +468,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           </select>
         </div>
       </div>
-      
-      <!-- JALUR DISTRIBUSI DI MODAL ADD & STATUS DIJADIKAN SATU BARIS -->
       <div style="display:flex; gap:8px; margin-bottom:12px;">
         <select class="fi" id="m-objective" style="flex:1; margin-bottom:0;" title="Jalur Distribusi">
             <option value="Konten">🪴 Konten Organik</option>
@@ -482,7 +477,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         </select>
         <select class="fi" id="m-status" style="flex:1; margin-bottom:0;" title="Status"></select>
       </div>
-
     </div>
     <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
       <button class="btn-c" onclick="closeAdd()">Batal</button>
@@ -532,11 +526,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="modal">
     <div class="modal-head" id="ws-title" style="padding:16px 20px; font-weight:700; border-bottom:1px solid #f0f0f0;">Project Baru</div>
     <div class="modal-body" style="padding:20px;">
-      <input class="fi" type="text" id="ws-name" placeholder="Nama Project..." onkeyup="autoFillId(this.value)"/>
-      <div id="ws-id-container" style="margin-top: 4px;">
-          <span style="font-size: 11px; color: #888; font-weight: 600;">ID PROJECT (URL & Database):</span>
-          <input class="fi" type="text" id="ws-id" placeholder="id-unik-project" style="font-family: monospace; font-size: 13px; background: #f9f9f9; margin-top: 6px; margin-bottom: 0;"/>
-      </div>
+      <input class="fi" type="text" id="ws-name" placeholder="Nama Project..."/>
     </div>
     <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
       <button id="ws-del-btn" class="btn-c" style="color:#e24b4a; margin-right:auto; display:none;" onclick="confirmDelWs()">Hapus</button>
@@ -606,7 +596,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 // IMPORT FIREBASE CORE & DATABASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 // IMPORT FIREBASE AUTHENTICATION
 import { 
@@ -623,18 +612,18 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCrOAzCGHAyZENhjU9Qlhf1SD0CbFQloq8",
-  authDomain: "to-do-pro-d71e1.firebaseapp.com",
-  databaseURL: "https://to-do-pro-d71e1-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "to-do-pro-d71e1",
-  storageBucket: "to-do-pro-d71e1.firebasestorage.app",
-  messagingSenderId: "1022896423011",
-  appId: "1:1022896423011:web:e51bb333c51fff70ec3856"
+  apiKey: "AIzaSyB2-cj9k_J9FDovpLz3l-kCAIvGjckmQtM",
+  authDomain: "contentboardpro.firebaseapp.com",
+  databaseURL: "https://contentboardpro-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "contentboardpro",
+  storageBucket: "contentboardpro.firebasestorage.app",
+  messagingSenderId: "133243951273",
+  appId: "1:133243951273:web:fb31eddd1bfcc40e95f1b8",
+  measurementId: "G-NYLEL5LNCJ"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const storage = getStorage(app);
 const auth = getAuth(app); 
 const googleProvider = new GoogleAuthProvider();
 
@@ -648,14 +637,14 @@ let unsubscribeBoard = null;
 let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '' };
 let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
 
-// GLOBAL HIDE CONTEXT MENU FIX
+// GLOBAL FIX: ALLOW DROP (Mencegah browser memblokir drag and drop)
+window.allowDrop = (e) => { e.preventDefault(); };
+
+// GLOBAL FIX: HIDE CONTEXT MENU
 window.hideCtxMenu = () => {
     const ctx = document.getElementById('ctx-menu');
     if (ctx) ctx.style.display = 'none';
 };
-
-// GLOBAL DRAG AND DROP ALLOWANCE (PENCEGAH ERROR BROWSER)
-window.allowDrop = (e) => { e.preventDefault(); };
 
 // FUNGSI PESAN ALERT / CONFIRM KUSTOM
 window.showMsg = (txt, cb) => {
@@ -671,15 +660,15 @@ window.showMsg = (txt, cb) => {
 
 // ================= SISTEM AUTHENTICATION FIREBASE =================
 
-window.isRegistering = false; // Flag khusus agar tidak bertabrakan saat daftar
+window.isRegistering = false;
 
 onAuthStateChanged(auth, (user) => {
-    if (window.isRegistering) return; // Abaikan jika sedang dalam proses pendaftaran
+    if (window.isRegistering) return;
 
     const loginOv = document.getElementById('login-ov');
     
     if (user) {
-        if (user.providerData[0].providerId === 'password' && !user.emailVerified) {
+        if (user.providerData[0] && user.providerData[0].providerId === 'password' && !user.emailVerified) {
             loginOv.classList.add('show');
             showMsg("Email Anda belum diverifikasi. Silakan cek kotak masuk/spam di email Anda, lalu coba masuk lagi.");
             signOut(auth);
@@ -758,15 +747,15 @@ window.registerEmail = async () => {
     btn.innerText = "Memproses...";
     btn.disabled = true;
     
-    window.isRegistering = true; // Kunci sistem onAuthStateChanged
+    window.isRegistering = true;
     
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
         await updateProfile(userCredential.user, { displayName: name });
         await sendEmailVerification(userCredential.user);
-        await signOut(auth); // Keluar agar wajib verifikasi
+        await signOut(auth);
         
-        window.isRegistering = false; // Buka kembali sistem
+        window.isRegistering = false;
         
         showMsg("Pendaftaran sukses!<br><b>Link verifikasi telah dikirim ke email Anda.</b> Silakan cek kotak masuk/spam dan klik link tersebut sebelum masuk.", () => {
             toggleAuth('log'); 
@@ -818,6 +807,30 @@ window.showLogoutMenu = () => {
     });
 };
 
+window.changeUsername = async () => {
+    if(!myUser) return;
+    const newName = prompt("Masukkan nama panggilan baru Anda:", myUser.name);
+    if(!newName || newName.trim() === '' || newName === myUser.name) return;
+
+    const nameTrimmed = newName.trim();
+    const btn = document.getElementById('user-avatar');
+    const oldText = btn.textContent;
+    btn.textContent = "⏳";
+
+    try {
+        if (auth.currentUser) {
+            await updateProfile(auth.currentUser, { displayName: nameTrimmed });
+        }
+        myUser.name = nameTrimmed;
+        document.getElementById('user-avatar').textContent = myUser.name.charAt(0).toUpperCase();
+        document.getElementById('user-menu-name').textContent = myUser.name;
+        showMsg("Nama berhasil diubah!");
+    } catch(e) {
+        showMsg("Gagal mengubah nama: " + e.message);
+        btn.textContent = oldText;
+    }
+};
+
 // ================= CUSTOM MENU (USER & PROJECT) =================
 window.toggleUserMenu = (e) => {
     e.stopPropagation();
@@ -839,7 +852,7 @@ document.addEventListener('click', (e) => {
     const pMenu = document.getElementById('proj-menu');
     if(uMenu && !e.target.closest('#user-avatar')) uMenu.classList.remove('show');
     if(pMenu && !e.target.closest('#project-btn')) pMenu.classList.remove('show');
-    hideCtxMenu();
+    window.hideCtxMenu();
 });
 
 
@@ -917,6 +930,7 @@ window.dragWs = (e, idx) => {
     setTimeout(() => e.target.style.opacity = '0.5', 0);
 };
 window.dragOverWs = (e) => {
+    e.preventDefault();
     const target = e.currentTarget;
     const rect = target.getBoundingClientRect();
     const offset = rect.y + (rect.height / 2);
@@ -956,21 +970,15 @@ window.dropWs = (e, targetIdx) => {
 
 
 window.openWsModal = (isEdit = false) => {
-    const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), idEl = document.getElementById('ws-id'), idContainer = document.getElementById('ws-id-container'), delBtn = document.getElementById('ws-del-btn');
+    const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn');
     if (isEdit) {
         editWsId = activeWsId; titleEl.textContent = "Edit Project";
         const currentWs = workspaces.find(w => w.id === activeWsId); 
         inputEl.value = currentWs ? currentWs.name : '';
-        idEl.value = currentWs ? currentWs.id : '';
-        idEl.disabled = true;
-        idEl.style.opacity = '0.6';
         delBtn.style.display = "block"; 
     } else {
         editWsId = null; titleEl.textContent = "Project Baru"; 
         inputEl.value = ''; 
-        idEl.value = '';
-        idEl.disabled = false;
-        idEl.style.opacity = '1';
         delBtn.style.display = "none";
     }
     document.getElementById('ws-ov').classList.add('show');
@@ -978,27 +986,15 @@ window.openWsModal = (isEdit = false) => {
 
 window.closeWsModal = () => { document.getElementById('ws-ov').classList.remove('show'); };
 
-// AUTO FILL ID PROJECT
-window.autoFillId = (val) => {
-    if (!editWsId) {
-        document.getElementById('ws-id').value = val.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    }
-};
-
 window.saveWs = () => {
     const name = document.getElementById('ws-name').value.trim();
-    let customId = document.getElementById('ws-id').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
     if(!name) return;
     
     if (editWsId) {
         const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name;
         set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { closeWsModal(); renderWsSelector(); });
     } else {
-        if (!customId) customId = 'ws_' + Date.now();
-        if (workspaces.some(w => w.id === customId)) {
-            showMsg("ID Project sudah digunakan. Silakan gunakan ID lain.");
-            return;
-        }
+        let customId = 'ws_' + Date.now();
         workspaces.push({id: customId, name: name});
         set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { 
             closeWsModal(); 
@@ -1124,6 +1120,18 @@ window.moveCardToWs = async () => {
     finally { btn.textContent = 'Pindahkan'; btn.disabled = false; }
 };
 
+window.showCtxMenu = (e, type, id) => {
+    e.preventDefault(); e.stopPropagation();
+    const ctx = document.getElementById('ctx-menu'); ctx.style.display = 'flex';
+    if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); window.hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); window.hideCtxMenu()">🗑️ Hapus Status</button>`;
+    else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); window.hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); window.hideCtxMenu()">🗑️ Hapus Brand</button>`;
+    else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); window.hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;window.hideCtxMenu()">📄 Duplikat</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); window.hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();window.hideCtxMenu()">🗑️ Hapus</button>`;
+    let x = e.clientX, y = e.clientY;
+    if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10;
+    if (y + ctx.offsetHeight > window.innerHeight) y = window.innerHeight - ctx.offsetHeight - 10;
+    ctx.style.left = x + 'px'; ctx.style.top = y + 'px';
+};
+
 window.cols = (t) => columns; 
 window.renderAll = () => { renderTabs(); renderBoard(); };
 window.renderTabs = () => {
@@ -1154,7 +1162,11 @@ window.renderBoard = () => {
         mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj),
         mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true;
         
-    if (c.type !== 'Catatan') { 
+    if (c.type === 'Catatan' || c.type === 'To-Do') { 
+        mM = true; 
+        mW = true; 
+        mObj = true; // Abaikan filter jalur untuk Catatan & To-Do
+    } else {
         if (fMonth && c.date) mM = c.date.startsWith(fMonth); 
         else if (fMonth && !c.date) mM = false; 
         mW = (fWeek === 'all' || c.week === fWeek); 
@@ -1186,30 +1198,34 @@ window.cardH = (c) => {
   else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;margin-left:4px;">🐢 Santai</span>`;
 
   let objBadge = '';
-  const obj = c.objective || 'Konten';
-  if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;margin-left:4px;">📢 Ads</span>`;
-  else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;margin-left:4px;">🎪 Campaign</span>`;
-  else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;margin-left:4px;">🚀 Boost</span>`;
-  else objBadge = `<span class="tbadge" style="background:#F0F0F0;color:#666;margin-left:4px;">🪴 Organik</span>`;
+  if (c.type !== 'Catatan' && c.type !== 'To-Do') {
+      const obj = c.objective || 'Konten';
+      if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;margin-left:4px;">📢 Ads</span>`;
+      else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;margin-left:4px;">🎪 Campaign</span>`;
+      else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;margin-left:4px;">🚀 Boost</span>`;
+      else objBadge = `<span class="tbadge" style="background:#F0F0F0;color:#666;margin-left:4px;">🪴 Organik</span>`;
+  }
 
   let dateStyle="color:#888;", alert="";
-  if (c.type !== 'Catatan' && c.date && ci < cl.length-1) {
+  if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) {
       const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5;
       if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; }
       else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; }
   }
-  const dt = c.date ? `<div style="float:right;display:flex;align-items:center;">${c.week?`<span style="font-size:10px;background:var(--primary-light);color:var(--primary);padding:2px 6px;border-radius:4px;margin-right:6px;font-weight:600;">P${c.week}</span>`:''}<span style="font-size:10px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:10px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : '';
+  const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="float:right;display:flex;align-items:center;">${c.week?`<span style="font-size:10px;background:var(--primary-light);color:var(--primary);padding:2px 6px;border-radius:4px;margin-right:6px;font-weight:600;">P${c.week}</span>`:''}<span style="font-size:10px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:10px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : '';
   const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Selesai</div>` : '';
   
-  return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${c.type==='Video'?'tv':c.type==='Feed'?'tf':c.type==='Catatan'?'tc':'ts'}">${c.type}</span>${objBadge}${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
+  const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts';
+  return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
 };
 
-// LOGIKA DRAG & DROP BRAND TABS (FIXED DATA TYPE)
+// LOGIKA DRAG & DROP BRAND TABS
 let draggedBrandIdx = null;
 window.dragB = (e, idx) => { 
     e.stopPropagation();
     draggedBrandIdx = idx; 
-    e.dataTransfer.setData("text/plain", String(idx)); // <- HARUS STRING (TEKS)
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(idx));
 };
 window.dropB = (e, targetIdx) => {
     e.preventDefault(); e.stopPropagation();
@@ -1226,14 +1242,22 @@ window.toggleCol = (id) => { const col = columns.find(c=>c.id===id); if(col){ co
 window.openAdd = (s) => { 
     document.getElementById('add-ov').classList.add('show'); 
     const curType = document.getElementById('filter-type').value;
-    selType(curType === 'Catatan' || curType === 'semua' ? 'Video' : curType); 
+    selType(curType === 'Catatan' || curType === 'To-Do' || curType === 'semua' ? 'Video' : curType); 
     renderMStatus('Video', s || columns[0].id); 
     document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; 
     document.getElementById('m-title').value = ''; 
-    document.getElementById('m-objective').value = 'Konten'; // Reset default
+    document.getElementById('m-objective').value = 'Konten';
 };
 window.closeAdd = () => document.getElementById('add-ov').classList.remove('show');
-window.selType = (t) => { mType=t; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); document.getElementById('btn-'+t[0].toLowerCase()).style.background='var(--primary-light)'; document.getElementById('m-datetime-container').style.display=t==='Catatan'?'none':'block'; renderMStatus(t,''); };
+window.selType = (t) => { 
+    mType=t; 
+    document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); 
+    let btnId = 'btn-' + (t==='To-Do' ? 't' : t[0].toLowerCase());
+    document.getElementById(btnId).style.background='var(--primary-light)'; 
+    document.getElementById('m-datetime-container').style.display=(t==='Catatan'||t==='To-Do')?'none':'block'; 
+    document.getElementById('m-objective').parentElement.style.display=(t==='Catatan'||t==='To-Do')?'none':'flex'; 
+    renderMStatus(t,''); 
+};
 window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; };
 window.saveCard = () => { 
     const t=document.getElementById('m-title').value.trim(); 
@@ -1243,11 +1267,11 @@ window.saveCard = () => {
         title:t,
         bId:document.getElementById('m-brand').value,
         type:mType,
-        date:mType==='Catatan'?'':document.getElementById('m-date').value,
-        time:mType==='Catatan'?'':document.getElementById('m-time').value,
-        week:mType==='Catatan'?'':document.getElementById('m-week').value,
+        date:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-date').value,
+        time:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-time').value,
+        week:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-week').value,
         urgency:document.getElementById('m-urgency').value,
-        objective:document.getElementById('m-objective').value,
+        objective:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-objective').value,
         status:document.getElementById('m-status').value,
         notes:'',images:[],steps:[]
     }); 
@@ -1266,19 +1290,30 @@ window.selCard = (id) => {
     document.getElementById('dp-fbrand').value=c.bId; 
     document.getElementById('dp-furgency').value=c.urgency||'normal'; 
     document.getElementById('dp-fobjective').value=c.objective||'Konten'; 
+    
+    document.getElementById('dp-datetime-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'block'; 
+    document.getElementById('dp-obj-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'flex'; 
+
     const s=document.getElementById('dp-fstatus'); 
     s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); 
     s.value=c.status; 
     document.getElementById('dp-notes').value=c.notes||''; 
     document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; 
-    document.getElementById('dp-datetime-container').style.display=c.type==='Catatan'?'none':'block'; 
     renderSteps(c); renderAtt(c.images); 
     document.getElementById('dp').classList.add('open'); 
     document.getElementById('dp-ov').classList.add('show'); 
 };
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
 window.dps = (f,v) => { const c=cards.find(x=>x.id===selId); if(c){c[f]=v; renderBoard(); syncToFirebase();} };
-window.dpChType = (v) => { const c=cards.find(x=>x.id===selId); if(c){c.type=v; if(v==='Catatan'){c.date='';c.time='';c.week='';} syncToFirebase(); selCard(selId);} };
+window.dpChType = (v) => { 
+    const c=cards.find(x=>x.id===selId); 
+    if(c){
+        c.type=v; 
+        if(v==='Catatan' || v==='To-Do'){c.date='';c.time='';c.week=''; c.objective='';} 
+        syncToFirebase(); 
+        selCard(selId);
+    } 
+};
 window.dupCard = () => { const c = cards.find(x=>x.id===selId); if(!c) return; const newC = JSON.parse(JSON.stringify(c)); newC.id = 'c'+Date.now(); newC.title += " (Copy)"; cards.unshift(newC); closeDP(); syncToFirebase(); };
 window.delCurCard = () => { showMsg("Hapus konten ini?",()=>{cards=cards.filter(x=>x.id!==selId); closeDP(); syncToFirebase();}); };
 window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" target="_blank" style="color:var(--primary);font-weight:600;">${u}</a>`);
@@ -1331,7 +1366,8 @@ let draggedStepIdx = null;
 window.dragStep = (e, idx) => { 
     e.stopPropagation(); 
     draggedStepIdx = idx; 
-    e.dataTransfer.setData("text/plain", String(idx)); // <- HARUS STRING (TEKS)
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(idx));
     setTimeout(() => { e.target.style.opacity = '0.4'; }, 0); 
 };
 window.dragEndStep = (e) => { e.target.style.opacity = '1'; draggedStepIdx = null; document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = ''); };
@@ -1354,27 +1390,20 @@ window.dropStep = (e, targetIdx) => {
     syncToFirebase(); renderSteps(c);
 };
 
-window.uploadImage = async (input) => { 
-    const f=input.files[0]; if(!f||!selId)return; 
-    const s=document.getElementById('upload-status'); s.style.display='block';
-    try { 
-        const r=sRef(storage,`attachments/${Date.now()}_${f.name}`); 
-        await uploadBytes(r,f); 
-        const url=await getDownloadURL(r); 
-        const c=cards.find(x=>x.id===selId); 
-        if(!c.images)c.images=[]; 
-        c.images.push(url); 
-        syncToFirebase(); 
-        renderAtt(c.images); 
-    } catch(e){
-        console.error(e);
-        showMsg("Gagal upload gambar. Cek storage/aturan Firebase Anda.");
-    } finally {
-        s.style.display='none'; input.value='';
-    } 
+window.addImageUrl = () => {
+    const url = prompt("Paste link gambar di sini (contoh dari Pinterest, Google Drive, atau Imgur):");
+    if (!url || url.trim() === '') return;
+    
+    if (selId) {
+        const c = cards.find(x => x.id === selId);
+        if (!c.images) c.images = [];
+        c.images.push(url.trim());
+        syncToFirebase();
+        renderAtt(c.images);
+    }
 };
 
-window.renderAtt = (imgs) => { document.getElementById('dp-attachments').innerHTML=(imgs||[]).map((u,i)=>`<div class="att-item"><img src="${u}" onclick="window.open('${u}','_blank')"><button class="att-del" onclick="event.stopPropagation();delImg(${i})">×</button></div>`).join(''); };
+window.renderAtt = (imgs) => { document.getElementById('dp-attachments').innerHTML=(imgs||[]).map((u,i)=>`<div class="att-item"><img src="${u}" onclick="window.open('${u}','_blank')" onerror="this.src='https://via.placeholder.com/60?text=Error'"><button class="att-del" onclick="event.stopPropagation();delImg(${i})">×</button></div>`).join(''); };
 window.delImg = (i) => { const c=cards.find(x=>x.id===selId); c.images.splice(i,1); syncToFirebase(); renderAtt(c.images); };
 
 window.openBrand = () => { 
@@ -1445,12 +1474,12 @@ window.mv = (id, d) => {
   if(ni>=0 && ni<cl.length) { c.status = cl[ni].id; renderBoard(); syncToFirebase(); }
 };
 
-// LOGIKA DRAG & DROP KARTU (FIXED DATA TYPE)
 let draggedCardId = null;
 window.dragCard = (e, id) => { 
     e.stopPropagation();
     draggedCardId = id; 
-    e.dataTransfer.setData("text/plain", String(id)); // <- HARUS STRING (TEKS)
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(id)); 
     setTimeout(() => { e.target.style.opacity = '0.5'; }, 0); 
 };
 window.dragEndCard = (e) => { 
@@ -1530,11 +1559,9 @@ window.exportToPDF=()=>{
       let vis = cards.filter(c => { 
           let mB = (aB==='all' || c.bId===aB); 
           let mT = (fType==='semua' || c.type===fType); 
-          let mM = fMonth ? (c.date && c.date.startsWith(fMonth)) : true; 
-          let mW = fWeek==='all' ? true : c.week === fWeek; 
-          let mU = fUrg === 'all' ? true : (c.urgency || 'normal') === fUrg;
-          let mObj = fObj === 'all' ? true : (c.objective || 'Konten') === fObj;
-          if (c.type === 'Catatan') { mM = true; mW = true; } 
+          let mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj);
+          if (c.type === 'Catatan' || c.type === 'To-Do') { mM = true; mW = true; mObj = true; } 
+          else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); }
           return mB && mT && mM && mW && mU && mObj; 
       });
       if (sortBy !== 'manual') { vis.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); }
