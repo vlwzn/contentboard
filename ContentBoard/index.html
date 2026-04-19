@@ -3,27 +3,53 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0"/>
-<title>ContentBoard - Abdi's Plan</title>
+<title>ContentBoard Pro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <style>
-/* CSS VARIABLES (DYNAMIC THEME) */
+/* CSS VARIABLES (DYNAMIC THEME & DARK MODE) */
 :root {
   --primary: #534AB7;
   --primary-light: rgba(83, 74, 183, 0.15);
+  
+  /* LIGHT MODE (Default) */
   --bg-app: #f5f5f3;
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.4);
+  --text-main: #1a1a1a;
+  --text-muted: #666;
+  --text-light: #888;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --modal-bg: #fff;
+  --input-bg: transparent;
+  --input-border: #e5e5e3;
+  --col-body-bg: rgba(255,255,255,0.25);
+  --hover-bg: #f5f5f3;
 }
 
-/* BASE STYLES */
+[data-theme="dark"] {
+  --bg-app: #121212;
+  --glass-bg: rgba(30, 30, 30, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-main: #e0e0e0;
+  --text-muted: #aaa;
+  --text-light: #777;
+  --card-bg: rgba(40, 40, 40, 0.95);
+  --modal-bg: #1e1e1e;
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: #333;
+  --col-body-bg: rgba(0,0,0,0.2);
+  --hover-bg: #2a2a2a;
+}
+
+/* BASE STYLES & SMOOTH TRANSITIONS */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-app);color:#1a1a1a;font-size:14px;overflow:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-app);color:var(--text-main);font-size:14px;overflow:hidden; transition: background-color 0.3s ease, color 0.3s ease;}
 
 /* LAYOUT */
-.app{display:flex;flex-direction:column;height:100vh;overflow:hidden; background-size: cover; background-position: center; background-attachment: fixed; transition: background 0.3s ease;}
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden; background-size: cover; background-position: center; background-attachment: fixed; transition: background 0.4s ease;}
 
-/* TOPBAR */
+/* TOPBAR MINIMALIS */
 .topbar {
     display: flex;
     align-items: center;
@@ -37,173 +63,168 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     flex-wrap: wrap;
     flex-shrink: 0;
     justify-content: space-between;
+    transition: all 0.3s ease;
 }
 .topbar-left { display: flex; align-items: center; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 8px; }
-.brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: background 0.3s; flex-shrink: 0; cursor: pointer; user-select: none; }
-.brand-icon:hover { opacity: 0.8; }
+.brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; flex-shrink: 0; cursor: pointer; user-select: none; }
+.brand-icon:hover { transform: scale(1.05); opacity: 0.9; }
 
 /* CUSTOM DROPDOWNS */
-.custom-dropdown { position: absolute; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 12px; padding: 6px; z-index: 5000; display: none; flex-direction: column; }
-.custom-dropdown.show { display: flex; }
-.proj-selector-btn { font-weight: 700; font-size: 15px; color: #1a1a1a; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; outline: none; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
-.proj-selector-btn:hover { background: rgba(0,0,0,0.05); }
-.proj-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #444; transition: all 0.2s; border-top: 2px solid transparent; border-bottom: 2px solid transparent; }
-.proj-item:hover { background: #f5f5f3; color: #1a1a1a; }
+.custom-dropdown { position: absolute; background: var(--modal-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 12px; padding: 6px; z-index: 5000; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.custom-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.proj-selector-btn { font-weight: 700; font-size: 16px; color: var(--text-main); background: transparent; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; outline: none; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
+.proj-selector-btn:hover { background: var(--input-bg); }
+.proj-item { padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-main); transition: all 0.2s; border-top: 2px solid transparent; border-bottom: 2px solid transparent; }
+.proj-item:hover { background: var(--hover-bg); }
 .proj-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
-.proj-drag-handle { cursor: grab; color: #ccc; margin-right: 8px; font-size: 14px; user-select: none; }
+.proj-drag-handle { cursor: grab; color: var(--text-light); margin-right: 8px; font-size: 14px; user-select: none; }
 
-.top-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
-.topbtn { height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; background: rgba(255,255,255,0.8); font-size: 12px; white-space: nowrap; cursor: pointer; transition: all 0.2s; outline: none; color: #444; }
-.export-btn { height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid #1D9E75; border-radius: 8px; background: #E1F5EE; color: #085041; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.top-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
+.topbtn { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--card-bg); font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none; color: var(--text-main); }
+.topbtn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+.export-btn { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; border: 1px solid #1D9E75; border-radius: 8px; background: #E1F5EE; color: #085041; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.export-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(29, 158, 117, 0.2); }
+.share-btn { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; gap:6px; border: 1px solid var(--primary); border-radius: 8px; background: var(--primary-light); color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-left: 4px; }
+.share-btn:hover { background: var(--primary); color: #fff; }
 
-/* PENCARIAN SEJAJAR DENGAN DROPDOWN */
-.search-input { width: 180px; padding-left: 32px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'); background-repeat: no-repeat; background-position: 10px center; cursor: text; }
-.search-input:focus { width: 240px; background-color: #fff; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
-.search-input::placeholder { color: #888; }
+.search-input { width: 200px; padding-left: 32px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'); background-repeat: no-repeat; background-position: 10px center; cursor: text; }
+.search-input:focus { width: 260px; background-color: var(--modal-bg); border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
 
-/* FLOATING ACTION BUTTON (FAB) */
-.fab {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-    z-index: 2500;
-    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
-    user-select: none;
-}
-.fab:hover { transform: scale(1.1); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
-.fab:active { transform: scale(0.95); }
+/* FILTER PANEL MELAYANG */
+#filter-panel { position: absolute; top: 60px; right: 16px; width: 320px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
+#filter-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+.filter-row { display: flex; flex-direction: column; gap: 4px; }
+.filter-lbl { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* BRAND TABS */
-.brand-tabs{display:flex; background:var(--glass-bg); backdrop-filter:blur(12px); border-bottom:1px solid var(--glass-border); overflow-x:auto;flex-shrink:0;padding:0 16px; z-index: 99;}
+.brand-tabs{display:flex; background:var(--glass-bg); backdrop-filter:blur(12px); border-bottom:1px solid var(--glass-border); overflow-x:auto;flex-shrink:0;padding:0 16px; z-index: 99; transition: all 0.3s;}
 .brand-tabs::-webkit-scrollbar{height:4px;}
 .brand-tabs::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px;}
-.btab{display:flex;align-items:center;gap:6px;padding:12px 14px;cursor:pointer;border-bottom:2px solid transparent;color:#888;font-size:13px;white-space:nowrap;user-select:none; transition: color 0.2s;}
-.btab.active{color:#1a1a1a;font-weight:600;border-bottom-color:var(--primary)}
-.bdot{width:9px;height:9px;border-radius:50%}
-.add-btab{padding:12px 10px;cursor:pointer;color:#aaa;font-size:20px;}
+.btab{display:flex;align-items:center;gap:6px;padding:14px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-light);font-size:13px;white-space:nowrap;user-select:none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
+.btab:hover { color: var(--text-main); background: var(--hover-bg); }
+.btab.active{color:var(--text-main);font-weight:600;border-bottom-color:var(--primary); background: transparent;}
+.bdot{width:10px;height:10px;border-radius:50%}
+.add-btab{padding:14px 12px;cursor:pointer;color:var(--text-light);font-size:20px; transition: color 0.2s;}
+.add-btab:hover{color:var(--primary);}
 
 /* BOARD */
-.board-wrap{flex:1;overflow-x:auto;overflow-y:hidden;display:flex}
-.board{display:flex;gap:12px;padding:14px 16px 24px 16px;align-items:stretch;height:100%}
+.board-wrap{flex:1;overflow-x:auto;overflow-y:hidden;display:flex; scroll-behavior: smooth;}
+.board{display:flex;gap:16px;padding:16px 20px 24px 20px;align-items:stretch;height:100%}
 
-.col{width:270px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;height:100%; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
-.col-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); box-shadow:0 2px 5px rgba(0,0,0,0.02)}
-.col-lbl{font-size:12px;font-weight:600;flex:1;color:#333;}
-.col-cnt{font-size:11px;color:#888;background:rgba(0,0,0,0.05); padding:2px 8px;border-radius:10px; font-weight: 500;}
-.col-body{overflow-y:auto;display:flex;flex-direction:column;gap:8px;flex:1; padding:10px 10px 80px 10px; background:rgba(255,255,255,0.25); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.4); border-radius:12px; box-shadow:inset 0 4px 15px rgba(0,0,0,0.02);} 
+.col{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;height:100%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+.col-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); box-shadow:0 2px 8px rgba(0,0,0,0.04); transition: background 0.3s;}
+.col-lbl{font-size:13px;font-weight:700;flex:1;color:var(--text-main);}
+.col-cnt{font-size:11px;color:var(--text-muted);background:var(--input-bg); padding:2px 8px;border-radius:10px; font-weight: 600; border: 1px solid var(--input-border);}
+.col-body{overflow-y:auto;display:flex;flex-direction:column;gap:10px;flex:1; padding:10px 10px 80px 10px; background:var(--col-body-bg); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid var(--glass-border); border-radius:16px; box-shadow:inset 0 4px 15px rgba(0,0,0,0.02); transition: background 0.3s;} 
 .col-body::-webkit-scrollbar{width:4px;}
 .col-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:4px;}
 
-.add-col-btn{padding:10px;border-radius:10px;color:#555;font-size:13px;border:1px dashed rgba(0,0,0,0.15);background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);cursor:pointer;text-align:center; transition: all 0.2s; font-weight: 500; width: 100%; box-shadow:0 2px 5px rgba(0,0,0,0.02);}
-.add-col-btn:hover{background:#fff; color:#222; border-color:#aaa;}
+.add-col-btn{padding:12px;border-radius:12px;color:var(--text-muted);font-size:13px;border:2px dashed var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(12px);cursor:pointer;text-align:center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600; width: 100%;}
+.add-col-btn:hover{background:var(--card-bg); color:var(--text-main); border-color:var(--primary); transform: translateY(-2px);}
 
-/* COLLAPSED COLUMN STYLES */
-.col.collapsed { width: 44px; align-items: center; background: transparent; height: max-content; align-self: flex-start; }
-.collapsed-head { display:flex; flex-direction: column; height: auto; min-height: 120px; width: 100%; cursor: pointer; justify-content: flex-start; align-items:center; padding: 12px 0; background: var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border: 1px solid var(--glass-border) !important; border-left: 4px solid var(--col-color) !important; border-radius: 8px; transition: background 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
-.col-toggle { background: none; border: none; cursor: pointer; color: #888; font-size: 11px; padding: 4px; display:flex; align-items:center; justify-content:center; }
-.col-lbl-vert { writing-mode: vertical-rl; transform: rotate(180deg); margin: 16px 0; font-size: 12px; font-weight: 600; color: #444; white-space: nowrap; letter-spacing: 0.5px;}
+/* COLLAPSED COLUMN */
+.col.collapsed { width: 50px; align-items: center; background: transparent; height: max-content; align-self: flex-start; }
+.collapsed-head { display:flex; flex-direction: column; height: auto; min-height: 140px; width: 100%; cursor: pointer; justify-content: flex-start; align-items:center; padding: 14px 0; background: var(--glass-bg); backdrop-filter:blur(12px); border: 1px solid var(--glass-border) !important; border-left: 5px solid var(--col-color) !important; border-radius: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
+.collapsed-head:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.1);}
+.col-toggle { background: none; border: none; cursor: pointer; color: var(--text-light); font-size: 11px; padding: 4px; display:flex; align-items:center; justify-content:center; transition: color 0.2s; outline:none;}
+.col-toggle:hover { color: var(--primary); }
+.col-lbl-vert { writing-mode: vertical-rl; transform: rotate(180deg); margin: 16px 0; font-size: 13px; font-weight: 700; color: var(--text-main); white-space: nowrap; letter-spacing: 0.5px;}
 
-/* CARD */
-.card{background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); border-radius:12px;padding:12px;cursor:grab;box-shadow:0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;}
-.card:active{cursor:grabbing;}
-.card:hover{transform:translateY(-2px); box-shadow:0 6px 12px rgba(0,0,0,0.08);}
-.tbadge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600;margin-bottom:8px;display:inline-block}
+/* CARD (TOMBOL KIRI KANAN DIHAPUS) */
+.card{background:var(--card-bg); border:1px solid var(--glass-border); border-radius:12px;padding:14px;cursor:grab;box-shadow:0 4px 10px rgba(0,0,0,0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative;}
+.card:active{cursor:grabbing; transform: scale(0.98);}
+.card:hover{transform:translateY(-4px); box-shadow:0 12px 20px rgba(0,0,0,0.08); border-color: var(--primary-light);}
+.tbadge{font-size:10px;padding:4px 8px;border-radius:6px;font-weight:700;margin-bottom:10px;display:inline-block; letter-spacing: 0.3px;}
 .tv{background:#EEEDFE;color:#3C3489}
 .tf{background:#E1F5EE;color:#085041}
 .ts{background:#E6F1FB;color:#0C447C}
 .tc{background:#FFF3CD;color:#856404} 
-.tt{background:#E3F2FD;color:#1565C0} /* WARNA KHUSUS TO-DO */
-.card-title{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:10px; color:#222;}
+.tt{background:#E3F2FD;color:#1565C0} 
+.card-title{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:12px; color:var(--text-main);}
 
-/* PROGRESS BAR */
-.c-prog-bg{background:rgba(0,0,0,0.08);height:5px;border-radius:3px;margin-bottom:10px;overflow:hidden;}
-.c-prog-fill{background:var(--primary);height:100%;transition:width 0.3s ease;}
-.c-prog-text{font-size:10px;color:#888;text-align:right; margin-top:-6px; margin-bottom:8px;}
+.c-prog-bg{background:var(--input-bg);height:6px;border-radius:3px;margin-bottom:10px;overflow:hidden; border: 1px solid var(--input-border);}
+.c-prog-fill{background:var(--primary);height:100%;transition:width 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+.c-prog-text{font-size:10px;color:var(--text-light);text-align:right; margin-top:-6px; margin-bottom:10px; font-weight: 500;}
 
-.card-foot{display:flex;align-items:center;gap:6px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.05)}
-.cfoot-name{font-size:11px;color:#888;flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.cfoot-btns{display:flex;gap:4px}
-.ca{background:none;border:1px solid #ddd;cursor:pointer;color:#888;font-size:12px;padding:2px 6px;border-radius:5px;}
+.card-foot{display:flex;align-items:center;gap:6px;padding-top:12px;border-top:1px solid var(--input-border)}
+.cfoot-name{font-size:11px;color:var(--text-muted);flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight: 500;}
+
+/* AVATAR PIC KECIL DI CARD */
+.pic-avatar-mini { width: 24px; height: 24px; border-radius: 50%; background: var(--primary-light); color: var(--primary); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-left: auto; text-transform: uppercase;}
 
 /* ATTACHMENT & STEPS */
 .att-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.att-item{width:60px;height:60px;border-radius:8px;border:1px solid #ddd;position:relative;overflow:hidden; cursor:pointer;}
-.att-item img{width:100%;height:100%;object-fit:cover; transition: transform 0.2s;}
-.att-item:hover img{transform:scale(1.1);}
-.att-del{position:absolute;top:2px;right:2px;background:rgba(226,75,74,0.9);color:white;border:none;width:18px;height:18px;border-radius:50%;font-size:10px;cursor:pointer; display:flex;align-items:center;justify-content:center;}
+.att-item{width:64px;height:64px;border-radius:10px;border:1px solid var(--input-border);position:relative;overflow:hidden; cursor:pointer;}
+.att-item img{width:100%;height:100%;object-fit:cover; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+.att-item:hover img{transform:scale(1.15);}
+.att-del{position:absolute;top:4px;right:4px;background:rgba(226,75,74,0.9);color:white;border:none;width:20px;height:20px;border-radius:50%;font-size:12px;cursor:pointer; display:flex;align-items:center;justify-content:center; transition: transform 0.2s;}
+.att-del:hover { transform: scale(1.1); }
 
-.step-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0f0; cursor:grab; transition: opacity 0.2s;}
+.step-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--input-border); cursor:grab; transition: opacity 0.2s, background 0.2s; border-radius: 6px;}
+.step-item:hover { background: var(--hover-bg); }
 .step-item:active{cursor:grabbing;}
-.step-item input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary);cursor:pointer;margin-top:4px;}
+.step-item input[type="checkbox"]{width:18px;height:18px;accent-color:var(--primary);cursor:pointer;margin-top:2px;}
+.step-input{flex:1;font-size:13px;color:var(--text-main);line-height:1.4;border:1px solid transparent;background:transparent;outline:none;padding:4px 8px;border-radius:6px;transition:all 0.2s;width:100%;font-family:inherit;}
+.step-input:focus{border-color:var(--primary);background:var(--input-bg);box-shadow:0 0 0 2px var(--primary-light);}
+.step-del{background:none;border:none;color:#e24b4a;cursor:pointer;font-size:18px;line-height:1; padding:0 6px; opacity: 0.5; transition: opacity 0.2s;}
+.step-item:hover .step-del { opacity: 1; }
+.drag-handle{color:var(--text-light); font-size:16px; margin-top:2px; cursor:grab; user-select:none; padding: 0 4px;}
 
-/* INLINE EDITING UNTUK TASK */
-.step-input{flex:1;font-size:13px;color:#222;line-height:1.4;border:1px solid transparent;background:transparent;outline:none;padding:4px 6px;border-radius:6px;transition:all 0.2s;width:100%;font-family:inherit;}
-.step-input:focus{border-color:var(--primary);background:rgba(255,255,255,0.9);box-shadow:0 0 0 2px var(--primary-light);}
-
-.step-del{background:none;border:none;color:#e24b4a;cursor:pointer;font-size:16px;line-height:1; padding:0 4px; margin-top:2px;}
-.drag-handle{color:#ccc; font-size:16px; margin-top:2px; cursor:grab; user-select:none;}
-
-/* MODAL & PANEL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:3000;align-items:center;justify-content:center;padding:20px; backdrop-filter:blur(4px);}
-.overlay.show{display:flex}
-.modal{background:#fff;border-radius:16px;width:100%;max-width:360px;overflow:hidden; box-shadow:0 15px 35px rgba(0,0,0,0.2);}
+/* MODAL & PANEL (SMOOTH ANIMATIONS) */
+.overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;align-items:center;justify-content:center;padding:20px; backdrop-filter:blur(5px); opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+.overlay.show{opacity: 1; visibility: visible;}
+.modal{background:var(--modal-bg);border-radius:20px;width:100%;max-width:400px;overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.3); transform: scale(0.95) translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+.overlay.show .modal { transform: scale(1) translateY(0); }
 
 /* OVERLAY KHUSUS UNTUK DETAIL PANEL */
-#dp-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1999; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
-#dp-ov.show { display: block; opacity: 1; }
+#dp-ov { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1999; backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+#dp-ov.show { opacity: 1; visibility: visible; }
 
-.dp{position:fixed;right:0;top:0;bottom:0;width:90%;max-width:380px; background:rgba(255,255,255,0.95); backdrop-filter:blur(15px); border-left:1px solid var(--glass-border);transform:translateX(100%);transition:transform .3s cubic-bezier(0.16, 1, 0.3, 1);z-index:2000; box-shadow:-5px 0 25px rgba(0,0,0,0.1);}
+.dp{position:fixed;right:0;top:0;bottom:0;width:90%;max-width:420px; background:var(--card-bg); backdrop-filter:blur(20px); border-left:1px solid var(--glass-border);transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);z-index:2000; box-shadow:-10px 0 40px rgba(0,0,0,0.15);}
 .dp.open{transform:translateX(0)}
-.dp-pull-indicator { display: none; width: 40px; height: 5px; background: rgba(0,0,0,0.15); border-radius: 3px; margin: 12px auto -4px; }
+.dp-pull-indicator { display: none; width: 40px; height: 5px; background: rgba(136,136,136,0.3); border-radius: 3px; margin: 12px auto -4px; }
 
-.dp-body{padding:20px;overflow-y:auto;height:calc(100% - 60px)}
-.dp-field{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f3}
-.dp-fl{font-size:12px;color:#888;width:80px;font-weight:500;}
+.dp-body{padding:24px;overflow-y:auto;height:calc(100% - 65px)}
+.dp-field{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--input-border)}
+.dp-fl{font-size:12px;color:var(--text-light);width:80px;font-weight:600; text-transform: uppercase; letter-spacing: 0.5px;}
 .dp-fv{flex:1}
-.dp-fv input, .dp-fv select{width:100%;border:none;outline:none;font-size:13px; color:#222; background:transparent;}
+.dp-fv input, .dp-fv select{width:100%;border:none;outline:none;font-size:14px; color:var(--text-main); background:transparent; font-weight: 500;}
+.dp-fv select { cursor: pointer; }
 
-.fi{padding:12px;border:1px solid #e5e5e3;border-radius:8px;width:100%;outline:none;margin-bottom:12px; font-size:13px; transition: border 0.2s;}
-.fi:focus{border-color:var(--primary);}
-.btn-c{padding:10px 16px;border:1px solid #ddd;border-radius:10px;background:#fff;font-weight:600;cursor:pointer; color:#444; transition: background 0.2s;}
-.btn-c:hover{background:#f5f5f3;}
-.btn-s{padding:10px 20px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer; transition: opacity 0.2s;}
-.btn-s:hover{opacity: 0.9;}
-.btn-s:disabled { opacity: 0.5; cursor: not-allowed; }
-.empty{text-align:center; padding:20px; color:#ccc; font-size:12px; font-style:italic;}
+/* USER ASSIGNEE (PIC) DI DETAIL PANEL */
+.pic-selector { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border: 1px solid var(--input-border); padding: 4px 8px; border-radius: 20px; cursor: pointer; transition: border 0.2s; }
+.pic-selector:hover { border-color: var(--primary); }
+.pic-avatar { width: 24px; height: 24px; border-radius: 50%; background: #ddd; color: #555; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+.pic-name { font-size: 13px; font-weight: 500; color: var(--text-main); }
+
+.fi{padding:14px;border:1px solid var(--input-border);border-radius:10px;width:100%;outline:none;margin-bottom:14px; font-size:14px; transition: all 0.2s; background: var(--input-bg); color: var(--text-main);}
+.fi:focus{border-color:var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: var(--modal-bg);}
+.fi::placeholder { color: var(--text-light); }
+
+.btn-c{padding:12px 20px;border:1px solid var(--input-border);border-radius:10px;background:var(--input-bg);font-weight:600;cursor:pointer; color:var(--text-main); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
+.btn-c:hover{background:var(--hover-bg); transform: translateY(-1px);}
+.btn-s{padding:12px 24px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px var(--primary-light);}
+.btn-s:hover{opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 16px var(--primary-light);}
+.btn-s:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;}
+.empty{text-align:center; padding:30px; color:var(--text-light); font-size:13px; font-style:italic;}
 
 /* CONTEXT MENU */
-.ctx-menu { position: fixed; background: #fff; border: 1px solid #e5e5e3; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 12px; padding: 6px; z-index: 5000; display: none; flex-direction: column; min-width: 160px; overflow:hidden;}
-.ctx-item { padding: 10px 14px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 8px; color: #444; text-align: left; background: none; border: none; display: flex; align-items: center; gap: 8px; transition: background 0.2s; outline:none;}
-.ctx-item:hover { background: #f5f5f3; color: #1a1a1a; }
+.ctx-menu { position: fixed; background: var(--modal-bg); border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 12px; padding: 6px; z-index: 5000; display: none; flex-direction: column; min-width: 180px; overflow:hidden;}
+.ctx-item { padding: 12px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 8px; color: var(--text-main); text-align: left; background: none; border: none; display: flex; align-items: center; gap: 10px; transition: background 0.2s; outline:none;}
+.ctx-item:hover { background: var(--hover-bg); }
 .ctx-item.danger { color: #e24b4a; }
-.ctx-hr { height: 1px; background: #f0f0f0; margin: 4px 0; }
-
-/* THEME PICKER */
-.theme-option { width:32px; height:32px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
-.theme-option.active { border-color:#222; }
+.ctx-hr { height: 1px; background: var(--input-border); margin: 4px 0; }
 
 /* FIX RESPONSIVE MOBILE */
 @media (max-width: 800px) { 
-  .topbar { flex-direction: column; align-items: stretch; padding: 12px; gap: 10px; }
-  .top-actions { width: 100%; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 4px; scrollbar-width: none; }
-  .top-actions::-webkit-scrollbar { display: none; }
-  .search-input { width: 150px; }
-  .search-input:focus { width: 180px; }
+  .topbar { padding: 12px; }
+  .top-actions { width: 100%; justify-content: space-between; }
+  .search-input { flex: 1; min-width: 100px; width: auto; }
+  .search-input:focus { width: auto; flex: 1; }
   
-  .dp { width: 100%; max-width: 100%; border-radius: 20px 20px 0 0; top: 40px; height: calc(100vh - 40px); border-left: none; transform: translateY(100%); }
+  .dp { width: 100%; max-width: 100%; border-radius: 24px 24px 0 0; top: 60px; height: calc(100vh - 60px); border-left: none; transform: translateY(100%); }
   .dp.open { transform: translateY(0); }
   .dp-pull-indicator { display: block; }
 }
@@ -211,65 +232,48 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
-<!-- AUTH OVERLAY (LOGIN / REGISTER / RESET) -->
-<div class="overlay" id="login-ov" style="z-index: 9999; background: var(--bg-app);">
-  <div class="modal" style="padding: 30px; text-align: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
-    <div style="width: 60px; height: 60px; background: var(--primary); color: #fff; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; margin: 0 auto 16px;">C</div>
-    <h2 id="auth-title" style="margin-bottom: 8px; color: #222;">Selamat Datang!</h2>
-    <p id="auth-desc" style="font-size: 13px; color: #666; margin-bottom: 24px; line-height: 1.5;">Masuk untuk mengelola ruang kerja Anda.</p>
+<div class="overlay" id="login-ov" style="z-index: 9999; background: var(--bg-app); opacity: 1; visibility: visible;">
+  <div class="modal" style="padding: 30px; text-align: center;">
+    <div style="width: 64px; height: 64px; background: var(--primary); color: #fff; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; margin: 0 auto 20px; box-shadow: 0 10px 20px var(--primary-light);">C</div>
+    <h2 id="auth-title" style="margin-bottom: 8px; color: var(--text-main); font-weight: 800;">ContentBoard Pro</h2>
+    <p id="auth-desc" style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;">Kolaborasi cerdas untuk tim kreatif.</p>
     
-    <!-- LOGIN FORM -->
     <div id="form-login" style="display: block;">
-        <input class="fi" type="email" id="log-email" placeholder="Alamat Email" style="margin-bottom: 10px; text-align:left;">
-        <input class="fi" type="password" id="log-pass" placeholder="Kata Sandi" style="margin-bottom: 10px; text-align:left;" onkeypress="if(event.key==='Enter') loginEmail()">
+        <input class="fi" type="email" id="log-email" placeholder="Alamat Email" style="text-align:left;">
+        <input class="fi" type="password" id="log-pass" placeholder="Kata Sandi" style="text-align:left; margin-bottom: 8px;" onkeypress="if(event.key==='Enter') loginEmail()">
+        <div style="font-size: 12px; margin-bottom: 20px; text-align: right;"><span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('reset')">Lupa sandi?</span></div>
+        <button class="btn-s" style="width: 100%;" onclick="loginEmail()">Masuk</button>
         
-        <div style="font-size: 12px; color: #666; margin-bottom: 16px; text-align: right;">
-            <span style="color: var(--primary); cursor: pointer; font-weight: 500;" onclick="toggleAuth('reset')">Lupa kata sandi?</span>
+        <div style="display:flex; align-items:center; gap:10px; margin: 16px 0;">
+            <hr style="flex:1; border:none; border-top:1px solid var(--input-border);">
+            <span style="font-size:11px; color:var(--text-light); font-weight:600;">ATAU</span>
+            <hr style="flex:1; border:none; border-top:1px solid var(--input-border);">
         </div>
 
-        <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 12px; font-size: 14px; box-shadow: 0 4px 10px rgba(83, 74, 183, 0.3);" onclick="loginEmail()">Masuk</button>
-        
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-            <hr style="flex:1; border:none; border-top:1px solid #ddd;">
-            <span style="font-size:11px; color:#888;">ATAU</span>
-            <hr style="flex:1; border:none; border-top:1px solid #ddd;">
-        </div>
-
-        <button class="btn-c" style="width: 100%; padding: 10px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:8px; font-size: 13px;" onclick="loginGoogle()">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Masuk dengan Google
-        </button>
-
-        <div style="font-size: 12px; color: #666;">Belum punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('reg')">Daftar di sini</span></div>
-    </div>
-
-    <!-- REGISTER FORM -->
-    <div id="form-register" style="display: none;">
-        <input class="fi" type="text" id="reg-name" placeholder="Nama Lengkap" style="margin-bottom: 10px; text-align:left;">
-        <input class="fi" type="email" id="reg-email" placeholder="Alamat Email" style="margin-bottom: 10px; text-align:left;">
-        <input class="fi" type="password" id="reg-pass" placeholder="Kata Sandi (Min. 6 Karakter)" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') registerEmail()">
-        <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 12px; font-size: 14px;" onclick="registerEmail()">Daftar Akun Baru</button>
-        
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-            <hr style="flex:1; border:none; border-top:1px solid #ddd;">
-            <span style="font-size:11px; color:#888;">ATAU JALUR CEPAT</span>
-            <hr style="flex:1; border:none; border-top:1px solid #ddd;">
-        </div>
-
-        <button class="btn-c" style="width: 100%; padding: 10px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:8px; font-size: 13px;" onclick="loginGoogle()">
+        <button class="btn-c" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 20px;" onclick="loginGoogle()">
             <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
             Lanjutkan dengan Google
         </button>
-
-        <div style="font-size: 12px; color: #666;">Sudah punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('log')">Masuk di sini</span></div>
+        <div style="font-size: 13px; color: var(--text-muted);">Belum punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('reg')">Daftar Gratis</span></div>
     </div>
 
-    <!-- RESET PASSWORD FORM -->
+    <div id="form-register" style="display: none;">
+        <input class="fi" type="text" id="reg-name" placeholder="Nama Lengkap" style="text-align:left;">
+        <input class="fi" type="email" id="reg-email" placeholder="Alamat Email" style="text-align:left;">
+        <input class="fi" type="password" id="reg-pass" placeholder="Kata Sandi (Min. 6 Karakter)" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') registerEmail()">
+        <button class="btn-s" style="width: 100%; margin-bottom:16px;" onclick="registerEmail()">Daftar Sekarang</button>
+        <button class="btn-c" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 24px;" onclick="loginGoogle()">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Atau Daftar dengan Google
+        </button>
+        <div style="font-size: 13px; color: var(--text-muted);">Sudah punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('log')">Masuk di sini</span></div>
+    </div>
+
     <div id="form-reset" style="display: none;">
-        <p style="font-size: 12px; color: #666; margin-bottom: 16px; text-align: left;">Masukkan email Anda yang terdaftar. Kami akan mengirimkan tautan untuk mengatur ulang kata sandi.</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; text-align: left; line-height:1.5;">Masukkan email terdaftar Anda. Kami akan mengirimkan tautan aman untuk membuat kata sandi baru.</p>
         <input class="fi" type="email" id="res-email" placeholder="Alamat Email" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') resetPassword()">
-        <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 20px; font-size: 14px;" onclick="resetPassword()">Kirim Link Reset</button>
-        <div style="font-size: 12px; color: #666;"><span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('log')">← Kembali ke Login</span></div>
+        <button class="btn-s" style="width: 100%; margin-bottom: 24px;" onclick="resetPassword()">Kirim Tautan Reset</button>
+        <div style="font-size: 13px; color: var(--text-muted);"><span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('log')">← Kembali ke Login</span></div>
     </div>
   </div>
 </div>
@@ -278,27 +282,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand">
-        <!-- MENU AKUN / LOGOUT -->
         <div style="position: relative;">
-            <div class="brand-icon" id="user-avatar" onclick="toggleUserMenu(event)" title="Opsi Akun">A</div>
-            <div id="user-menu" class="custom-dropdown" style="top: 40px; left: 0; min-width: 180px;">
-                <div style="padding: 8px 12px; border-bottom: 1px solid #eee; margin-bottom: 4px;">
-                    <div style="font-weight: 600; color: #222; font-size: 13px;" id="user-menu-name">Nama</div>
-                    <div style="font-size: 11px; color: #888;" id="user-menu-email">user@email.com</div>
+            <div class="brand-icon" id="user-avatar" onclick="toggleMenu('user-menu', event)" title="Opsi Akun">A</div>
+            <div id="user-menu" class="custom-dropdown" style="top: 44px; left: 0; min-width: 200px;">
+                <div style="padding: 12px; border-bottom: 1px solid var(--input-border); margin-bottom: 4px;">
+                    <div style="font-weight: 700; color: var(--text-main); font-size: 14px;" id="user-menu-name">Nama</div>
+                    <div style="font-size: 11px; color: var(--text-light); word-break: break-all;" id="user-menu-email">user@email.com</div>
                 </div>
-                <button class="ctx-item" onclick="changeUsername()" style="width: 100%; justify-content: flex-start;">✏️ Ubah Nama</button>
-                <button class="ctx-item danger" onclick="showLogoutMenu()" style="width: 100%; justify-content: flex-start;">🚪 Keluar (Logout)</button>
+                <button class="ctx-item" onclick="toggleDarkMode()">🌓 Mode Terang/Gelap</button>
+                <button class="ctx-item" onclick="changeUsername()">✏️ Ubah Nama Profil</button>
+                <div class="ctx-hr"></div>
+                <button class="ctx-item danger" onclick="showLogoutMenu()">🚪 Keluar (Logout)</button>
             </div>
         </div>
         
-        <!-- PROJECT SELECTOR CUSTOM -->
-        <div style="position: relative;">
-            <button id="project-btn" class="proj-selector-btn" onclick="toggleProjMenu(event)">Project Utama ▾</button>
-            <div id="proj-menu" class="custom-dropdown" style="top: 36px; left: 0; min-width: 220px; max-height: 400px; overflow-y: auto;">
-                <div id="proj-list-container" style="display:flex; flex-direction:column; gap:2px;"></div>
-                <div style="border-top: 1px solid #eee; margin-top: 4px; padding-top: 4px;">
-                    <button class="ctx-item" onclick="openWsModal(false)" style="width: 100%; justify-content: flex-start;">➕ Buat Project Baru</button>
-                    <button class="ctx-item" onclick="openWsModal(true)" style="width: 100%; justify-content: flex-start;">✏️ Edit Nama Project</button>
+        <div style="position: relative; display: flex; align-items:center;">
+            <button id="project-btn" class="proj-selector-btn" onclick="toggleMenu('proj-menu', event)">Project Utama ▾</button>
+            <button class="share-btn" onclick="generateShareLink()" title="Undang anggota tim ke project ini">🤝 Bagikan</button>
+
+            <div id="proj-menu" class="custom-dropdown" style="top: 40px; left: 0; min-width: 260px; max-height: 400px; overflow-y: auto;">
+                <div style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: var(--text-light); letter-spacing: 0.5px;">PROJECT SAYA</div>
+                <div id="proj-list-container" style="display:flex; flex-direction:column; gap:2px; margin-bottom: 8px;"></div>
+                
+                <div id="shared-proj-header" style="display:none; padding: 12px 12px 8px; font-size: 11px; font-weight: 700; color: var(--text-light); letter-spacing: 0.5px; border-top: 1px solid var(--input-border);">DIBAGIKAN KE SAYA</div>
+                <div id="shared-proj-list" style="display:flex; flex-direction:column; gap:2px; margin-bottom: 8px;"></div>
+
+                <div style="border-top: 1px solid var(--input-border); padding-top: 6px;">
+                    <button class="ctx-item" onclick="openWsModal(false)">➕ Buat Project Baru</button>
+                    <button class="ctx-item" id="btn-edit-ws" onclick="openWsModal(true)">✏️ Edit Nama Project Ini</button>
                 </div>
             </div>
         </div>
@@ -306,45 +317,48 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
 
     <div class="top-actions">
-      <input type="text" id="search-input" class="topbtn search-input" placeholder="Cari konten..." oninput="renderBoard()">
-      <input type="month" id="filter-month" class="topbtn" onchange="renderBoard()" title="Filter Bulan">
-      <select id="filter-week" class="topbtn" onchange="renderBoard()" title="Filter Pekan">
-        <option value="all">🗓️ Pekan</option>
-        <option value="1">Pekan 1</option>
-        <option value="2">Pekan 2</option>
-        <option value="3">Pekan 3</option>
-        <option value="4">Pekan 4</option>
-        <option value="5">Pekan 5</option>
-      </select>
-      <select id="filter-type" class="topbtn" onchange="renderBoard()" title="Filter Jenis Konten">
-        <option value="semua">📑 Jenis</option>
-        <option value="Video">📹 Video</option>
-        <option value="Feed">🖼️ Feed</option>
-        <option value="Story">📱 Story</option>
-        <option value="Catatan">📝 Catatan</option>
-        <option value="To-Do">✅ To-Do</option>
-      </select>
-      <select id="filter-objective" class="topbtn" onchange="renderBoard()" title="Filter Jalur Distribusi">
-        <option value="all">📢 Jalur</option>
-        <option value="Konten">🪴 Konten Organik</option>
-        <option value="Boost">🚀 Boost</option>
-        <option value="Campaign">🎪 Campaign</option>
-        <option value="Ads">📢 Ads</option>
-      </select>
-      <select id="filter-urgency" class="topbtn" onchange="renderBoard()" title="Filter Prioritas">
-        <option value="all">🎯 Prioritas</option>
-        <option value="high">🔥 Mendesak</option>
-        <option value="med">⚡ Penting</option>
-        <option value="normal">⚪ Normal</option>
-        <option value="low">🐢 Santai</option>
-      </select>
-      <select id="sort-by" class="topbtn" onchange="renderBoard()" title="Urutkan Konten">
-        <option value="manual">↕️ Urutkan</option>
-        <option value="newest">✨ Baru Ditambahkan</option>
-        <option value="date-asc">📅 Tanggal Terdekat</option>
-        <option value="date-desc">📆 Tanggal Terjauh</option>
-        <option value="type">🏷️ Jenis Konten</option>
-      </select>
+      <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="renderBoard()">
+      
+      <div style="position: relative;">
+          <button class="topbtn" onclick="toggleMenu('filter-panel', event)" id="filter-btn">
+              <span style="font-size: 14px;">⚙️</span> Filter & Tampilan
+          </button>
+          
+          <div id="filter-panel" onclick="event.stopPropagation()">
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid var(--input-border); padding-bottom: 10px;">Pengaturan Tampilan</div>
+              
+              <div class="filter-row">
+                  <span class="filter-lbl">Waktu Tayang</span>
+                  <div style="display:flex; gap:8px;">
+                    <input type="month" id="filter-month" class="fi" style="margin:0; padding:8px 10px;" onchange="renderBoard()">
+                    <select id="filter-week" class="fi" style="margin:0; padding:8px 10px;" onchange="renderBoard()"><option value="all">Semua Pekan</option><option value="1">Pekan 1</option><option value="2">Pekan 2</option><option value="3">Pekan 3</option><option value="4">Pekan 4</option><option value="5">Pekan 5</option></select>
+                  </div>
+              </div>
+
+              <div style="display:flex; gap:12px;">
+                  <div class="filter-row" style="flex:1;">
+                      <span class="filter-lbl">Jenis</span>
+                      <select id="filter-type" class="fi" style="margin:0; padding:8px 10px;" onchange="renderBoard()"><option value="semua">Semua Jenis</option><option value="Video">Video</option><option value="Feed">Feed</option><option value="Story">Story</option><option value="Catatan">Catatan</option><option value="To-Do">To-Do</option></select>
+                  </div>
+                  <div class="filter-row" style="flex:1;">
+                      <span class="filter-lbl">Jalur</span>
+                      <select id="filter-objective" class="fi" style="margin:0; padding:8px 10px;" onchange="renderBoard()"><option value="all">Semua Jalur</option><option value="Konten">Organik</option><option value="Boost">Boost</option><option value="Campaign">Campaign</option><option value="Ads">Ads</option></select>
+                  </div>
+              </div>
+
+              <div style="display:flex; gap:12px;">
+                  <div class="filter-row" style="flex:1;">
+                      <span class="filter-lbl">Prioritas</span>
+                      <select id="filter-urgency" class="fi" style="margin:0; padding:8px 10px;" onchange="renderBoard()"><option value="all">Semua</option><option value="high">Mendesak</option><option value="med">Penting</option><option value="normal">Normal</option><option value="low">Santai</option></select>
+                  </div>
+                  <div class="filter-row" style="flex:1;">
+                      <span class="filter-lbl">Urutkan Kartu</span>
+                      <select id="sort-by" class="fi" style="margin:0; padding:8px 10px;" onchange="renderBoard()"><option value="manual">Manual (Geser)</option><option value="newest">Paling Baru</option><option value="date-asc">Tanggal Terdekat</option><option value="date-desc">Tanggal Terjauh</option></select>
+                  </div>
+              </div>
+          </div>
+      </div>
+
       <button class="topbtn" onclick="openThemeModal()">🎨 Tema</button>
       <button class="export-btn" onclick="exportToPDF()">📑 PDF</button>
     </div>
@@ -352,47 +366,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   
   <div class="brand-tabs" id="brand-tabs"></div>
   
-  <!-- BOARD AREA -->
-  <div class="board-wrap" id="board-wrap">
-      <div class="board" id="board"></div>
-  </div>
+  <div class="board-wrap" id="board-wrap"><div class="board" id="board"></div></div>
 
-  <!-- EMPTY STATE -->
   <div id="empty-state" style="display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
-    <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.8;">📦</div>
-    <h3 style="color: #222; margin-bottom: 12px; font-size: 20px;">Ruang Kerja Kosong</h3>
-    <p style="color: #666; font-size: 14px; max-width: 320px; margin-bottom: 24px; line-height: 1.5;">Anda belum memiliki project di akun ini. Silakan buat project personal baru.</p>
-    <div style="display:flex; flex-direction:column; gap:12px; width: 100%; max-width: 250px;">
-        <button class="btn-s" style="padding: 12px 24px; font-size: 14px; box-shadow: 0 4px 12px rgba(83,74,183,0.3);" onclick="openWsModal()">+ Buat Project Baru</button>
-    </div>
+    <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.8; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">✨</div>
+    <h3 style="color: var(--text-main); margin-bottom: 12px; font-size: 24px; font-weight: 800;">Ruang Kerja Kosong</h3>
+    <p style="color: var(--text-muted); font-size: 15px; max-width: 380px; margin-bottom: 30px; line-height: 1.6;">Selamat datang di ContentBoard Pro! Silakan buat project personal baru, atau minta rekan tim Anda untuk mengirimkan link undangan project mereka.</p>
+    <button class="btn-s" style="padding: 14px 30px; font-size: 15px;" onclick="openWsModal()">+ Buat Project Baru</button>
   </div>
 </div>
 
-<button class="fab" id="fab-add" onclick="openAdd()" title="Buat Konten Baru">+</button>
+<button class="fab" id="fab-add" onclick="openAdd()" title="Buat Konten Baru">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+</button>
 
-<!-- OVERLAY UNTUK PANEL -->
 <div id="dp-ov" onclick="closeDP()"></div>
 
-<!-- DETAIL PANEL -->
 <div class="dp" id="dp">
   <div class="dp-pull-indicator"></div>
-  <div class="dp-head" style="padding:16px 20px; border-bottom:1px solid #f0f0ee; display:flex; align-items:center;">
-    <div class="dp-title" id="dp-title" style="flex:1; font-weight:700; font-size:15px; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
-    <button onclick="addToGCal()" style="border:none; background:none; cursor:pointer; color:#1D9E75; margin-right:12px; font-size:15px;" title="Tambahkan ke Google Calendar">📅</button>
-    <button onclick="dupCard()" style="border:none; background:none; cursor:pointer; color:#185FA5; margin-right:12px; font-size:15px;" title="Duplikat Konten">📄</button>
-    <button onclick="delCurCard()" style="border:none; background:none; cursor:pointer; color:#e24b4a; margin-right:12px; font-size:15px;" title="Hapus Konten">🗑️</button>
-    <button onclick="closeDP()" style="border:none; background:none; cursor:pointer; font-size:24px; color:#888; line-height:1;">×</button>
+  <div class="dp-head" style="padding:20px 24px; border-bottom:1px solid var(--input-border); display:flex; align-items:center;">
+    <div class="dp-title" id="dp-title" style="flex:1; font-weight:800; font-size:16px; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+    <button onclick="addToGCal()" style="border:none; background:var(--input-bg); border-radius:8px; width:32px; height:32px; cursor:pointer; color:#1D9E75; margin-right:8px; font-size:14px; transition:all 0.2s;" title="Tambahkan ke Google Calendar">📅</button>
+    <button onclick="dupCard()" style="border:none; background:var(--input-bg); border-radius:8px; width:32px; height:32px; cursor:pointer; color:#185FA5; margin-right:8px; font-size:14px; transition:all 0.2s;" title="Duplikat Konten">📄</button>
+    <button onclick="delCurCard()" style="border:none; background:var(--input-bg); border-radius:8px; width:32px; height:32px; cursor:pointer; color:#e24b4a; margin-right:12px; font-size:14px; transition:all 0.2s;" title="Hapus Konten">🗑️</button>
+    <button onclick="closeDP()" style="border:none; background:none; cursor:pointer; font-size:28px; color:var(--text-light); line-height:1; transition:color 0.2s;">×</button>
   </div>
   <div class="dp-body">
+    
+    <div style="background: var(--primary-light); padding: 12px 16px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <span style="font-size: 12px; font-weight: 700; color: var(--primary);">👤 DITUGASKAN KE (PIC):</span>
+        <select id="dp-fassignee" style="background: transparent; border: none; font-weight: 700; color: var(--text-main); font-size: 14px; cursor: pointer; outline: none; text-align: right; max-width: 150px;" onchange="dps('assignee', this.value)">
+            <option value="">Belum Ada PIC</option>
+            </select>
+    </div>
+
     <div class="dp-field"><span class="dp-fl">Judul</span><div class="dp-fv"><input type="text" id="dp-ftitle" onblur="dps('title',this.value)"/></div></div>
     
     <div class="dp-field"><span class="dp-fl">Prioritas</span>
       <div class="dp-fv">
         <select id="dp-furgency" onchange="dps('urgency',this.value)">
-          <option value="normal">⚪ Normal</option>
-          <option value="low">🐢 Santai</option>
-          <option value="med">⚡ Penting</option>
-          <option value="high">🔥 Mendesak</option>
+          <option value="normal">⚪ Normal</option><option value="low">🐢 Santai</option><option value="med">⚡ Penting</option><option value="high">🔥 Mendesak</option>
         </select>
       </div>
     </div>
@@ -407,209 +420,177 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     
     <div class="dp-field" id="dp-obj-container"><span class="dp-fl">Jalur</span>
       <div class="dp-fv">
-        <select id="dp-fobjective" onchange="dps('objective',this.value)">
-          <option value="Konten">🪴 Konten Organik</option>
-          <option value="Boost">🚀 Boost</option>
-          <option value="Campaign">🎪 Campaign</option>
-          <option value="Ads">📢 Ads</option>
-        </select>
+        <select id="dp-fobjective" onchange="dps('objective',this.value)"><option value="Konten">🪴 Konten Organik</option><option value="Boost">🚀 Boost</option><option value="Campaign">🎪 Campaign</option><option value="Ads">📢 Ads</option></select>
       </div>
     </div>
 
     <div class="dp-field"><span class="dp-fl">Brand</span><div class="dp-fv"><select id="dp-fbrand" onchange="dps('bId',this.value)"></select></div></div>
     <div class="dp-field"><span class="dp-fl">Status</span><div class="dp-fv"><select id="dp-fstatus" onchange="dps('status',this.value)"></select></div></div>
     
-    <div style="margin-top:20px; font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">SUB-TASK / CHECKLIST</div>
+    <div style="margin-top:24px; font-size:11px; color:var(--text-light); font-weight:800; letter-spacing:1px; border-bottom: 1px solid var(--input-border); padding-bottom:6px;">DAFTAR TUGAS (TO-DO)</div>
     
-    <div id="dp-steps-list" style="margin-top:8px;"></div>
-    <div style="display:flex; gap:6px; margin-top:8px;">
-        <input type="text" id="new-step-input" class="fi" style="margin-bottom:0; padding:8px 12px;" placeholder="Tambah tugas baru..." onkeypress="if(event.key==='Enter') addStep()">
-        <button class="btn-s" style="padding:8px 14px; font-size:16px; line-height:1;" onclick="addStep()">+</button>
+    <div id="dp-steps-list" style="margin-top:12px;"></div>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+        <input type="text" id="new-step-input" class="fi" style="margin-bottom:0; padding:10px 14px;" placeholder="Ketik tugas baru..." onkeypress="if(event.key==='Enter') addStep()">
+        <button class="btn-s" style="padding:10px 18px; font-size:18px; line-height:1; border-radius:10px;" onclick="addStep()">+</button>
     </div>
 
-    <div style="margin-top:20px; font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">CATATAN / SCRIPT</div>
+    <div style="margin-top:28px; font-size:11px; color:var(--text-light); font-weight:800; letter-spacing:1px; border-bottom: 1px solid var(--input-border); padding-bottom:6px;">CATATAN & SCRIPT</div>
     
-    <div id="dp-notes-display" style="width:100%; min-height:80px; margin-top:8px; border:1px solid #ddd; border-radius:8px; padding:10px; font-size:13px; background:rgba(255,255,255,0.5); white-space:pre-wrap; word-break:break-word; cursor:text; transition:border 0.2s; line-height:1.5;" onclick="editNotes()" title="Klik untuk mengedit"></div>
-    <textarea id="dp-notes" style="display:none; width:100%; height:120px; margin-top:8px; border:1px solid var(--primary); border-radius:8px; padding:10px; outline:none; font-family:inherit; font-size:13px; resize:vertical; background:#fff; line-height:1.5;" onblur="saveNotes(this.value)" placeholder="Ketik catatan atau paste link di sini..."></textarea>
+    <div id="dp-notes-display" style="width:100%; min-height:100px; margin-top:12px; border:1px solid transparent; border-radius:12px; padding:14px; font-size:14px; background:var(--input-bg); white-space:pre-wrap; word-break:break-word; cursor:text; transition:all 0.2s; line-height:1.6;" onclick="editNotes()" title="Klik untuk mengedit naskah/catatan"></div>
+    <textarea id="dp-notes" style="display:none; width:100%; height:150px; margin-top:12px; border:1px solid var(--primary); border-radius:12px; padding:14px; outline:none; font-family:inherit; font-size:14px; resize:vertical; background:var(--modal-bg); color:var(--text-main); line-height:1.6; box-shadow: 0 0 0 3px var(--primary-light);" onblur="saveNotes(this.value)" placeholder="Ketik narasi, catatan kreatif, atau paste link di sini..."></textarea>
     
-    <div style="margin-top:20px; font-size:11px; color:#aaa; font-weight:700; letter-spacing:0.5px;">LAMPIRAN / REFERENSI</div>
+    <div style="margin-top:28px; font-size:11px; color:var(--text-light); font-weight:800; letter-spacing:1px; border-bottom: 1px solid var(--input-border); padding-bottom:6px;">LAMPIRAN VISUAL</div>
     <div id="dp-attachments" class="att-list"></div>
-    <button class="add-col-btn" style="margin-top:12px;" onclick="addImageUrl()">
-      + Tambah Link Gambar (Gratis)
+    <button class="add-col-btn" style="margin-top:16px; border-style:solid;" onclick="addImageUrl()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px; margin-top:-2px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+      Tempel Link Gambar (Gratis)
     </button>
   </div>
 </div>
 
-<!-- MODAL ADD KONTEN -->
 <div class="overlay" id="add-ov">
   <div class="modal">
-    <div class="modal-head" style="padding:16px 20px; font-weight:700; border-bottom:1px solid #f0f0f0;">Buat Baru</div>
-    <div class="modal-body" style="padding:20px;">
-      <input class="fi" type="text" id="m-title" placeholder="Judul..."/>
-      <select class="fi" id="m-brand"></select>
-      <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;">
-        <button class="fi" id="btn-v" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:500;" onclick="selType('Video')">Video</button>
-        <button class="fi" id="btn-f" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:500;" onclick="selType('Feed')">Feed</button>
-        <button class="fi" id="btn-s" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:500;" onclick="selType('Story')">Story</button>
-        <button class="fi" id="btn-c" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:500; min-width:80px;" onclick="selType('Catatan')">Catatan</button>
-        <button class="fi" id="btn-t" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:500; min-width:80px;" onclick="selType('To-Do')">To-Do</button>
-      </div>
-      <div id="m-datetime-container">
-        <div style="display:flex; gap:8px; margin-bottom:12px;">
-          <input class="fi" type="date" id="m-date" style="flex:1; margin-bottom:0;" title="Tanggal Tayang"/>
-          <input class="fi" type="time" id="m-time" style="flex:1; margin-bottom:0;" title="Waktu Tayang"/>
-        </div>
-        <div style="display:flex; gap:8px; margin-bottom:12px;">
-          <select class="fi" id="m-week" style="flex:1; margin-bottom:0;" title="Pekan Ke">
-            <option value="1">Pekan 1</option><option value="2">Pekan 2</option><option value="3">Pekan 3</option><option value="4">Pekan 4</option><option value="5">Pekan 5</option>
-          </select>
-          <select class="fi" id="m-urgency" style="flex:1; margin-bottom:0;" title="Prioritas">
-            <option value="normal">⚪ Normal</option><option value="low">🐢 Santai</option><option value="med">⚡ Penting</option><option value="high">🔥 Mendesak</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex; gap:8px; margin-bottom:12px;">
-        <select class="fi" id="m-objective" style="flex:1; margin-bottom:0;" title="Jalur Distribusi">
-            <option value="Konten">🪴 Konten Organik</option>
-            <option value="Boost">🚀 Boost</option>
-            <option value="Campaign">🎪 Campaign</option>
-            <option value="Ads">📢 Ads</option>
+    <div class="modal-head" style="padding:20px 24px; font-weight:800; font-size:18px; border-bottom:1px solid var(--input-border); color:var(--text-main);">Buat Konten Baru</div>
+    <div class="modal-body" style="padding:24px;">
+      <input class="fi" type="text" id="m-title" placeholder="Tulis Judul Konten..." style="font-size:16px; font-weight:600; padding:16px;"/>
+      
+      <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <select class="fi" id="m-brand" style="margin-bottom:0; flex:2;"></select>
+        <select class="fi" id="m-assignee" style="margin-bottom:0; flex:1;" title="Tugaskan ke">
+             <option value="">PIC</option>
         </select>
-        <select class="fi" id="m-status" style="flex:1; margin-bottom:0;" title="Status"></select>
+      </div>
+
+      <div style="font-size:11px; color:var(--text-light); font-weight:700; margin-bottom:8px; letter-spacing:0.5px;">PILIH FORMAT</div>
+      <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+        <button class="fi" id="btn-v" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('Video')">📹 Video</button>
+        <button class="fi" id="btn-f" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('Feed')">🖼️ Feed</button>
+        <button class="fi" id="btn-s" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('Story')">📱 Story</button>
+        <button class="fi" id="btn-c" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('Catatan')">📝 Catatan</button>
+        <button class="fi" id="btn-t" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('To-Do')">✅ To-Do</button>
+      </div>
+      
+      <div id="m-datetime-container">
+        <div style="font-size:11px; color:var(--text-light); font-weight:700; margin-bottom:8px; letter-spacing:0.5px;">JADWAL TAYANG</div>
+        <div style="display:flex; gap:10px; margin-bottom:16px;">
+          <input class="fi" type="date" id="m-date" style="flex:1; margin-bottom:0;" title="Tanggal Tayang"/>
+          <input class="fi" type="time" id="m-time" style="width:120px; margin-bottom:0;" title="Waktu Tayang"/>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+          <select class="fi" id="m-week" style="flex:1; margin-bottom:0;" title="Pekan Ke"><option value="1">Pekan 1</option><option value="2">Pekan 2</option><option value="3">Pekan 3</option><option value="4">Pekan 4</option><option value="5">Pekan 5</option></select>
+          <select class="fi" id="m-urgency" style="flex:1; margin-bottom:0;" title="Prioritas"><option value="normal">⚪ Normal</option><option value="low">🐢 Santai</option><option value="med">⚡ Penting</option><option value="high">🔥 Mendesak</option></select>
+        </div>
+      </div>
+      
+      <div style="display:flex; gap:10px; margin-bottom:8px;">
+        <select class="fi" id="m-objective" style="flex:1; margin-bottom:0;" title="Jalur Distribusi"><option value="Konten">🪴 Konten Organik</option><option value="Boost">🚀 Boost</option><option value="Campaign">🎪 Campaign</option><option value="Ads">📢 Ads</option></select>
+        <select class="fi" id="m-status" style="flex:1; margin-bottom:0; font-weight:700;" title="Status Awal"></select>
       </div>
     </div>
-    <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
+    <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
       <button class="btn-c" onclick="closeAdd()">Batal</button>
-      <button class="btn-s" onclick="saveCard()">Simpan</button>
+      <button class="btn-s" onclick="saveCard()">Buat Konten</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL ADD/EDIT BRAND -->
 <div class="overlay" id="brand-ov">
   <div class="modal">
-    <div class="modal-head" id="bm-title" style="padding:16px 20px; font-weight:700; border-bottom:1px solid #f0f0f0;">Brand baru</div>
-    <div class="modal-body" style="padding:20px;">
-      <input class="fi" type="text" id="bm-name" placeholder="Nama brand..."/>
-      <div style="display:flex; align-items:center; gap:12px; background:#f9f9f9; padding:12px; border-radius:10px; border:1px solid #eee;">
-        <input type="color" id="bm-color-wheel" style="width:36px; height:36px; border:none; cursor:pointer; border-radius:50%;" oninput="syncColor(this.value, 'hex', 'bm')">
-        <input type="text" id="bm-color-hex" style="flex:1; border:none; background:transparent; font-family:monospace; font-weight:700; font-size:14px; outline:none; color:#444;" maxlength="7" oninput="syncColor(this.value, 'wheel', 'bm')">
+    <div class="modal-head" id="bm-title" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Klien / Brand Baru</div>
+    <div class="modal-body" style="padding:24px;">
+      <input class="fi" type="text" id="bm-name" placeholder="Ketik nama Brand..." style="font-size:16px; font-weight:600;"/>
+      <div style="font-size:11px; color:var(--text-light); font-weight:700; margin-bottom:8px; margin-top:8px; letter-spacing:0.5px;">WARNA IDENTITAS</div>
+      <div style="display:flex; align-items:center; gap:16px; background:var(--input-bg); padding:16px; border-radius:12px; border:1px solid var(--input-border);">
+        <input type="color" id="bm-color-wheel" style="width:44px; height:44px; border:none; cursor:pointer; border-radius:50%; padding:0; background:none;" oninput="syncColor(this.value, 'hex', 'bm')">
+        <input type="text" id="bm-color-hex" style="flex:1; border:none; background:transparent; font-family:monospace; font-weight:700; font-size:16px; outline:none; color:var(--text-main); text-transform:uppercase;" maxlength="7" oninput="syncColor(this.value, 'wheel', 'bm')">
       </div>
     </div>
-    <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
+    <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
       <button class="btn-c" onclick="closeBrand()">Batal</button>
-      <button class="btn-s" id="bm-save-btn" onclick="saveBrand()">Simpan</button>
+      <button class="btn-s" id="bm-save-btn" onclick="saveBrand()">Simpan Brand</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL ADD/EDIT KOLOM -->
 <div class="overlay" id="col-ov">
   <div class="modal">
-    <div class="modal-head" id="cm-title" style="padding:16px 20px; font-weight:700; border-bottom:1px solid #f0f0f0;">Status baru</div>
-    <div class="modal-body" style="padding:20px;">
-      <input class="fi" type="text" id="cm-name" placeholder="Nama status..."/>
-      <div style="display:flex; align-items:center; gap:12px; background:#f9f9f9; padding:12px; border-radius:10px; border:1px solid #eee;">
-        <input type="color" id="cm-color-wheel" style="width:36px; height:36px; border:none; cursor:pointer; border-radius:50%;" oninput="syncColor(this.value, 'hex', 'cm')">
-        <input type="text" id="cm-color-hex" style="flex:1; border:none; background:transparent; font-family:monospace; font-weight:700; font-size:14px; outline:none; color:#444;" maxlength="7" oninput="syncColor(this.value, 'wheel', 'cm')">
+    <div class="modal-head" id="cm-title" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Status Pengerjaan Baru</div>
+    <div class="modal-body" style="padding:24px;">
+      <input class="fi" type="text" id="cm-name" placeholder="Ketik nama status (cth: Revisi)..." style="font-size:16px; font-weight:600;"/>
+      <div style="font-size:11px; color:var(--text-light); font-weight:700; margin-bottom:8px; margin-top:8px; letter-spacing:0.5px;">WARNA KOLOM</div>
+      <div style="display:flex; align-items:center; gap:16px; background:var(--input-bg); padding:16px; border-radius:12px; border:1px solid var(--input-border);">
+        <input type="color" id="cm-color-wheel" style="width:44px; height:44px; border:none; cursor:pointer; border-radius:50%; padding:0; background:none;" oninput="syncColor(this.value, 'hex', 'cm')">
+        <input type="text" id="cm-color-hex" style="flex:1; border:none; background:transparent; font-family:monospace; font-weight:700; font-size:16px; outline:none; color:var(--text-main); text-transform:uppercase;" maxlength="7" oninput="syncColor(this.value, 'wheel', 'cm')">
       </div>
     </div>
-    <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
+    <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
       <button class="btn-c" onclick="closeCol()">Batal</button>
-      <button class="btn-s" onclick="saveCol()">Simpan</button>
+      <button class="btn-s" onclick="saveCol()">Simpan Status</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL WORKSPACE -->
 <div class="overlay" id="ws-ov">
   <div class="modal">
-    <div class="modal-head" id="ws-title" style="padding:16px 20px; font-weight:700; border-bottom:1px solid #f0f0f0;">Project Baru</div>
-    <div class="modal-body" style="padding:20px;">
-      <input class="fi" type="text" id="ws-name" placeholder="Nama Project..."/>
+    <div class="modal-head" id="ws-title" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Ruang Kerja Baru</div>
+    <div class="modal-body" style="padding:24px;">
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">Buat ruang kerja baru yang terpisah. Anda bisa mengundang tim ke project ini setelah selesai dibuat.</p>
+      <input class="fi" type="text" id="ws-name" placeholder="Ketik Nama Project..." style="font-size:16px; font-weight:600; margin-bottom:0;"/>
     </div>
-    <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
-      <button id="ws-del-btn" class="btn-c" style="color:#e24b4a; margin-right:auto; display:none;" onclick="confirmDelWs()">Hapus</button>
+    <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
+      <button id="ws-del-btn" class="btn-c" style="color:#e24b4a; margin-right:auto; display:none; border-color:rgba(226,75,74,0.3); background:rgba(226,75,74,0.05);" onclick="confirmDelWs()">Hapus Project</button>
       <button class="btn-c" onclick="closeWsModal()">Batal</button>
-      <button class="btn-s" onclick="saveWs()">Simpan</button>
+      <button class="btn-s" onclick="saveWs()">Buat Project</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL TEMA -->
 <div class="overlay" id="theme-ov">
   <div class="modal">
-    <div class="modal-head" style="padding:16px 20px; font-weight:700; border-bottom:1px solid #f0f0f0;">Kustomisasi Tampilan</div>
-    <div class="modal-body" style="padding:20px;">
-      <div style="font-size:12px; font-weight:600; color:#888; margin-bottom:8px;">WARNA UTAMA (TEMA)</div>
-      <div style="display:flex; gap:10px; margin-bottom:20px;">
-          <div class="theme-option active" style="background:#534AB7;" onclick="setThemeColor('#534AB7', this)"></div>
-          <div class="theme-option" style="background:#1D9E75;" onclick="setThemeColor('#1D9E75', this)"></div>
-          <div class="theme-option" style="background:#D85A30;" onclick="setThemeColor('#D85A30', this)"></div>
-          <div class="theme-option" style="background:#222222;" onclick="setThemeColor('#222222', this)"></div>
-          <input type="color" id="custom-theme-color" style="width:32px; height:32px; border:none; border-radius:50%; cursor:pointer;" onchange="setThemeColor(this.value, null)">
+    <div class="modal-head" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Estetika Tampilan</div>
+    <div class="modal-body" style="padding:24px;">
+      <div style="font-size:11px; font-weight:800; color:var(--text-light); margin-bottom:12px; letter-spacing:1px;">WARNA AKSEN</div>
+      <div style="display:flex; gap:12px; margin-bottom:28px;">
+          <div class="theme-option active" style="background:#534AB7; width:40px; height:40px;" onclick="setThemeColor('#534AB7', this)"></div>
+          <div class="theme-option" style="background:#1D9E75; width:40px; height:40px;" onclick="setThemeColor('#1D9E75', this)"></div>
+          <div class="theme-option" style="background:#D85A30; width:40px; height:40px;" onclick="setThemeColor('#D85A30', this)"></div>
+          <div class="theme-option" style="background:#1a1a1a; width:40px; height:40px; border:1px solid #555;" onclick="setThemeColor('#1a1a1a', this)"></div>
+          <input type="color" id="custom-theme-color" style="width:40px; height:40px; border:none; border-radius:50%; cursor:pointer; padding:0; background:none;" onchange="setThemeColor(this.value, null)" title="Warna Kustom">
       </div>
-      <div style="font-size:12px; font-weight:600; color:#888; margin-bottom:8px;">BACKGROUND PROJECT</div>
-      <div id="bg-preview" style="width:100%; height:100px; background:#f5f5f3; border-radius:8px; border:1px solid #ddd; margin-bottom:10px; background-size:cover; background-position:center;"></div>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-          <input type="text" id="bg-url-input" class="fi" style="margin-bottom:0; padding:8px 12px; font-size:12px;" placeholder="Nama file (cth: bg.jpg) atau Paste Link..." />
-          <div style="display:flex; gap:8px;">
-              <button class="btn-s" style="flex:1; padding:8px; font-size:12px;" onclick="applyBgUrl()">Terapkan BG</button>
-              <button class="btn-c" style="padding:8px 12px; font-size:12px;" onclick="removeBg()">Hapus</button>
+      <div style="font-size:11px; font-weight:800; color:var(--text-light); margin-bottom:12px; letter-spacing:1px;">WALLPAPER PAPAN (Link URL)</div>
+      <div id="bg-preview" style="width:100%; height:120px; background:var(--input-bg); border-radius:12px; border:1px solid var(--input-border); margin-bottom:16px; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:var(--text-light); font-size:12px;">Preview</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+          <input type="text" id="bg-url-input" class="fi" style="margin-bottom:0;" placeholder="Paste link gambar (Unsplash, Pinterest, Drive)..." />
+          <div style="display:flex; gap:10px;">
+              <button class="btn-s" style="flex:2;" onclick="applyBgUrl()">Terapkan Wallpaper</button>
+              <button class="btn-c" style="flex:1;" onclick="removeBg()">Hapus</button>
           </div>
       </div>
     </div>
-    <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;"><button class="btn-s" onclick="closeThemeModal()">Selesai</button></div>
-  </div>
-</div>
-
-<!-- MODAL PINDAH PROJECT -->
-<div class="overlay" id="move-ws-ov" style="z-index: 3100;">
-  <div class="modal">
-    <div class="modal-head" style="padding:16px 20px; font-weight:700; border-bottom:1px solid #f0f0f0;">Pindahkan Konten</div>
-    <div class="modal-body" style="padding:20px;">
-      <p style="font-size:12px; color:#666; margin-bottom:12px;">Pilih project tujuan. Label Brand akan dikosongkan agar aman.</p>
-      <select class="fi" id="move-ws-select" style="margin-bottom:0;"></select>
-    </div>
-    <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
-      <button class="btn-c" onclick="closeMoveWsModal()">Batal</button>
-      <button class="btn-s" id="move-ws-btn" onclick="moveCardToWs()">Pindahkan</button>
+    <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
+        <button class="btn-s" onclick="closeThemeModal()">Tutup Pengaturan</button>
     </div>
   </div>
 </div>
 
-<!-- MENU KLIK KANAN -->
 <div id="ctx-menu" class="ctx-menu"></div>
 
-<!-- KUSTOM MODAL ALERT -->
 <div class="overlay" id="msg-ov" style="z-index: 10000;">
-  <div class="modal" style="max-width: 320px; text-align: center;">
-    <div style="padding: 24px 20px 10px;"><div id="msg-text" style="font-weight: 500; font-size: 14px; color: #222; line-height: 1.5;"></div></div>
-    <div style="padding: 16px 20px 20px; display: flex; gap: 10px; justify-content: center;">
+  <div class="modal" style="max-width: 360px; text-align: center;">
+    <div style="padding: 32px 24px 16px;"><div id="msg-text" style="font-weight: 500; font-size: 15px; color: var(--text-main); line-height: 1.6;"></div></div>
+    <div style="padding: 16px 24px 24px; display: flex; gap: 12px; justify-content: center;">
       <button class="btn-c" id="msg-cancel" style="display:none; flex:1;">Batal</button>
-      <button class="btn-s" id="msg-ok" style="flex:1;">OK</button>
+      <button class="btn-s" id="msg-ok" style="flex:1;">Mengerti</button>
     </div>
   </div>
 </div>
 
 <script type="module">
-// IMPORT FIREBASE CORE & DATABASE
+// FIREBASE CONFIGURATION
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-// IMPORT FIREBASE AUTHENTICATION
-import { 
-    getAuth, 
-    signInWithPopup, 
-    GoogleAuthProvider,
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    sendEmailVerification, 
-    sendPasswordResetEmail,
-    onAuthStateChanged, 
-    signOut,
-    updateProfile
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, set, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB2-cj9k_J9FDovpLz3l-kCAIvGjckmQtM",
@@ -618,8 +599,7 @@ const firebaseConfig = {
   projectId: "contentboardpro",
   storageBucket: "contentboardpro.firebasestorage.app",
   messagingSenderId: "133243951273",
-  appId: "1:133243951273:web:fb31eddd1bfcc40e95f1b8",
-  measurementId: "G-NYLEL5LNCJ"
+  appId: "1:133243951273:web:fb31eddd1bfcc40e95f1b8"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -627,518 +607,381 @@ const db = getDatabase(app);
 const auth = getAuth(app); 
 const googleProvider = new GoogleAuthProvider();
 
-// Global State
+// GLOBAL STATE
 let myUser = null; 
-let workspaces = [];
+let workspaces = []; // Project Pribadi
+let sharedWorkspaces = []; // Project Orang Lain
 let activeWsId = null;
+let isOwner = true; // Status akses
+let wsMembers = {}; // Daftar PIC/Anggota
+
 let unsubscribeWs = null;
+let unsubscribeSharedWs = null;
 let unsubscribeBoard = null;
 
 let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '' };
-let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
+let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null;
 
-// GLOBAL FIX: ALLOW DROP (Mencegah browser memblokir drag and drop)
+// HELPER: UTILS & UI
 window.allowDrop = (e) => { e.preventDefault(); };
+window.hideCtxMenu = () => { const ctx = document.getElementById('ctx-menu'); if (ctx) ctx.style.display = 'none'; };
+document.addEventListener('click', () => { 
+    hideCtxMenu();
+    document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('show'));
+});
 
-// GLOBAL FIX: HIDE CONTEXT MENU
-window.hideCtxMenu = () => {
-    const ctx = document.getElementById('ctx-menu');
-    if (ctx) ctx.style.display = 'none';
+window.toggleMenu = (id, e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.custom-dropdown').forEach(d => { if(d.id !== id) d.classList.remove('show') });
+    document.getElementById(id).classList.toggle('show');
 };
 
-// FUNGSI PESAN ALERT / CONFIRM KUSTOM
 window.showMsg = (txt, cb) => {
-    const msgText = document.getElementById('msg-text');
-    if(msgText) msgText.innerHTML = txt;
+    document.getElementById('msg-text').innerHTML = txt;
     const ok = document.getElementById('msg-ok'), cancel = document.getElementById('msg-cancel');
-    if(cancel) cancel.style.display = cb ? 'block' : 'none';
+    if(cancel) cancel.style.display = cb && cb.name !== 'closeOnly' ? 'block' : 'none';
     const clean = () => { document.getElementById('msg-ov').classList.remove('show'); if(ok) ok.onclick = null; if(cancel) cancel.onclick = null; };
-    if(ok) ok.onclick = () => { clean(); if(cb) cb(); };
+    ok.onclick = () => { clean(); if(cb) cb(); };
     if(cancel) cancel.onclick = clean;
     document.getElementById('msg-ov').classList.add('show');
 };
 
-// ================= SISTEM AUTHENTICATION FIREBASE =================
+// DARK MODE
+window.toggleDarkMode = () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    localStorage.setItem('cb_theme', isDark ? 'light' : 'dark');
+};
+if(localStorage.getItem('cb_theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 
+// ================= AUTHENTICATION =================
 window.isRegistering = false;
 
 onAuthStateChanged(auth, (user) => {
     if (window.isRegistering) return;
-
     const loginOv = document.getElementById('login-ov');
-    
     if (user) {
         if (user.providerData[0] && user.providerData[0].providerId === 'password' && !user.emailVerified) {
             loginOv.classList.add('show');
-            showMsg("Email Anda belum diverifikasi. Silakan cek kotak masuk/spam di email Anda, lalu coba masuk lagi.");
-            signOut(auth);
-            return;
+            showMsg("Email Anda belum diverifikasi. Silakan cek inbox/spam, lalu coba masuk lagi.");
+            signOut(auth); return;
         }
+        myUser = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email };
         
-        myUser = { 
-            id: user.uid, 
-            name: user.displayName || user.email.split('@')[0],
-            email: user.email
-        };
+        // Simpan data user ke DB publik agar bisa ditarik sebagai PIC
+        set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email });
+
         loginOv.classList.remove('show');
         initApp(); 
     } else {
         myUser = null;
         loginOv.classList.add('show');
         document.getElementById('board-wrap').style.display = 'none';
-        document.getElementById('brand-tabs').style.display = 'none';
-        document.getElementById('fab-add').style.display = 'none';
     }
 });
 
 window.toggleAuth = (type) => {
-    document.getElementById('form-login').style.display = 'none';
-    document.getElementById('form-register').style.display = 'none';
-    document.getElementById('form-reset').style.display = 'none';
-
-    if(type === 'reg') {
-        document.getElementById('form-register').style.display = 'block';
-        document.getElementById('auth-title').innerText = "Buat Akun Baru";
-        document.getElementById('auth-desc').innerText = "Daftar untuk membuat ruang kerja personal.";
-    } else if(type === 'reset') {
-        document.getElementById('form-reset').style.display = 'block';
-        document.getElementById('auth-title').innerText = "Atur Ulang Sandi";
-        document.getElementById('auth-desc').innerText = "Jangan khawatir, mari kita pulihkan akses Anda.";
-    } else {
-        document.getElementById('form-login').style.display = 'block';
-        document.getElementById('auth-title').innerText = "Selamat Datang!";
-        document.getElementById('auth-desc').innerText = "Masuk untuk mengelola ruang kerja Anda.";
-    }
+    document.querySelectorAll('#form-login, #form-register, #form-reset').forEach(el => el.style.display = 'none');
+    if(type === 'reg') { document.getElementById('form-register').style.display = 'block'; document.getElementById('auth-title').innerText = "Buat Akun Baru"; } 
+    else if(type === 'reset') { document.getElementById('form-reset').style.display = 'block'; document.getElementById('auth-title').innerText = "Atur Ulang Sandi"; } 
+    else { document.getElementById('form-login').style.display = 'block'; document.getElementById('auth-title').innerText = "ContentBoard Pro"; }
 };
 
-window.loginGoogle = () => {
-    signInWithPopup(auth, googleProvider).catch((error) => {
-        showMsg("Gagal masuk dengan Google: " + error.message);
-    });
-};
-
+window.loginGoogle = () => { signInWithPopup(auth, googleProvider).catch(e => showMsg("Gagal: " + e.message)); };
 window.loginEmail = () => {
-    const email = document.getElementById('log-email').value.trim();
-    const pass = document.getElementById('log-pass').value.trim();
-    if(!email || !pass) return showMsg("Email dan kata sandi harus diisi.");
-    
-    const btn = document.querySelector('#form-login .btn-s');
-    const originalText = btn.innerText;
-    btn.innerText = "Memproses...";
-    btn.disabled = true;
-
-    signInWithEmailAndPassword(auth, email, pass).catch((error) => {
-        btn.innerText = originalText;
-        btn.disabled = false;
-        showMsg("Gagal masuk: Periksa kembali email dan kata sandi Anda.");
-    });
+    const email = document.getElementById('log-email').value.trim(), pass = document.getElementById('log-pass').value.trim();
+    if(!email || !pass) return showMsg("Isi email dan kata sandi.");
+    const btn = document.querySelector('#form-login .btn-s'); const ori = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+    signInWithEmailAndPassword(auth, email, pass).catch(e => { btn.innerText = ori; btn.disabled = false; showMsg("Gagal masuk. Periksa kembali data Anda."); });
 };
 
 window.registerEmail = async () => {
-    const name = document.getElementById('reg-name').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const pass = document.getElementById('reg-pass').value.trim();
+    const name = document.getElementById('reg-name').value.trim(), email = document.getElementById('reg-email').value.trim(), pass = document.getElementById('reg-pass').value.trim();
+    if(!name || !email || !pass) return showMsg("Semua kolom wajib diisi.");
+    if(pass.length < 6) return showMsg("Sandi minimal 6 karakter.");
     
-    if(!name || !email || !pass) return showMsg("Semua kolom (Nama, Email, Sandi) wajib diisi.");
-    if(pass.length < 6) return showMsg("Kata sandi minimal 6 karakter.");
-    
-    const btn = document.querySelector('#form-register .btn-s');
-    const originalText = btn.innerText;
-    btn.innerText = "Memproses...";
-    btn.disabled = true;
-    
-    window.isRegistering = true;
-    
+    const btn = document.querySelector('#form-register .btn-s'); const ori = btn.innerText; btn.innerText = "⏳"; btn.disabled = true; window.isRegistering = true;
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-        await updateProfile(userCredential.user, { displayName: name });
-        await sendEmailVerification(userCredential.user);
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(cred.user, { displayName: name });
+        await sendEmailVerification(cred.user);
         await signOut(auth);
-        
         window.isRegistering = false;
-        
-        showMsg("Pendaftaran sukses!<br><b>Link verifikasi telah dikirim ke email Anda.</b> Silakan cek kotak masuk/spam dan klik link tersebut sebelum masuk.", () => {
-            toggleAuth('log'); 
-        });
-    } catch(error) {
-        window.isRegistering = false;
-        if(error.code === 'auth/email-already-in-use') showMsg("Email ini sudah pernah terdaftar.");
-        else showMsg("Gagal mendaftar: " + error.message);
-    } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
+        showMsg("Sukses! Link verifikasi dikirim ke email Anda. Klik link tersebut sebelum login.", () => toggleAuth('log'));
+    } catch(e) {
+        window.isRegistering = false; btn.innerText = ori; btn.disabled = false;
+        showMsg(e.code === 'auth/email-already-in-use' ? "Email sudah terdaftar." : "Gagal: " + e.message);
     }
 };
 
 window.resetPassword = async () => {
-    const email = document.getElementById('res-email').value.trim() || document.getElementById('log-email').value.trim();
-    if(!email) {
-        document.getElementById('res-email').focus();
-        return showMsg("Harap masukkan alamat email Anda terlebih dahulu.");
-    }
-    
-    const btn = document.querySelector('#form-reset .btn-s');
-    const originalText = btn.innerText;
-    btn.innerText = "Mengirim...";
-    btn.disabled = true;
-    
+    const email = document.getElementById('res-email').value.trim();
+    if(!email) return showMsg("Masukkan email Anda.");
+    const btn = document.querySelector('#form-reset .btn-s'); const ori = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
     try {
         await sendPasswordResetEmail(auth, email);
-        showMsg(`Tautan reset kata sandi telah dikirim ke <b>${email}</b>.<br>Silakan periksa kotak masuk atau folder spam Anda.`, () => {
-            toggleAuth('log'); 
-        });
-        document.getElementById('res-email').value = '';
-    } catch(error) {
-        if(error.code === 'auth/user-not-found') showMsg("Email tidak terdaftar di sistem kami.");
-        else if(error.code === 'auth/invalid-email') showMsg("Format email tidak valid.");
-        else showMsg("Gagal mengirim email: " + error.message);
-    } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
+        showMsg(`Link reset dikirim ke <b>${email}</b>.`, () => toggleAuth('log'));
+    } catch(e) { showMsg("Gagal: " + e.message); } 
+    finally { btn.innerText = ori; btn.disabled = false; }
 };
 
-window.showLogoutMenu = () => {
-    if(!myUser) return;
-    showMsg(`Apakah Anda yakin ingin keluar (Log out) dari aplikasi?`, () => {
-        signOut(auth).then(() => {
-            window.location.reload();
-        });
-    });
-};
-
+window.showLogoutMenu = () => { showMsg(`Yakin ingin keluar?`, () => signOut(auth).then(()=>window.location.reload())); };
 window.changeUsername = async () => {
-    if(!myUser) return;
-    const newName = prompt("Masukkan nama panggilan baru Anda:", myUser.name);
+    const newName = prompt("Nama panggilan baru:", myUser.name);
     if(!newName || newName.trim() === '' || newName === myUser.name) return;
-
-    const nameTrimmed = newName.trim();
-    const btn = document.getElementById('user-avatar');
-    const oldText = btn.textContent;
-    btn.textContent = "⏳";
-
     try {
-        if (auth.currentUser) {
-            await updateProfile(auth.currentUser, { displayName: nameTrimmed });
-        }
-        myUser.name = nameTrimmed;
+        await updateProfile(auth.currentUser, { displayName: newName.trim() });
+        myUser.name = newName.trim();
+        set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email }); // Update public DB
         document.getElementById('user-avatar').textContent = myUser.name.charAt(0).toUpperCase();
         document.getElementById('user-menu-name').textContent = myUser.name;
-        showMsg("Nama berhasil diubah!");
-    } catch(e) {
-        showMsg("Gagal mengubah nama: " + e.message);
-        btn.textContent = oldText;
-    }
+        showMsg("Nama berhasil diperbarui!");
+    } catch(e) { showMsg("Gagal: " + e.message); }
 };
 
-// ================= CUSTOM MENU (USER & PROJECT) =================
-window.toggleUserMenu = (e) => {
-    e.stopPropagation();
-    document.getElementById('user-menu').classList.toggle('show');
-    const pm = document.getElementById('proj-menu');
-    if(pm) pm.classList.remove('show');
-};
-
-window.toggleProjMenu = (e) => {
-    e.stopPropagation();
-    document.getElementById('proj-menu').classList.toggle('show');
-    const um = document.getElementById('user-menu');
-    if(um) um.classList.remove('show');
-};
-
-// Menutup menu jika klik di luar
-document.addEventListener('click', (e) => {
-    const uMenu = document.getElementById('user-menu');
-    const pMenu = document.getElementById('proj-menu');
-    if(uMenu && !e.target.closest('#user-avatar')) uMenu.classList.remove('show');
-    if(pMenu && !e.target.closest('#project-btn')) pMenu.classList.remove('show');
-    window.hideCtxMenu();
-});
-
-
-// ================= INISIALISASI APLIKASI UTAMA =================
+// ================= SISTEM PROJECT & COLLABORATION =================
 
 function initApp() {
-    const avatarEl = document.getElementById('user-avatar');
-    if(avatarEl) avatarEl.textContent = myUser.name.charAt(0).toUpperCase();
-    
+    document.getElementById('user-avatar').textContent = myUser.name.charAt(0).toUpperCase();
     document.getElementById('user-menu-name').textContent = myUser.name;
     document.getElementById('user-menu-email').textContent = myUser.email;
     
-    const userWsRef = ref(db, `users/${myUser.id}/workspaces`);
-    unsubscribeWs = onValue(userWsRef, (snapshot) => {
-        const data = snapshot.val();
-        workspaces = data ? Object.values(data) : [];
-        renderWsSelector();
+    // CEK APAKAH ADA LINK INVITE DI URL ?join=xxx
+    const urlParams = new URLSearchParams(window.location.search);
+    const joinId = urlParams.get('join');
+    if (joinId) {
+        joinProject(joinId);
+        window.history.replaceState({}, document.title, window.location.pathname); // Bersihkan URL
+    }
 
-        if (workspaces.length === 0) {
-            // SCRIPT MIGRASI OTOMATIS DATA LAMA KE AKUN BARU
-            get(ref(db, 'content_board_workspaces_list')).then(snap => {
-                const oldData = snap.val();
-                if (oldData) {
-                    // Pindahkan data lama ke laci pribadi akun baru Anda
-                    set(ref(db, `users/${myUser.id}/workspaces`), oldData).then(() => {
-                        showMsg("Selamat datang kembali! Data lama Anda berhasil ditemukan dan dipulihkan ke akun ini.");
-                    });
-                } else {
-                    // Tampilan Kosong (Jika memang benar-benar pengguna baru dan tidak ada data lama)
-                    document.getElementById('empty-state').style.display = 'flex';
-                    document.getElementById('board-wrap').style.display = 'none';
-                    document.getElementById('brand-tabs').style.display = 'none';
-                    document.getElementById('fab-add').style.display = 'none';
-                }
-            });
-        } else {
-            // Tampilan Normal (Data sudah ada)
-            document.getElementById('empty-state').style.display = 'none';
-            document.getElementById('board-wrap').style.display = 'flex';
-            document.getElementById('brand-tabs').style.display = 'flex';
-            document.getElementById('fab-add').style.display = 'flex';
-            
-            const savedWs = localStorage.getItem('cb_active_ws');
-            if (workspaces.some(w => w.id === savedWs)) {
-                switchWorkspace(savedWs);
-            } else {
-                switchWorkspace(workspaces[0].id);
-            }
-        }
+    // Dengarkan Project Pribadi
+    unsubscribeWs = onValue(ref(db, `users/${myUser.id}/workspaces`), (snap) => {
+        workspaces = snap.val() ? Object.values(snap.val()) : [];
+        checkAndRenderWs();
+    });
+
+    // Dengarkan Project Kolaborasi (Shared)
+    unsubscribeSharedWs = onValue(ref(db, `users/${myUser.id}/shared`), (snap) => {
+        sharedWorkspaces = snap.val() ? Object.values(snap.val()) : [];
+        checkAndRenderWs();
     });
 }
 
-function renderWsSelector() {
-    const btn = document.getElementById('project-btn');
-    const container = document.getElementById('proj-list-container');
-    
-    if (workspaces.length === 0) {
-        if(btn) btn.innerHTML = 'Belum ada Project ▾';
-        if(container) container.innerHTML = '<div style="padding:8px 12px; font-size:12px; color:#888;">Kosong</div>';
-        return;
-    }
-
-    const activeWs = workspaces.find(w => w.id === activeWsId) || workspaces[0];
-    if (activeWs && btn) btn.innerHTML = `${activeWs.name} ▾`;
-
-    if(container) {
-        container.innerHTML = workspaces.map((w, i) => `
-            <div class="proj-item ${w.id === activeWsId ? 'active' : ''}" 
-                 draggable="true" 
-                 ondragstart="dragWs(event, ${i})" 
-                 ondragover="allowDrop(event); dragOverWs(event);" 
-                 ondragleave="dragLeaveWs(event)"
-                 ondrop="dropWs(event, ${i})" 
-                 onclick="switchWorkspace('${w.id}')">
-                <div><span class="proj-drag-handle" title="Tarik untuk memindahkan">⠿</span> ${w.name}</div>
-                ${w.id === activeWsId ? '<span>✓</span>' : ''}
-            </div>
-        `).join('');
+function checkAndRenderWs() {
+    renderWsSelector();
+    if (workspaces.length === 0 && sharedWorkspaces.length === 0) {
+        document.getElementById('empty-state').style.display = 'flex';
+        document.getElementById('board-wrap').style.display = 'none';
+        document.getElementById('brand-tabs').style.display = 'none';
+    } else {
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('board-wrap').style.display = 'flex';
+        document.getElementById('brand-tabs').style.display = 'flex';
+        
+        // Coba buka project yang terakhir dibuka, jika tidak ada, buka yang pertama
+        const savedWs = localStorage.getItem('cb_active_ws');
+        if (workspaces.some(w => w.id === savedWs)) {
+            switchWorkspace(savedWs, true);
+        } else if (sharedWorkspaces.some(w => w.id === savedWs)) {
+            switchWorkspace(savedWs, false);
+        } else {
+            if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true);
+            else switchWorkspace(sharedWorkspaces[0].id, false);
+        }
     }
 }
 
-// LOGIKA DRAG & DROP UNTUK PROJECT (WORKSPACE)
-let draggedWsIdx = null;
-window.dragWs = (e, idx) => { 
-    e.stopPropagation();
-    draggedWsIdx = idx; 
-    e.dataTransfer.setData("text/plain", String(idx));
-    setTimeout(() => e.target.style.opacity = '0.5', 0);
-};
-window.dragOverWs = (e) => {
-    e.preventDefault();
-    const target = e.currentTarget;
-    const rect = target.getBoundingClientRect();
-    const offset = rect.y + (rect.height / 2);
-    if (e.clientY < offset) {
-        target.style.borderTop = '2px solid var(--primary)';
-        target.style.borderBottom = '2px solid transparent';
-    } else {
-        target.style.borderBottom = '2px solid var(--primary)';
-        target.style.borderTop = '2px solid transparent';
+function renderWsSelector() {
+    const btn = document.getElementById('project-btn'), cont = document.getElementById('proj-list-container'), sharedCont = document.getElementById('shared-proj-list'), sharedHead = document.getElementById('shared-proj-header');
+    
+    if (workspaces.length === 0 && sharedWorkspaces.length === 0) {
+        btn.innerHTML = 'Ruang Kosong ▾'; cont.innerHTML = ''; sharedHead.style.display = 'none'; sharedCont.innerHTML = ''; return;
     }
-};
-window.dragLeaveWs = (e) => {
-    e.currentTarget.style.borderTop = '2px solid transparent';
-    e.currentTarget.style.borderBottom = '2px solid transparent';
-};
+
+    let activeData = workspaces.find(w => w.id === activeWsId) || sharedWorkspaces.find(w => w.id === activeWsId);
+    if (activeData) btn.innerHTML = `${activeData.name} ▾`;
+
+    // Render Project Pribadi
+    cont.innerHTML = workspaces.map((w, i) => `
+        <div class="proj-item ${w.id === activeWsId ? 'active' : ''}" draggable="true" ondragstart="dragWs(event, ${i})" ondragover="allowDrop(event); dragOverWs(event);" ondragleave="dragLeaveWs(event)" ondrop="dropWs(event, ${i})" onclick="switchWorkspace('${w.id}', true)">
+            <div><span class="proj-drag-handle">⠿</span> ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}
+        </div>`).join('');
+
+    // Render Project Tim (Shared)
+    if(sharedWorkspaces.length > 0) {
+        sharedHead.style.display = 'block';
+        sharedCont.innerHTML = sharedWorkspaces.map(w => `
+            <div class="proj-item ${w.id === activeWsId ? 'active' : ''}" onclick="switchWorkspace('${w.id}', false)">
+                <div>👥 ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}
+            </div>`).join('');
+    } else {
+        sharedHead.style.display = 'none'; sharedCont.innerHTML = '';
+    }
+}
+
+// LOGIKA DRAG WS SAMA SEPERTI SEBELUMNYA
+let draggedWsIdx = null;
+window.dragWs = (e, i) => { e.stopPropagation(); draggedWsIdx = i; e.dataTransfer.setData("text/plain", String(i)); };
+window.dragOverWs = (e) => { e.preventDefault(); const t = e.currentTarget, r = t.getBoundingClientRect(); if(e.clientY < r.y + r.height/2) { t.style.borderTop='2px solid var(--primary)'; t.style.borderBottom='2px solid transparent'; } else { t.style.borderBottom='2px solid var(--primary)'; t.style.borderTop='2px solid transparent'; } };
+window.dragLeaveWs = (e) => { e.currentTarget.style.borderTop='2px solid transparent'; e.currentTarget.style.borderBottom='2px solid transparent'; };
 window.dropWs = (e, targetIdx) => {
-    e.preventDefault(); e.stopPropagation();
-    e.currentTarget.style.borderTop = '2px solid transparent';
-    e.currentTarget.style.borderBottom = '2px solid transparent';
-    document.querySelectorAll('.proj-item').forEach(el => el.style.opacity = '1');
-    
+    e.preventDefault(); e.stopPropagation(); e.currentTarget.style.borderTop='2px solid transparent'; e.currentTarget.style.borderBottom='2px solid transparent';
     if (draggedWsIdx === null || draggedWsIdx === targetIdx) return;
-    
-    const w = workspaces.splice(draggedWsIdx, 1)[0];
-    const rect = e.currentTarget.getBoundingClientRect();
-    const dropBelow = e.clientY > (rect.y + rect.height / 2);
-    
+    const w = workspaces.splice(draggedWsIdx, 1)[0], dropBelow = e.clientY > (e.currentTarget.getBoundingClientRect().y + e.currentTarget.getBoundingClientRect().height/2);
     let insertIdx = targetIdx;
-    if (draggedWsIdx < targetIdx && !dropBelow) insertIdx = targetIdx - 1;
-    if (draggedWsIdx > targetIdx && dropBelow) insertIdx = targetIdx + 1;
-    
+    if (draggedWsIdx < targetIdx && !dropBelow) insertIdx--; if (draggedWsIdx > targetIdx && dropBelow) insertIdx++;
     workspaces.splice(insertIdx, 0, w);
-    set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
-    renderWsSelector();
-    draggedWsIdx = null;
+    set(ref(db, `users/${myUser.id}/workspaces`), workspaces); draggedWsIdx = null;
+};
+
+// BAGIKAN & GABUNG PROJECT
+window.generateShareLink = () => {
+    if(!activeWsId) return;
+    if(!isOwner) return showMsg("Hanya pembuat project yang bisa mengundang orang lain.");
+    
+    // Tambahkan diri sendiri ke daftar member (jika belum)
+    update(ref(db, `board_members/${activeWsId}/${myUser.id}`), { role: 'owner' });
+    
+    const link = `${window.location.origin}${window.location.pathname}?join=${activeWsId}`;
+    navigator.clipboard.writeText(link).then(() => {
+        showMsg(`<b>Link Undangan Disalin!</b><br><br>Kirim link ini ke tim Anda:<br><code style="background:var(--input-bg); padding:4px; border-radius:4px; display:block; margin-top:8px; word-break:break-all; font-size:11px;">${link}</code><br>Mereka wajib login/daftar terlebih dahulu sebelum bisa bergabung.`);
+    });
+};
+
+window.joinProject = async (joinId) => {
+    if (!myUser) return;
+    try {
+        // Cek apakah project exist dengan membaca meta-nya (Aman karena database belum dikunci penuh per node di client ini)
+        const snap = await get(ref(db, `content_board_data_${joinId}/meta`));
+        let projName = "Shared Project";
+        if(snap.exists() && snap.val().name) projName = snap.val().name;
+
+        // Cek apakah sudah join
+        const exist = sharedWorkspaces.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId);
+        if(exist) return showMsg("Anda sudah tergabung dalam project ini.");
+
+        // Tambahkan ke daftar shared user
+        const newShared = [...sharedWorkspaces, { id: joinId, name: projName }];
+        await set(ref(db, `users/${myUser.id}/shared`), newShared);
+        
+        // Daftarkan user ini sebagai member di board tersebut
+        await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' });
+
+        showMsg("Berhasil bergabung ke project tim!");
+        switchWorkspace(joinId, false);
+    } catch (e) { showMsg("Link tidak valid atau project sudah dihapus."); }
 };
 
 
 window.openWsModal = (isEdit = false) => {
     const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn');
     if (isEdit) {
+        if(!isOwner) return showMsg("Hanya pemilik yang dapat mengubah nama/menghapus project.");
         editWsId = activeWsId; titleEl.textContent = "Edit Project";
-        const currentWs = workspaces.find(w => w.id === activeWsId); 
-        inputEl.value = currentWs ? currentWs.name : '';
-        delBtn.style.display = "block"; 
+        const w = workspaces.find(w => w.id === activeWsId); inputEl.value = w ? w.name : ''; delBtn.style.display = "block"; 
     } else {
-        editWsId = null; titleEl.textContent = "Project Baru"; 
-        inputEl.value = ''; 
-        delBtn.style.display = "none";
+        editWsId = null; titleEl.textContent = "Project Baru"; inputEl.value = ''; delBtn.style.display = "none";
     }
     document.getElementById('ws-ov').classList.add('show');
 };
 
-window.closeWsModal = () => { document.getElementById('ws-ov').classList.remove('show'); };
+window.closeWsModal = () => document.getElementById('ws-ov').classList.remove('show');
 
 window.saveWs = () => {
-    const name = document.getElementById('ws-name').value.trim();
-    if(!name) return;
-    
+    const name = document.getElementById('ws-name').value.trim(); if(!name) return;
     if (editWsId) {
         const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name;
-        set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { closeWsModal(); renderWsSelector(); });
+        set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
+        set(ref(db, `content_board_data_${editWsId}/meta/name`), name); // Update public name
+        closeWsModal();
     } else {
-        let customId = 'ws_' + Date.now();
+        const customId = 'ws_' + Date.now();
         workspaces.push({id: customId, name: name});
-        set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { 
-            closeWsModal(); 
-            localStorage.setItem('cb_active_ws', customId);
-        });
+        set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
+        set(ref(db, `content_board_data_${customId}/meta`), { name: name, owner: myUser.id }); // Set owner
+        set(ref(db, `board_members/${customId}/${myUser.id}`), { role: 'owner' }); // Set initial member
+        closeWsModal(); localStorage.setItem('cb_active_ws', customId);
     }
 };
 
 window.confirmDelWs = () => {
-    showMsg("Hapus project ini dari ruang kerja Anda?", () => {
+    showMsg("Hapus project ini beserta seluruh kontennya secara permanen?", () => {
         workspaces = workspaces.filter(w => w.id !== activeWsId);
-        set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { 
-            closeWsModal(); 
-            if(workspaces.length > 0) localStorage.setItem('cb_active_ws', workspaces[0].id);
-        });
+        set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
+        remove(ref(db, `content_board_data_${activeWsId}`)); // Hapus dari DB Publik
+        remove(ref(db, `board_members/${activeWsId}`)); 
+        closeWsModal(); if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true);
     });
 };
 
-window.switchWorkspace = (wsId) => {
+window.switchWorkspace = (wsId, ownerFlag) => {
     if(unsubscribeBoard) unsubscribeBoard(); 
-    activeWsId = wsId; 
+    activeWsId = wsId; isOwner = ownerFlag;
     localStorage.setItem('cb_active_ws', wsId); 
     aB = 'all';
+    document.getElementById('btn-edit-ws').style.display = isOwner ? 'flex' : 'none';
     
-    const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
+    // Dengarkan Member (PIC) Board Ini
+    onValue(ref(db, `board_members/${wsId}`), async (snap) => {
+        wsMembers = {};
+        if(snap.val()) {
+            const memIds = Object.keys(snap.val());
+            for(let id of memIds) {
+                const uSnap = await get(ref(db, `public_users/${id}`));
+                if(uSnap.exists()) wsMembers[id] = { id: id, name: uSnap.val().name };
+            }
+        }
+        updateAssigneeDropdowns(); renderBoard();
+    });
+
+    const dbPath = `content_board_data_${wsId}`;
     unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
         const data = snapshot.val() || {};
         brands = data.brands || []; cards = data.cards || [];
-        columns = (data.columns && data.columns.length > 0) ? data.columns : [
-          {id:'backup',lbl:'Backup Aset',c:'#888780', collapsed: false},
-          {id:'edit',lbl:'Edit',c:'#185FA5', collapsed: false},
-          {id:'thumbnail',lbl:'Thumbnail',c:'#BA7517', collapsed: false},
-          {id:'review',lbl:'Review',c:'#534AB7', collapsed: false},
-          {id:'revisi',lbl:'Revisi',c:'#D85A30', collapsed: false},
-          {id:'upload',lbl:'Upload',c:'#1D9E75', collapsed: false}
-        ];
+        columns = (data.columns && data.columns.length > 0) ? data.columns : [{id:'review',lbl:'Review',c:'#534AB7', collapsed: false}];
         themeSettings = data.theme || { color: '#534AB7', bg: '' };
-        applyTheme(); renderAll();
-        renderWsSelector(); // Update the dropdown button name
+        applyTheme(); renderAll(); renderWsSelector();
     });
 };
 
+function updateAssigneeDropdowns() {
+    let opts = `<option value="">Belum Ada PIC</option>`;
+    for(let id in wsMembers) opts += `<option value="${id}">${wsMembers[id].name}</option>`;
+    document.getElementById('m-assignee').innerHTML = opts;
+    const dpAss = document.getElementById('dp-fassignee');
+    if(dpAss) { dpAss.innerHTML = opts; if(selId){ const c = cards.find(x=>x.id===selId); if(c) dpAss.value = c.assignee || '';} }
+}
+
 function syncToFirebase() { 
     if(!activeWsId) return;
-    const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`;
-    set(ref(db, dbPath), { brands, cards, columns, theme: themeSettings }); 
+    const updates = { brands, cards, columns, theme: themeSettings };
+    update(ref(db, `content_board_data_${activeWsId}`), updates); 
 }
 
 function applyTheme() {
     const root = document.documentElement;
     root.style.setProperty('--primary', themeSettings.color || '#534AB7');
-    let lightColor = themeSettings.color || '#534AB7';
-    if(lightColor.length === 7) lightColor += '20'; 
+    let lightColor = themeSettings.color || '#534AB7'; if(lightColor.length === 7) lightColor += '20'; 
     root.style.setProperty('--primary-light', lightColor);
-    const appEl = document.querySelector('.app');
-    if(appEl) {
-        if(themeSettings.bg) {
-            appEl.style.backgroundImage = `url('${themeSettings.bg}')`;
-            const bgPreview = document.getElementById('bg-preview');
-            if (bgPreview) bgPreview.style.backgroundImage = `url('${themeSettings.bg}')`;
-        } else {
-            appEl.style.backgroundImage = 'none';
-            const bgPreview = document.getElementById('bg-preview');
-            if (bgPreview) bgPreview.style.backgroundImage = 'none';
-        }
-    }
+    const appEl = document.querySelector('.app'), bgP = document.getElementById('bg-preview');
+    if(themeSettings.bg) { appEl.style.backgroundImage = `url('${themeSettings.bg}')`; if(bgP) bgP.style.backgroundImage = `url('${themeSettings.bg}')`; } 
+    else { appEl.style.backgroundImage = 'none'; if(bgP) bgP.style.backgroundImage = 'none'; }
 }
 
-// ================= FUNGSI-FUNGSI PAPAN KERJA =================
+// ================= FUNGSI PAPAN & KARTU =================
 
-window.openThemeModal = () => { 
-    document.getElementById('bg-url-input').value = themeSettings.bg || '';
-    document.getElementById('theme-ov').classList.add('show'); 
-};
-window.closeThemeModal = () => { document.getElementById('theme-ov').classList.remove('show'); };
-window.setThemeColor = (color, el) => {
-    themeSettings.color = color;
-    document.querySelectorAll('.theme-option').forEach(x => x.classList.remove('active'));
-    if(el) el.classList.add('active');
-    applyTheme(); syncToFirebase();
-};
-
-window.applyBgUrl = () => {
-    const url = document.getElementById('bg-url-input').value.trim();
-    if(!url) return;
-    themeSettings.bg = url; 
-    applyTheme(); 
-    syncToFirebase();
-};
-
-window.removeBg = () => { 
-    themeSettings.bg = ''; 
-    document.getElementById('bg-url-input').value = '';
-    applyTheme(); 
-    syncToFirebase(); 
-};
-
-window.openMoveWsModal = (cardId) => {
-    cardToMoveId = cardId;
-    const availableWs = workspaces.filter(w => w.id !== activeWsId);
-    if(availableWs.length === 0) { showMsg("Buat Project lain dulu."); return; }
-    document.getElementById('move-ws-select').innerHTML = availableWs.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
-    document.getElementById('move-ws-ov').classList.add('show');
-};
-window.closeMoveWsModal = () => { document.getElementById('move-ws-ov').classList.remove('show'); cardToMoveId = null; };
-window.moveCardToWs = async () => {
-    const targetWsId = document.getElementById('move-ws-select').value;
-    const cIdx = cards.findIndex(x => x.id === cardToMoveId); if(cIdx === -1) return;
-    const cardToMove = JSON.parse(JSON.stringify(cards[cIdx])), btn = document.getElementById('move-ws-btn');
-    try {
-        btn.textContent = 'Memindahkan...'; btn.disabled = true;
-        cards.splice(cIdx, 1); syncToFirebase();
-        const destPath = targetWsId === 'default' ? 'content_board_data' : `content_board_data_${targetWsId}`;
-        const destSnap = await get(ref(db, destPath));
-        let destData = destSnap.val() || { cards: [], columns: [], brands: [] };
-        if(!destData.cards) destData.cards = [];
-        cardToMove.bId = ""; 
-        cardToMove.status = (destData.columns && destData.columns.length > 0) ? destData.columns[0].id : 'backup';
-        destData.cards.unshift(cardToMove);
-        await set(ref(db, destPath), destData);
-        closeMoveWsModal(); showMsg("Berhasil dipindahkan!"); renderBoard(); 
-    } catch(e) { cards.splice(cIdx, 0, cardToMove); syncToFirebase(); renderBoard(); } 
-    finally { btn.textContent = 'Pindahkan'; btn.disabled = false; }
-};
+window.openThemeModal = () => { document.getElementById('bg-url-input').value = themeSettings.bg || ''; document.getElementById('theme-ov').classList.add('show'); };
+window.closeThemeModal = () => document.getElementById('theme-ov').classList.remove('show');
+window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelectorAll('.theme-option').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); applyTheme(); syncToFirebase(); };
+window.applyBgUrl = () => { const u = document.getElementById('bg-url-input').value.trim(); if(u) { themeSettings.bg = u; applyTheme(); syncToFirebase(); }};
+window.removeBg = () => { themeSettings.bg = ''; document.getElementById('bg-url-input').value = ''; applyTheme(); syncToFirebase(); };
 
 window.showCtxMenu = (e, type, id) => {
     e.preventDefault(); e.stopPropagation();
     const ctx = document.getElementById('ctx-menu'); ctx.style.display = 'flex';
-    if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); window.hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); window.hideCtxMenu()">🗑️ Hapus Status</button>`;
-    else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); window.hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); window.hideCtxMenu()">🗑️ Hapus Brand</button>`;
-    else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); window.hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;window.hideCtxMenu()">📄 Duplikat</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); window.hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();window.hideCtxMenu()">🗑️ Hapus</button>`;
+    if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`;
+    else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`;
+    else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;hideCtxMenu()">📄 Duplikat Konten</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();hideCtxMenu()">🗑️ Hapus Konten</button>`;
     let x = e.clientX, y = e.clientY;
     if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10;
     if (y + ctx.offsetHeight > window.innerHeight) y = window.innerHeight - ctx.offsetHeight - 10;
@@ -1148,460 +991,231 @@ window.showCtxMenu = (e, type, id) => {
 window.cols = (t) => columns; 
 window.renderAll = () => { renderTabs(); renderBoard(); };
 window.renderTabs = () => {
-  document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua</div>`
+  document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>`
     + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('')
-    + `<div class="add-btab" onclick="openBrand()">+</div>`;
-  const opts = `<option value="">Tanpa Brand</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join('');
+    + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`;
+  const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join('');
   document.getElementById('m-brand').innerHTML = opts; document.getElementById('dp-fbrand').innerHTML = opts;
 };
 
 window.renderBoard = () => {
-  if (workspaces.length === 0) return;
-
-  const fMonth = document.getElementById('filter-month').value, 
-        fWeek = document.getElementById('filter-week').value, 
-        fUrg = document.getElementById('filter-urgency').value,
-        fType = document.getElementById('filter-type').value,
-        fObj = document.getElementById('filter-objective').value,
-        sortBy = document.getElementById('sort-by').value || 'manual',
-        sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+  if (workspaces.length === 0 && sharedWorkspaces.length === 0) return;
+  const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, sortBy = document.getElementById('sort-by').value, sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
         
   const vis = cards.filter(c => {
-    let mB = (aB==='all' || c.bId===aB), 
-        mT = (fType==='semua' || c.type===fType), 
-        mM = true, 
-        mW = true,
-        mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg),
-        mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj),
-        mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true;
-        
-    if (c.type === 'Catatan' || c.type === 'To-Do') { 
-        mM = true; 
-        mW = true; 
-        mObj = true; // Abaikan filter jalur untuk Catatan & To-Do
-    } else {
-        if (fMonth && c.date) mM = c.date.startsWith(fMonth); 
-        else if (fMonth && !c.date) mM = false; 
-        mW = (fWeek === 'all' || c.week === fWeek); 
-    }
+    let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true;
+    if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); }
     return mB && mT && mM && mW && mU && mObj && mS;
   });
   
   document.getElementById('board').innerHTML = columns.map((col, idx) => {
     let cc = vis.filter(c => c.status===col.id);
-    if (sortBy !== 'manual') {
-        cc.sort((a, b) => {
-            if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999');
-            if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000');
-            if (sortBy === 'newest') return b.id.localeCompare(a.id);
-            return a.type.localeCompare(b.type);
-        });
-    }
+    if (sortBy !== 'manual') cc.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); });
+    
     if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`;
-    return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" style="border-top:3px solid ${col.c}" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle" onclick="toggleCol('${col.id}')">▼</button><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><div style="display:flex;gap:2px;margin-left:auto;"><button class="ca" onclick="mvCol(${idx},-1)" ${idx===0?'disabled':''}>◀</button><button class="ca" onclick="mvCol(${idx},1)" ${idx===columns.length-1?'disabled':''}>▶</button></div></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`;
-  }).join('') + `<div class="col" style="justify-content:center; width:270px; min-width:270px;"><button class="add-col-btn" style="height:100px; border:2px dashed #ccc; font-weight:bold; font-size:13px;" onclick="openCol()">+ Tambah Status Baru</button></div>`;
+    
+    return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" style="border-top:4px solid ${col.c}" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`;
+  }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`;
 };
 
 window.cardH = (c) => {
   const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status);
   
   let urgBadge = '';
-  if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;margin-left:4px;">🔥 Mendesak</span>`;
-  else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;margin-left:4px;">⚡ Penting</span>`;
-  else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;margin-left:4px;">🐢 Santai</span>`;
+  if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`;
+  else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`;
+  else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`;
 
   let objBadge = '';
   if (c.type !== 'Catatan' && c.type !== 'To-Do') {
       const obj = c.objective || 'Konten';
-      if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;margin-left:4px;">📢 Ads</span>`;
-      else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;margin-left:4px;">🎪 Campaign</span>`;
-      else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;margin-left:4px;">🚀 Boost</span>`;
-      else objBadge = `<span class="tbadge" style="background:#F0F0F0;color:#666;margin-left:4px;">🪴 Organik</span>`;
+      if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`;
+      else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`;
+      else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`;
   }
 
-  let dateStyle="color:#888;", alert="";
+  let dateStyle="color:var(--text-light);", alert="";
   if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) {
       const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5;
       if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; }
       else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; }
   }
-  const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="float:right;display:flex;align-items:center;">${c.week?`<span style="font-size:10px;background:var(--primary-light);color:var(--primary);padding:2px 6px;border-radius:4px;margin-right:6px;font-weight:600;">P${c.week}</span>`:''}<span style="font-size:10px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:10px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : '';
-  const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Selesai</div>` : '';
+  const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : '';
+  const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : '';
   
   const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts';
-  return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
+  
+  // PIC AVATAR
+  let picHtml = '';
+  if (c.assignee && wsMembers[c.assignee]) {
+      const init = wsMembers[c.assignee].name.charAt(0);
+      picHtml = `<div class="pic-avatar-mini" title="Ditugaskan ke: ${wsMembers[c.assignee].name}">${init}</div>`;
+  }
+
+  return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')">
+    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+        <span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}
+    </div>
+    ${dt}<div class="card-title">${c.title}</div>${prog}
+    <div class="card-foot">
+        ${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;"></span>`:''}
+        <span class="cfoot-name">${b.n || 'Umum'}</span>
+        ${picHtml}
+    </div>
+  </div>`;
 };
 
-// LOGIKA DRAG & DROP BRAND TABS
-let draggedBrandIdx = null;
-window.dragB = (e, idx) => { 
-    e.stopPropagation();
-    draggedBrandIdx = idx; 
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", String(idx));
-};
-window.dropB = (e, targetIdx) => {
-    e.preventDefault(); e.stopPropagation();
-    if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return;
-    const b = brands.splice(draggedBrandIdx, 1)[0];
-    brands.splice(targetIdx, 0, b);
-    syncToFirebase();
-    renderAll();
-    draggedBrandIdx = null;
-};
+// LOGIKA DRAG & DROP
+let draggedBrandIdx = null; window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.setData("text/plain", String(idx)); };
+window.dropB = (e, targetIdx) => { e.preventDefault(); e.stopPropagation(); if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return; brands.splice(targetIdx, 0, brands.splice(draggedBrandIdx, 1)[0]); syncToFirebase(); renderAll(); draggedBrandIdx = null; };
 
 window.setB = (id) => { aB=id; renderAll(); };
 window.toggleCol = (id) => { const col = columns.find(c=>c.id===id); if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } };
+
 window.openAdd = (s) => { 
     document.getElementById('add-ov').classList.add('show'); 
-    const curType = document.getElementById('filter-type').value;
-    selType(curType === 'Catatan' || curType === 'To-Do' || curType === 'semua' ? 'Video' : curType); 
-    renderMStatus('Video', s || columns[0].id); 
+    selType('Video'); renderMStatus('Video', s || columns[0].id); 
     document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; 
     document.getElementById('m-title').value = ''; 
     document.getElementById('m-objective').value = 'Konten';
 };
 window.closeAdd = () => document.getElementById('add-ov').classList.remove('show');
 window.selType = (t) => { 
-    mType=t; 
-    document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); 
-    let btnId = 'btn-' + (t==='To-Do' ? 't' : t[0].toLowerCase());
-    document.getElementById(btnId).style.background='var(--primary-light)'; 
+    mType=t; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); 
+    document.getElementById('btn-' + (t==='To-Do' ? 't' : t[0].toLowerCase())).style.background='var(--primary-light)'; 
     document.getElementById('m-datetime-container').style.display=(t==='Catatan'||t==='To-Do')?'none':'block'; 
     document.getElementById('m-objective').parentElement.style.display=(t==='Catatan'||t==='To-Do')?'none':'flex'; 
     renderMStatus(t,''); 
 };
 window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; };
+
 window.saveCard = () => { 
-    const t=document.getElementById('m-title').value.trim(); 
-    if(!t)return; 
+    const t=document.getElementById('m-title').value.trim(); if(!t)return; 
     cards.unshift({
-        id:'c'+Date.now(),
-        title:t,
-        bId:document.getElementById('m-brand').value,
-        type:mType,
+        id:'c'+Date.now(), title:t, bId:document.getElementById('m-brand').value, type:mType,
         date:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-date').value,
         time:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-time').value,
         week:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-week').value,
         urgency:document.getElementById('m-urgency').value,
         objective:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-objective').value,
-        status:document.getElementById('m-status').value,
+        status:document.getElementById('m-status').value, assignee: document.getElementById('m-assignee').value,
         notes:'',images:[],steps:[]
     }); 
     closeAdd(); syncToFirebase(); 
 };
+
 window.selCard = (id) => { 
-    selId=id; 
-    const c=cards.find(x=>x.id===id); 
-    if(!c)return; 
-    document.getElementById('dp-title').textContent=c.title; 
-    document.getElementById('dp-ftitle').value=c.title; 
-    document.getElementById('dp-fdate').value=c.date||''; 
-    document.getElementById('dp-ftime').value=c.time||''; 
-    document.getElementById('dp-fweek').value=c.week||'1'; 
-    document.getElementById('dp-ftype').value=c.type; 
-    document.getElementById('dp-fbrand').value=c.bId; 
-    document.getElementById('dp-furgency').value=c.urgency||'normal'; 
-    document.getElementById('dp-fobjective').value=c.objective||'Konten'; 
+    selId=id; const c=cards.find(x=>x.id===id); if(!c)return; 
+    document.getElementById('dp-title').textContent=c.title; document.getElementById('dp-ftitle').value=c.title; 
+    document.getElementById('dp-fdate').value=c.date||''; document.getElementById('dp-ftime').value=c.time||''; document.getElementById('dp-fweek').value=c.week||'1'; 
+    document.getElementById('dp-ftype').value=c.type; document.getElementById('dp-fbrand').value=c.bId; document.getElementById('dp-furgency').value=c.urgency||'normal'; 
+    document.getElementById('dp-fobjective').value=c.objective||'Konten'; document.getElementById('dp-fassignee').value=c.assignee||'';
     
     document.getElementById('dp-datetime-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'block'; 
     document.getElementById('dp-obj-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'flex'; 
 
-    const s=document.getElementById('dp-fstatus'); 
-    s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); 
-    s.value=c.status; 
-    document.getElementById('dp-notes').value=c.notes||''; 
-    document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; 
+    const s=document.getElementById('dp-fstatus'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); s.value=c.status; 
+    document.getElementById('dp-notes').value=c.notes||''; document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; 
     renderSteps(c); renderAtt(c.images); 
-    document.getElementById('dp').classList.add('open'); 
-    document.getElementById('dp-ov').classList.add('show'); 
+    document.getElementById('dp').classList.add('open'); document.getElementById('dp-ov').classList.add('show'); 
 };
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
 window.dps = (f,v) => { const c=cards.find(x=>x.id===selId); if(c){c[f]=v; renderBoard(); syncToFirebase();} };
-window.dpChType = (v) => { 
-    const c=cards.find(x=>x.id===selId); 
-    if(c){
-        c.type=v; 
-        if(v==='Catatan' || v==='To-Do'){c.date='';c.time='';c.week=''; c.objective='';} 
-        syncToFirebase(); 
-        selCard(selId);
-    } 
-};
+window.dpChType = (v) => { const c=cards.find(x=>x.id===selId); if(c){c.type=v; if(v==='Catatan' || v==='To-Do'){c.date='';c.time='';c.week=''; c.objective='';} syncToFirebase(); selCard(selId);} };
 window.dupCard = () => { const c = cards.find(x=>x.id===selId); if(!c) return; const newC = JSON.parse(JSON.stringify(c)); newC.id = 'c'+Date.now(); newC.title += " (Copy)"; cards.unshift(newC); closeDP(); syncToFirebase(); };
-window.delCurCard = () => { showMsg("Hapus konten ini?",()=>{cards=cards.filter(x=>x.id!==selId); closeDP(); syncToFirebase();}); };
+window.delCurCard = () => { showMsg("Hapus konten ini secara permanen?",()=>{cards=cards.filter(x=>x.id!==selId); closeDP(); syncToFirebase();}); };
 window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" target="_blank" style="color:var(--primary);font-weight:600;">${u}</a>`);
 window.editNotes = () => { document.getElementById('dp-notes-display').style.display='none'; const ta=document.getElementById('dp-notes'); ta.style.display='block'; ta.focus(); };
 window.saveNotes = (v) => { dps('notes',v); document.getElementById('dp-notes-display').innerHTML=v?linkify(v):'Klik tambah catatan...'; document.getElementById('dp-notes-display').style.display='block'; document.getElementById('dp-notes').style.display='none'; };
 
 window.addToGCal = () => {
-    const c = cards.find(x => x.id === selId);
-    if(!c) return;
-    const title = encodeURIComponent(`Konten: ${c.title}`);
-    let details = `Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}`;
-    if (c.notes) details += `\n\nCatatan Naskah:\n${c.notes}`;
-    details = encodeURIComponent(details);
-
-    let dates = "";
-    if (c.date) {
-        try {
-            const timeStr = c.time ? c.time : '09:00';
-            const startDt = new Date(`${c.date}T${timeStr}:00`);
-            const endDt = new Date(startDt.getTime() + (60 * 60 * 1000));
-            const formatGcal = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
-            dates = `&dates=${formatGcal(startDt)}/${formatGcal(endDt)}`;
-        } catch(e) { console.error("Format tanggal tidak valid", e); }
-    }
-    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`;
-    window.open(url, '_blank');
+    const c = cards.find(x => x.id === selId); if(!c) return;
+    const title = encodeURIComponent(`Konten: ${c.title}`), details = encodeURIComponent(`Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}\n\nCatatan:\n${c.notes||''}`);
+    let dates = ""; if (c.date) { const d = new Date(`${c.date}T${c.time||'09:00'}:00`), d2 = new Date(d.getTime() + 36e5), f = x => x.toISOString().replace(/-|:|\.\d\d\d/g, ''); dates = `&dates=${f(d)}/${f(d2)}`; }
+    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`, '_blank');
 };
 
 window.renderSteps = (c) => { 
-    document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`
-    <div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})">
-        <span class="drag-handle" title="Tarik untuk memindahkan">⠿</span>
-        <input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})">
-        <input class="step-input" type="text" value="${s.text.replace(/"/g, '&quot;')}" onchange="updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:#aaa;':''}" title="Klik untuk mengedit judul tugas">
-        <button class="step-del" onclick="delStep(${i})">×</button>
-    </div>`).join(''); 
+    document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`<div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})"><span class="drag-handle">⠿</span><input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})"><input class="step-input" type="text" value="${s.text.replace(/"/g, '&quot;')}" onchange="updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:var(--text-light);':''}"><button class="step-del" onclick="delStep(${i})">×</button></div>`).join(''); 
 };
-window.updateStepText = (i, v) => { 
-    const c = cards.find(x => x.id === selId); if(!c) return; 
-    if(!v.trim()) { renderSteps(c); return; } 
-    c.steps[i].text = v.trim(); 
-    syncToFirebase(); 
-};
-
+window.updateStepText = (i, v) => { const c = cards.find(x => x.id === selId); if(c && v.trim()){ c.steps[i].text = v.trim(); syncToFirebase(); } else if(c) renderSteps(c); };
 window.toggleStep = (i) => { const c=cards.find(x=>x.id===selId); c.steps[i].done=!c.steps[i].done; syncToFirebase(); renderSteps(c); renderBoard(); };
 window.addStep = () => { const i=document.getElementById('new-step-input'); if(!i.value.trim())return; const c=cards.find(x=>x.id===selId); if(!c.steps)c.steps=[]; c.steps.push({text:i.value.trim(),done:false}); i.value=''; syncToFirebase(); renderSteps(c); renderBoard(); };
 window.delStep = (i) => { const c=cards.find(x=>x.id===selId); c.steps.splice(i,1); syncToFirebase(); renderSteps(c); renderBoard(); };
 
 let draggedStepIdx = null;
-window.dragStep = (e, idx) => { 
-    e.stopPropagation(); 
-    draggedStepIdx = idx; 
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", String(idx));
-    setTimeout(() => { e.target.style.opacity = '0.4'; }, 0); 
-};
+window.dragStep = (e, i) => { e.stopPropagation(); draggedStepIdx = i; e.dataTransfer.setData("text/plain", String(i)); setTimeout(() => { e.target.style.opacity = '0.4'; }, 0); };
 window.dragEndStep = (e) => { e.target.style.opacity = '1'; draggedStepIdx = null; document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = ''); };
-window.dragOverStep = (e) => {
-    e.preventDefault(); e.stopPropagation(); if(draggedStepIdx === null) return;
-    const stepEl = e.target.closest('.step-item'); if(!stepEl) return;
-    const offset = stepEl.getBoundingClientRect().y + (stepEl.getBoundingClientRect().height / 2);
-    if (e.clientY - offset > 0) stepEl.style.boxShadow = '0 2px 0 var(--primary)'; else stepEl.style.boxShadow = '0 -2px 0 var(--primary)'; 
-};
-window.dragLeaveStep = (e) => { const stepEl = e.target.closest('.step-item'); if(stepEl) stepEl.style.boxShadow = ''; };
-window.dropStep = (e, targetIdx) => {
-    e.preventDefault(); e.stopPropagation();
-    if (draggedStepIdx === null || draggedStepIdx === targetIdx) { document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = ''); return; }
-    const c = cards.find(x => x.id === selId); if (!c || !c.steps) return;
-    const dropBelow = e.clientY - (e.target.closest('.step-item').getBoundingClientRect().y + (e.target.closest('.step-item').getBoundingClientRect().height / 2)) > 0;
-    const draggedStep = c.steps.splice(draggedStepIdx, 1)[0];
-    let newTargetIdx = targetIdx; if (draggedStepIdx < targetIdx) { newTargetIdx--; }
-    if (dropBelow) c.steps.splice(newTargetIdx + 1, 0, draggedStep); else c.steps.splice(newTargetIdx, 0, draggedStep);
-    document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = ''); draggedStepIdx = null;
-    syncToFirebase(); renderSteps(c);
+window.dragOverStep = (e) => { e.preventDefault(); e.stopPropagation(); if(draggedStepIdx === null) return; const el = e.target.closest('.step-item'); if(!el) return; if (e.clientY - (el.getBoundingClientRect().y + el.getBoundingClientRect().height/2) > 0) el.style.boxShadow = '0 2px 0 var(--primary)'; else el.style.boxShadow = '0 -2px 0 var(--primary)'; };
+window.dragLeaveStep = (e) => { const el = e.target.closest('.step-item'); if(el) el.style.boxShadow = ''; };
+window.dropStep = (e, t) => {
+    e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = '');
+    if (draggedStepIdx === null || draggedStepIdx === t) return;
+    const c = cards.find(x => x.id === selId); if (!c) return;
+    const dropBelow = e.clientY - (e.target.closest('.step-item').getBoundingClientRect().y + e.target.closest('.step-item').getBoundingClientRect().height/2) > 0;
+    const step = c.steps.splice(draggedStepIdx, 1)[0];
+    let nt = t; if (draggedStepIdx < t) nt--; if (dropBelow) nt++;
+    c.steps.splice(nt, 0, step); draggedStepIdx = null; syncToFirebase(); renderSteps(c);
 };
 
 window.addImageUrl = () => {
-    const url = prompt("Paste link gambar di sini (contoh dari Pinterest, Google Drive, atau Imgur):");
-    if (!url || url.trim() === '') return;
-    
-    if (selId) {
-        const c = cards.find(x => x.id === selId);
-        if (!c.images) c.images = [];
-        c.images.push(url.trim());
-        syncToFirebase();
-        renderAtt(c.images);
+    const url = prompt("Paste link gambar di sini (contoh dari Pinterest, Google Drive, atau Web):");
+    if (url && url.trim() !== '' && selId) {
+        const c = cards.find(x => x.id === selId); if (!c.images) c.images = [];
+        c.images.push(url.trim()); syncToFirebase(); renderAtt(c.images);
     }
 };
-
-window.renderAtt = (imgs) => { document.getElementById('dp-attachments').innerHTML=(imgs||[]).map((u,i)=>`<div class="att-item"><img src="${u}" onclick="window.open('${u}','_blank')" onerror="this.src='https://via.placeholder.com/60?text=Error'"><button class="att-del" onclick="event.stopPropagation();delImg(${i})">×</button></div>`).join(''); };
+window.renderAtt = (imgs) => { document.getElementById('dp-attachments').innerHTML=(imgs||[]).map((u,i)=>`<div class="att-item"><img src="${u}" onclick="window.open('${u}','_blank')" onerror="this.src='https://via.placeholder.com/60?text=Gagal+Dimuat'"><button class="att-del" onclick="event.stopPropagation();delImg(${i})">×</button></div>`).join(''); };
 window.delImg = (i) => { const c=cards.find(x=>x.id===selId); c.images.splice(i,1); syncToFirebase(); renderAtt(c.images); };
 
-window.openBrand = () => { 
-    editBrandId=null; 
-    document.getElementById('bm-name').value=''; 
-    bCol = '#534AB7';
-    document.getElementById('bm-color-wheel').value = bCol;
-    document.getElementById('bm-color-hex').value = bCol;
-    document.getElementById('brand-ov').classList.add('show'); 
-};
-window.openEditBrand = (id) => { 
-    const b=brands.find(x=>x.id===id); 
-    editBrandId=id; 
-    document.getElementById('bm-name').value=b.n; 
-    bCol = b.c || '#534AB7';
-    document.getElementById('bm-color-wheel').value = bCol;
-    document.getElementById('bm-color-hex').value = bCol;
-    document.getElementById('brand-ov').classList.add('show'); 
-};
-window.saveBrand = () => { 
-    const n=document.getElementById('bm-name').value.trim(); 
-    if(!n)return; 
-    if(editBrandId){ 
-        const b=brands.find(x=>x.id===editBrandId); 
-        b.n=n; b.c=bCol; 
-    } else {
-        brands.push({id:'b'+Date.now(),n,c:bCol}); 
-    } 
-    document.getElementById('brand-ov').classList.remove('show'); 
-    syncToFirebase(); 
-};
-window.confirmDelBrand = (id) => { showMsg("Hapus brand?",()=>{brands=brands.filter(x=>x.id!==id); syncToFirebase();}); };
+window.openBrand = () => { editBrandId=null; document.getElementById('bm-name').value=''; bCol='#534AB7'; document.getElementById('bm-color-wheel').value=bCol; document.getElementById('bm-color-hex').value=bCol; document.getElementById('brand-ov').classList.add('show'); };
+window.openEditBrand = (id) => { const b=brands.find(x=>x.id===id); editBrandId=id; document.getElementById('bm-name').value=b.n; bCol=b.c||'#534AB7'; document.getElementById('bm-color-wheel').value=bCol; document.getElementById('bm-color-hex').value=bCol; document.getElementById('brand-ov').classList.add('show'); };
+window.saveBrand = () => { const n=document.getElementById('bm-name').value.trim(); if(!n)return; if(editBrandId){ const b=brands.find(x=>x.id===editBrandId); b.n=n; b.c=bCol; } else { brands.push({id:'b'+Date.now(),n,c:bCol}); } document.getElementById('brand-ov').classList.remove('show'); syncToFirebase(); };
+window.confirmDelBrand = (id) => { showMsg("Hapus brand ini?",()=>{brands=brands.filter(x=>x.id!==id); syncToFirebase();}); };
 
-window.openCol = (id) => { 
-    editColId=id; 
-    if(id){ 
-        const c=columns.find(x=>x.id===id); 
-        document.getElementById('cm-name').value=c.lbl; 
-        cCol = c.c || '#534AB7';
-    } else { 
-        document.getElementById('cm-name').value=''; 
-        cCol = '#534AB7';
-    } 
-    document.getElementById('cm-color-wheel').value = cCol;
-    document.getElementById('cm-color-hex').value = cCol;
-    document.getElementById('col-ov').classList.add('show'); 
-};
+window.openCol = (id) => { editColId=id; if(id){ const c=columns.find(x=>x.id===id); document.getElementById('cm-name').value=c.lbl; cCol=c.c||'#534AB7'; } else { document.getElementById('cm-name').value=''; cCol='#534AB7'; } document.getElementById('cm-color-wheel').value=cCol; document.getElementById('cm-color-hex').value=cCol; document.getElementById('col-ov').classList.add('show'); };
 window.closeCol = () => document.getElementById('col-ov').classList.remove('show');
-window.saveCol = () => { 
-    const n=document.getElementById('cm-name').value.trim(); 
-    if(!n)return; 
-    if(editColId){ 
-        const c=columns.find(x=>x.id===editColId); 
-        c.lbl=n; c.c=cCol; 
-    } else {
-        columns.push({id:'col'+Date.now(),lbl:n,c:cCol,collapsed:false}); 
-    } 
-    document.getElementById('col-ov').classList.remove('show'); 
-    renderAll(); 
-    syncToFirebase(); 
-};
-window.confirmDelCol = (id) => { if(columns.length<=1)return; showMsg("Hapus status?",()=>{const f=columns.find(x=>x.id!==id).id; cards.forEach(c=>{if(c.status===id)c.status=f;}); columns=columns.filter(x=>x.id!==id); renderAll(); syncToFirebase();}); };
-
-window.mvCol = (i,d) => { const n=i+d; if(n>=0&&n<columns.length){ const t=columns[i]; columns[i]=columns[n]; columns[n]=t; renderBoard(); syncToFirebase(); } };
-window.mv = (id, d) => {
-  const c = cards.find(x=>x.id===id); if(!c) return;
-  const cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status), ni = ci+d;
-  if(ni>=0 && ni<cl.length) { c.status = cl[ni].id; renderBoard(); syncToFirebase(); }
-};
+window.saveCol = () => { const n=document.getElementById('cm-name').value.trim(); if(!n)return; if(editColId){ const c=columns.find(x=>x.id===editColId); c.lbl=n; c.c=cCol; } else { columns.push({id:'col'+Date.now(),lbl:n,c:cCol,collapsed:false}); } document.getElementById('col-ov').classList.remove('show'); renderAll(); syncToFirebase(); };
+window.confirmDelCol = (id) => { if(columns.length<=1)return showMsg("Harus ada minimal 1 status."); showMsg("Hapus kolom status ini?",()=>{const f=columns.find(x=>x.id!==id).id; cards.forEach(c=>{if(c.status===id)c.status=f;}); columns=columns.filter(x=>x.id!==id); renderAll(); syncToFirebase();}); };
 
 let draggedCardId = null;
-window.dragCard = (e, id) => { 
-    e.stopPropagation();
-    draggedCardId = id; 
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", String(id)); 
-    setTimeout(() => { e.target.style.opacity = '0.5'; }, 0); 
-};
-window.dragEndCard = (e) => { 
-    e.target.style.opacity = '1'; 
-    draggedCardId = null; 
-    document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); 
-};
-window.dragOverCard = (e, id) => {
-    e.preventDefault(); e.stopPropagation();
-    if(!draggedCardId || draggedCardId === id) return;
-    const target = e.currentTarget;
-    const offset = target.getBoundingClientRect().y + (target.getBoundingClientRect().height / 2);
-    if (e.clientY - offset > 0) target.style.boxShadow = '0 4px 0 var(--primary)';
-    else target.style.boxShadow = '0 -4px 0 var(--primary)';
-};
+window.dragCard = (e, id) => { e.stopPropagation(); draggedCardId = id; e.dataTransfer.setData("text/plain", String(id)); setTimeout(() => { e.target.style.opacity = '0.5'; }, 0); };
+window.dragEndCard = (e) => { e.target.style.opacity = '1'; draggedCardId = null; document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); };
+window.dragOverCard = (e, id) => { e.preventDefault(); e.stopPropagation(); if(!draggedCardId || draggedCardId === id) return; const t = e.currentTarget; if (e.clientY - (t.getBoundingClientRect().y + t.getBoundingClientRect().height/2) > 0) t.style.boxShadow = '0 4px 0 var(--primary)'; else t.style.boxShadow = '0 -4px 0 var(--primary)'; };
 window.dragLeaveCard = (e) => { if(e.currentTarget) e.currentTarget.style.boxShadow = ''; };
-
 window.dropOnCard = (e, targetId) => {
-    e.preventDefault(); e.stopPropagation();
-    document.querySelectorAll('.card').forEach(c => c.style.boxShadow = '');
+    e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.card').forEach(c => c.style.boxShadow = '');
     if (!draggedCardId || draggedCardId === targetId) return;
-
-    const cIdx = cards.findIndex(x => x.id === draggedCardId);
-    const tIdx = cards.findIndex(x => x.id === targetId);
+    const cIdx = cards.findIndex(x => x.id === draggedCardId), tIdx = cards.findIndex(x => x.id === targetId);
     if (cIdx === -1 || tIdx === -1) return;
-
-    const targetStatus = cards[tIdx].status;
-    const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + (e.currentTarget.getBoundingClientRect().height / 2)) > 0;
-
-    const draggedCard = cards.splice(cIdx, 1)[0];
-    draggedCard.status = targetStatus; 
-
-    let newTargetIdx = cards.findIndex(x => x.id === targetId);
-    if (dropBelow) newTargetIdx++;
-
-    cards.splice(newTargetIdx, 0, draggedCard);
-    
-    document.getElementById('sort-by').value = 'manual'; 
-    draggedCardId = null;
-    
-    renderBoard(); syncToFirebase();
+    const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + e.currentTarget.getBoundingClientRect().height/2) > 0;
+    const card = cards.splice(cIdx, 1)[0]; card.status = cards[tIdx].status; 
+    let newIdx = cards.findIndex(x => x.id === targetId); if (dropBelow) newIdx++;
+    cards.splice(newIdx, 0, card); document.getElementById('sort-by').value = 'manual'; draggedCardId = null; renderBoard(); syncToFirebase();
 };
-
 window.dropCard = (e, colId) => { 
-    e.preventDefault(); e.stopPropagation();
-    const id = e.dataTransfer.getData("text/plain") || draggedCardId; 
-    if(!id) return;
-    
+    e.preventDefault(); e.stopPropagation(); const id = e.dataTransfer.getData("text/plain") || draggedCardId; if(!id) return;
     const cIdx = cards.findIndex(x => x.id === id);
-    if(cIdx > -1) {
-        const card = cards.splice(cIdx, 1)[0];
-        card.status = colId;
-        cards.push(card); 
-        document.getElementById('sort-by').value = 'manual';
-        renderBoard(); syncToFirebase();
-    }
+    if(cIdx > -1) { const card = cards.splice(cIdx, 1)[0]; card.status = colId; cards.push(card); document.getElementById('sort-by').value = 'manual'; renderBoard(); syncToFirebase(); }
     draggedCardId = null;
 };
 
 window.exportToPDF=()=>{
   try {
-      const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan", 14, 20);
-      const fMonth = document.getElementById('filter-month').value; 
-      const fWeek = document.getElementById('filter-week').value; 
-      const fUrg = document.getElementById('filter-urgency').value;
-      const fType = document.getElementById('filter-type').value;
-      const fObj = document.getElementById('filter-objective').value;
-      const sortBy = document.getElementById('sort-by').value || 'manual';
-      
-      const urgText = fUrg === 'all' ? 'Semua' : (fUrg === 'high' ? 'Mendesak' : (fUrg === 'med' ? 'Penting' : (fUrg === 'low' ? 'Santai' : 'Normal')));
-      const typeText = fType === 'semua' ? 'Semua Jenis' : fType;
-      const objText = fObj === 'all' ? 'Semua Jalur' : (fObj === 'Konten' ? 'Organik' : fObj);
-      
-      const filterText = `Filter: Brand (${brands.find(b=>b.id===aB)?.n || 'Semua'}), Jenis (${typeText}), Jalur (${objText}), Bulan (${fMonth||'Semua'}), Pekan (${fWeek==='all'?'Semua':fWeek}), Prioritas (${urgText})`;
-      
-      doc.setFontSize(10); doc.text(filterText, 14, 28);
-      let vis = cards.filter(c => { 
-          let mB = (aB==='all' || c.bId===aB); 
-          let mT = (fType==='semua' || c.type===fType); 
-          let mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj);
-          if (c.type === 'Catatan' || c.type === 'To-Do') { mM = true; mW = true; mObj = true; } 
-          else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); }
-          return mB && mT && mM && mW && mU && mObj; 
-      });
-      if (sortBy !== 'manual') { vis.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); }
-      
-      const data=vis.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective === 'Konten' ? 'Organik' : c.objective || 'Organik'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') + (c.time ? ` ${c.time}` : '') ]);
+      const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20);
+      doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
+      const data=cards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]);
       doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } });
       doc.save("Content_Plan.pdf");
   } catch(err) { showMsg("Gagal membuat PDF."); }
 };
 
-window.syncColor = (v, targetIdSuffix, p='bm') => { 
-    if(p==='bm') bCol=v; else cCol=v; 
-    const el = document.getElementById(p + '-color-' + targetIdSuffix);
-    if(el) el.value = v;
-};
+window.syncColor = (v, idS, p='bm') => { if(p==='bm') bCol=v; else cCol=v; const el = document.getElementById(p + '-color-' + idS); if(el) el.value = v; };
 
-// SWIPE UNTUK MENUTUP PANEL
-let dpTouchStartX = 0, dpTouchStartY = 0;
-const dpEl = document.getElementById('dp'), dpBody = document.querySelector('.dp-body');
-
-dpEl.addEventListener('touchstart', e => { dpTouchStartX = e.changedTouches[0].screenX; dpTouchStartY = e.changedTouches[0].screenY; }, {passive: true});
-dpEl.addEventListener('touchend', e => {
-    let deltaX = e.changedTouches[0].screenX - dpTouchStartX;
-    let deltaY = e.changedTouches[0].screenY - dpTouchStartY;
-    if (deltaX > 80 && Math.abs(deltaY) < 100) closeDP();
-    if (deltaY > 80 && Math.abs(deltaX) < 100 && dpBody.scrollTop <= 10) closeDP();
-});
+// SWIPE PANEL
+let dpTx = 0, dpTy = 0; const dpEl = document.getElementById('dp'), dpBody = document.querySelector('.dp-body');
+dpEl.addEventListener('touchstart', e => { dpTx = e.changedTouches[0].screenX; dpTy = e.changedTouches[0].screenY; }, {passive: true});
+dpEl.addEventListener('touchend', e => { let dx = e.changedTouches[0].screenX - dpTx, dy = e.changedTouches[0].screenY - dpTy; if (dx > 80 && Math.abs(dy) < 100) closeDP(); if (dy > 80 && Math.abs(dx) < 100 && dpBody.scrollTop <= 10) closeDP(); });
 </script>
 </body>
 </html>
