@@ -240,24 +240,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
-<!-- AUTH OVERLAY (Sekarang menggunakan layar Loading default untuk cegah flicker) -->
+<!-- AUTH OVERLAY -->
 <div class="overlay show" id="login-ov" style="z-index: 9999; background: var(--bg-app); opacity: 1; visibility: visible;">
   <div class="modal" style="padding: 30px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
     
-    <!-- LOADING STATE (Mencegah tampilan login berkedip saat refresh browser) -->
     <div id="auth-loading" style="display: block; padding: 20px 0;">
         <div style="font-size: 40px; animation: pulse 1.5s infinite;">⏳</div>
         <h3 style="color: var(--text-main); margin-top: 16px; font-weight: 800;">Memuat Sesi...</h3>
         <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Mengecek kredensial Anda yang tersimpan</p>
     </div>
 
-    <!-- SEMUA FORM LOGIN DISIMPAN DI SINI, HANYA TAMPIL JIKA USER BENAR-BENAR LOGOUT -->
     <div id="auth-content" style="display: none;">
         <div style="width: 64px; height: 64px; background: var(--primary); color: #fff; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; margin: 0 auto 20px; box-shadow: 0 10px 20px var(--primary-light);">C</div>
         <h2 id="auth-title" style="margin-bottom: 8px; color: var(--text-main); font-weight: 800;">ContentBoard Pro</h2>
         <p id="auth-desc" style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;">Kolaborasi cerdas untuk tim kreatif.</p>
         
-        <!-- LOGIN FORM -->
         <div id="form-login" style="display: block;">
             <input class="fi" type="email" id="log-email" placeholder="Alamat Email" style="text-align:left;">
             <input class="fi" type="password" id="log-pass" placeholder="Kata Sandi" style="text-align:left; margin-bottom: 8px;" onkeypress="if(event.key==='Enter') loginEmail()">
@@ -277,7 +274,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <div style="font-size: 13px; color: var(--text-muted);">Belum punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('reg')">Daftar Gratis</span></div>
         </div>
 
-        <!-- REGISTER FORM -->
         <div id="form-register" style="display: none;">
             <input class="fi" type="text" id="reg-name" placeholder="Nama Lengkap" style="text-align:left;">
             <input class="fi" type="email" id="reg-email" placeholder="Alamat Email" style="text-align:left;">
@@ -290,7 +286,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <div style="font-size: 13px; color: var(--text-muted);">Sudah punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('log')">Masuk di sini</span></div>
         </div>
 
-        <!-- RESET PASSWORD FORM -->
         <div id="form-reset" style="display: none;">
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; text-align: left; line-height:1.5;">Masukkan email terdaftar Anda. Kami akan mengirimkan tautan aman untuk membuat kata sandi baru.</p>
             <input class="fi" type="email" id="res-email" placeholder="Alamat Email" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') resetPassword()">
@@ -316,7 +311,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                 <button class="ctx-item" onclick="toggleDarkMode()">🌓 Mode Terang/Gelap</button>
                 <button class="ctx-item" onclick="changeUsername()">✏️ Ubah Nama Profil</button>
                 <div class="ctx-hr"></div>
-                <!-- TOMBOL AJAIB UNTUK MEMULIHKAN DATA LAMA -->
                 <button class="ctx-item" onclick="restoreLegacy()">📥 Pulihkan Data Lama</button>
                 <div class="ctx-hr"></div>
                 <button class="ctx-item danger" onclick="showLogoutMenu()">🚪 Keluar (Logout)</button>
@@ -350,7 +344,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       
       <div style="position: relative;">
           <button class="topbtn" onclick="toggleMenu('filter-panel', event)" id="filter-btn">
-              <span style="font-size: 14px;">⚙️</span> Filter & Tampilan
+              <span style="font-size: 14px;">⚙️</span> Filter
           </button>
           
           <div id="filter-panel" onclick="event.stopPropagation()">
@@ -359,8 +353,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
               <div class="filter-row">
                   <span class="filter-lbl">Waktu Tayang</span>
                   <div style="display:flex; gap:8px;">
-                    <input type="month" id="filter-month" class="fi" style="margin:0; padding:8px 10px;" onchange="renderBoard()">
-                    <select id="filter-week" class="fi" style="margin:0; padding:8px 10px;" onchange="renderBoard()"><option value="all">Semua Pekan</option><option value="1">Pekan 1</option><option value="2">Pekan 2</option><option value="3">Pekan 3</option><option value="4">Pekan 4</option><option value="5">Pekan 5</option></select>
+                    <input type="month" id="filter-month" class="fi" style="margin:0; padding:8px 10px; flex:1;" onchange="renderBoard()">
+                    <select id="filter-week" class="fi" style="margin:0; padding:8px 10px; flex:1;" onchange="renderBoard()"><option value="all">Semua Pekan</option><option value="1">Pekan 1</option><option value="2">Pekan 2</option><option value="3">Pekan 3</option><option value="4">Pekan 4</option><option value="5">Pekan 5</option></select>
                   </div>
               </div>
 
@@ -418,7 +412,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 </button>
 
-<div id="dp-ov" onclick="closeDP()"></div>
+<div id="dp-ov" onclick="if(event.target===this) closeDP()"></div>
 
 <!-- DETAIL PANEL -->
 <div class="dp" id="dp">
@@ -488,7 +482,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<div class="overlay" id="add-ov">
+<!-- SEMUA MODAL DENGAN FITUR TUTUP SAAT DIKLIK DI LUAR (OVERLAY) -->
+<div class="overlay" id="add-ov" onclick="if(event.target===this) closeAdd()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; font-size:18px; border-bottom:1px solid var(--input-border); color:var(--text-main);">Buat Konten Baru</div>
     <div class="modal-body" style="padding:24px;">
@@ -534,7 +529,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<div class="overlay" id="brand-ov">
+<div class="overlay" id="brand-ov" onclick="if(event.target===this) closeBrand()">
   <div class="modal">
     <div class="modal-head" id="bm-title" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Klien / Brand Baru</div>
     <div class="modal-body" style="padding:24px;">
@@ -552,7 +547,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<div class="overlay" id="col-ov">
+<div class="overlay" id="col-ov" onclick="if(event.target===this) closeCol()">
   <div class="modal">
     <div class="modal-head" id="cm-title" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Status Pengerjaan Baru</div>
     <div class="modal-body" style="padding:24px;">
@@ -570,7 +565,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<div class="overlay" id="ws-ov">
+<div class="overlay" id="ws-ov" onclick="if(event.target===this) closeWsModal()">
   <div class="modal">
     <div class="modal-head" id="ws-title" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Ruang Kerja Baru</div>
     <div class="modal-body" style="padding:24px;">
@@ -585,7 +580,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<div class="overlay" id="theme-ov">
+<div class="overlay" id="theme-ov" onclick="if(event.target===this) closeThemeModal()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Estetika Tampilan</div>
     <div class="modal-body" style="padding:24px;">
@@ -613,9 +608,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<div class="overlay" id="move-ws-ov" onclick="if(event.target===this) closeMoveWsModal()">
+  <div class="modal">
+    <div class="modal-head" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Pindahkan Konten</div>
+    <div class="modal-body" style="padding:24px;">
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Pilih project tujuan. Label Brand akan dikosongkan agar aman.</p>
+      <select class="fi" id="move-ws-select" style="margin-bottom:0;"></select>
+    </div>
+    <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
+      <button class="btn-c" onclick="closeMoveWsModal()">Batal</button>
+      <button class="btn-s" id="move-ws-btn" onclick="moveCardToWs()">Pindahkan</button>
+    </div>
+  </div>
+</div>
+
 <div id="ctx-menu" class="ctx-menu"></div>
 
-<div class="overlay" id="msg-ov" style="z-index: 10000;">
+<div class="overlay" id="msg-ov" onclick="if(event.target===this && document.getElementById('msg-cancel').style.display === 'none') document.getElementById('msg-ok').click()" style="z-index: 10000;">
   <div class="modal" style="max-width: 360px; text-align: center;">
     <div style="padding: 32px 24px 16px;"><div id="msg-text" style="font-weight: 500; font-size: 15px; color: var(--text-main); line-height: 1.6;"></div></div>
     <div style="padding: 16px 24px 24px; display: flex; gap: 12px; justify-content: center;">
@@ -659,7 +668,7 @@ let unsubscribeSharedWs = null;
 let unsubscribeBoard = null;
 
 let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '' };
-let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null;
+let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
 
 // HELPER: UTILS & UI
 window.allowDrop = (e) => { e.preventDefault(); };
@@ -800,20 +809,50 @@ window.changeUsername = async () => {
     } catch(e) { showMsg("Gagal: " + e.message); }
 };
 
-// SCRIPT PEMULIHAN DATA LAMA
+// SCRIPT PEMULIHAN DATA LAMA (SANGAT ROBUST)
 window.restoreLegacy = async () => {
     try {
-        const snap = await get(ref(db, 'content_board_workspaces_list'));
-        const oldWs = snap.val();
-        if (oldWs && oldWs.length > 0) {
-            let currentWs = [...workspaces];
+        let restoredCount = 0;
+        let currentWs = [...workspaces];
+
+        // 1. Cek Data dari Workspace List Lama
+        const snapList = await get(ref(db, 'content_board_workspaces_list'));
+        let oldWs = snapList.val();
+        if (oldWs) {
+            if (!Array.isArray(oldWs)) oldWs = Object.values(oldWs); 
             oldWs.forEach(ow => {
-                if (!currentWs.find(cw => cw.id === ow.id)) currentWs.push(ow);
+                if (ow && ow.id && !currentWs.find(cw => cw.id === ow.id)) {
+                    currentWs.push(ow);
+                    set(ref(db, `board_members/${ow.id}/${myUser.id}`), { role: 'owner' });
+                    restoredCount++;
+                }
             });
+        }
+
+        // 2. Cek Data dari Papan 'default' (Akar Project)
+        const snapDefault = await get(ref(db, 'content_board_data'));
+        if (snapDefault.exists() && !currentWs.find(cw => cw.id === 'default')) {
+            currentWs.push({id: 'default', name: 'Project Lama (Utama)'});
+            set(ref(db, `board_members/default/${myUser.id}`), { role: 'owner' });
+            restoredCount++;
+        }
+
+        // 3. Fallback Khusus jika struktur list rusak tapi data papan spesifik ada
+        if (restoredCount === 0) {
+            const snapFallback = await get(ref(db, 'content_board_data_ws_1776508305205'));
+            if (snapFallback.exists() && !currentWs.find(cw => cw.id === 'ws_1776508305205')) {
+                currentWs.push({id: 'ws_1776508305205', name: 'Recovered Project'});
+                set(ref(db, `board_members/ws_1776508305205/${myUser.id}`), { role: 'owner' });
+                restoredCount++;
+            }
+        }
+
+        if (restoredCount > 0) {
+            currentWs = currentWs.filter(w => w && w.id); // Bersihkan objek kosong
             await set(ref(db, `users/${myUser.id}/workspaces`), currentWs);
-            showMsg("Berhasil! Data project lama Anda telah dipulihkan.");
+            showMsg(`Berhasil! ${restoredCount} project lama Anda telah dipulihkan. Halaman akan dimuat ulang.`, () => window.location.reload());
         } else {
-            showMsg("Tidak ditemukan data lama di database.");
+            showMsg("Tidak ada data lama yang ditemukan. Pastikan Anda sudah mengimport JSON di database.");
         }
     } catch (e) {
         showMsg("Gagal memulihkan: " + e.message);
@@ -951,7 +990,6 @@ window.openWsModal = (isEdit = false) => {
     }
     document.getElementById('ws-ov').classList.add('show');
 };
-
 window.closeWsModal = () => document.getElementById('ws-ov').classList.remove('show');
 
 window.saveWs = () => {
@@ -1000,7 +1038,7 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         updateAssigneeDropdowns(); renderBoard();
     });
 
-    const dbPath = `content_board_data_${wsId}`;
+    const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
     unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
         const data = snapshot.val() || {};
         brands = data.brands || []; cards = data.cards || [];
@@ -1020,8 +1058,9 @@ function updateAssigneeDropdowns() {
 
 function syncToFirebase() { 
     if(!activeWsId) return;
+    const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`;
     const updates = { brands, cards, columns, theme: themeSettings };
-    update(ref(db, `content_board_data_${activeWsId}`), updates); 
+    update(ref(db, dbPath), updates); 
 }
 
 function applyTheme() {
@@ -1042,12 +1081,41 @@ window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelec
 window.applyBgUrl = () => { const u = document.getElementById('bg-url-input').value.trim(); if(u) { themeSettings.bg = u; applyTheme(); syncToFirebase(); }};
 window.removeBg = () => { themeSettings.bg = ''; document.getElementById('bg-url-input').value = ''; applyTheme(); syncToFirebase(); };
 
+window.openMoveWsModal = (cardId) => {
+    cardToMoveId = cardId;
+    const availableWs = workspaces.filter(w => w.id !== activeWsId);
+    if(availableWs.length === 0) return showMsg("Buat Project lain dulu untuk memindahkan.");
+    document.getElementById('move-ws-select').innerHTML = availableWs.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+    document.getElementById('move-ws-ov').classList.add('show');
+};
+window.closeMoveWsModal = () => { document.getElementById('move-ws-ov').classList.remove('show'); cardToMoveId = null; };
+window.moveCardToWs = async () => {
+    const targetWsId = document.getElementById('move-ws-select').value;
+    const cIdx = cards.findIndex(x => x.id === cardToMoveId); if(cIdx === -1) return;
+    const cardToMove = JSON.parse(JSON.stringify(cards[cIdx]));
+    const btn = document.getElementById('move-ws-btn');
+    try {
+        btn.textContent = 'Memindahkan...'; btn.disabled = true;
+        cards.splice(cIdx, 1); syncToFirebase();
+        const destPath = targetWsId === 'default' ? 'content_board_data' : `content_board_data_${targetWsId}`;
+        const destSnap = await get(ref(db, destPath));
+        let destData = destSnap.val() || { cards: [], columns: [], brands: [] };
+        if(!destData.cards) destData.cards = [];
+        cardToMove.bId = ""; 
+        cardToMove.status = (destData.columns && destData.columns.length > 0) ? destData.columns[0].id : 'review';
+        destData.cards.unshift(cardToMove);
+        await set(ref(db, destPath), destData);
+        closeMoveWsModal(); showMsg("Berhasil dipindahkan!"); renderBoard(); 
+    } catch(e) { cards.splice(cIdx, 0, cardToMove); syncToFirebase(); renderBoard(); showMsg("Gagal: " + e.message); } 
+    finally { btn.textContent = 'Pindahkan'; btn.disabled = false; }
+};
+
 window.showCtxMenu = (e, type, id) => {
     e.preventDefault(); e.stopPropagation();
     const ctx = document.getElementById('ctx-menu'); ctx.style.display = 'flex';
     if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`;
     else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`;
-    else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;hideCtxMenu()">📄 Duplikat Konten</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();hideCtxMenu()">🗑️ Hapus Konten</button>`;
+    else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;hideCtxMenu()">📄 Duplikat Konten</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();hideCtxMenu()">🗑️ Hapus Konten</button>`;
     let x = e.clientX, y = e.clientY;
     if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10;
     if (y + ctx.offsetHeight > window.innerHeight) y = window.innerHeight - ctx.offsetHeight - 10;
@@ -1131,8 +1199,8 @@ window.cardH = (c) => {
   </div>`;
 };
 
-// LOGIKA DRAG & DROP
-let draggedBrandIdx = null; window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.setData("text/plain", String(idx)); };
+// LOGIKA DRAG & DROP BRAND TABS
+let draggedBrandIdx = null; window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); };
 window.dropB = (e, targetIdx) => { e.preventDefault(); e.stopPropagation(); if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return; brands.splice(targetIdx, 0, brands.splice(draggedBrandIdx, 1)[0]); syncToFirebase(); renderAll(); draggedBrandIdx = null; };
 
 window.setB = (id) => { aB=id; renderAll(); };
@@ -1210,7 +1278,7 @@ window.addStep = () => { const i=document.getElementById('new-step-input'); if(!
 window.delStep = (i) => { const c=cards.find(x=>x.id===selId); c.steps.splice(i,1); syncToFirebase(); renderSteps(c); renderBoard(); };
 
 let draggedStepIdx = null;
-window.dragStep = (e, i) => { e.stopPropagation(); draggedStepIdx = i; e.dataTransfer.setData("text/plain", String(i)); setTimeout(() => { e.target.style.opacity = '0.4'; }, 0); };
+window.dragStep = (e, i) => { e.stopPropagation(); draggedStepIdx = i; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(i)); setTimeout(() => { e.target.style.opacity = '0.4'; }, 0); };
 window.dragEndStep = (e) => { e.target.style.opacity = '1'; draggedStepIdx = null; document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = ''); };
 window.dragOverStep = (e) => { e.preventDefault(); e.stopPropagation(); if(draggedStepIdx === null) return; const el = e.target.closest('.step-item'); if(!el) return; if (e.clientY - (el.getBoundingClientRect().y + el.getBoundingClientRect().height/2) > 0) el.style.boxShadow = '0 2px 0 var(--primary)'; else el.style.boxShadow = '0 -2px 0 var(--primary)'; };
 window.dragLeaveStep = (e) => { const el = e.target.closest('.step-item'); if(el) el.style.boxShadow = ''; };
@@ -1238,6 +1306,7 @@ window.openBrand = () => { editBrandId=null; document.getElementById('bm-name').
 window.openEditBrand = (id) => { const b=brands.find(x=>x.id===id); editBrandId=id; document.getElementById('bm-name').value=b.n; bCol=b.c||'#534AB7'; document.getElementById('bm-color-wheel').value=bCol; document.getElementById('bm-color-hex').value=bCol; document.getElementById('brand-ov').classList.add('show'); };
 window.saveBrand = () => { const n=document.getElementById('bm-name').value.trim(); if(!n)return; if(editBrandId){ const b=brands.find(x=>x.id===editBrandId); b.n=n; b.c=bCol; } else { brands.push({id:'b'+Date.now(),n,c:bCol}); } document.getElementById('brand-ov').classList.remove('show'); syncToFirebase(); };
 window.confirmDelBrand = (id) => { showMsg("Hapus brand ini?",()=>{brands=brands.filter(x=>x.id!==id); syncToFirebase();}); };
+window.closeBrand = () => document.getElementById('brand-ov').classList.remove('show');
 
 window.openCol = (id) => { editColId=id; if(id){ const c=columns.find(x=>x.id===id); document.getElementById('cm-name').value=c.lbl; cCol=c.c||'#534AB7'; } else { document.getElementById('cm-name').value=''; cCol='#534AB7'; } document.getElementById('cm-color-wheel').value=cCol; document.getElementById('cm-color-hex').value=cCol; document.getElementById('col-ov').classList.add('show'); };
 window.closeCol = () => document.getElementById('col-ov').classList.remove('show');
@@ -1245,7 +1314,7 @@ window.saveCol = () => { const n=document.getElementById('cm-name').value.trim()
 window.confirmDelCol = (id) => { if(columns.length<=1)return showMsg("Harus ada minimal 1 status."); showMsg("Hapus kolom status ini?",()=>{const f=columns.find(x=>x.id!==id).id; cards.forEach(c=>{if(c.status===id)c.status=f;}); columns=columns.filter(x=>x.id!==id); renderAll(); syncToFirebase();}); };
 
 let draggedCardId = null;
-window.dragCard = (e, id) => { e.stopPropagation(); draggedCardId = id; e.dataTransfer.setData("text/plain", String(id)); setTimeout(() => { e.target.style.opacity = '0.5'; }, 0); };
+window.dragCard = (e, id) => { e.stopPropagation(); draggedCardId = id; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(id)); setTimeout(() => { e.target.style.opacity = '0.5'; }, 0); };
 window.dragEndCard = (e) => { e.target.style.opacity = '1'; draggedCardId = null; document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); };
 window.dragOverCard = (e, id) => { e.preventDefault(); e.stopPropagation(); if(!draggedCardId || draggedCardId === id) return; const t = e.currentTarget; if (e.clientY - (t.getBoundingClientRect().y + t.getBoundingClientRect().height/2) > 0) t.style.boxShadow = '0 4px 0 var(--primary)'; else t.style.boxShadow = '0 -4px 0 var(--primary)'; };
 window.dragLeaveCard = (e) => { if(e.currentTarget) e.currentTarget.style.boxShadow = ''; };
