@@ -660,9 +660,12 @@ window.isRegistering = false;
 onAuthStateChanged(auth, (user) => {
     if (window.isRegistering) return;
     const loginOv = document.getElementById('login-ov');
+    
     if (user) {
         if (user.providerData[0] && user.providerData[0].providerId === 'password' && !user.emailVerified) {
             loginOv.classList.add('show');
+            loginOv.style.opacity = '1';
+            loginOv.style.visibility = 'visible';
             showMsg("Email Anda belum diverifikasi. Silakan cek inbox/spam, lalu coba masuk lagi.");
             signOut(auth); return;
         }
@@ -671,11 +674,17 @@ onAuthStateChanged(auth, (user) => {
         // Simpan data user ke DB publik agar bisa ditarik sebagai PIC
         set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email });
 
+        // Pastikan overlay login benar-benar hilang dengan animasi
         loginOv.classList.remove('show');
+        loginOv.style.opacity = '0';
+        setTimeout(() => { loginOv.style.visibility = 'hidden'; }, 300); // Sinkron dengan durasi transisi CSS
+        
         initApp(); 
     } else {
         myUser = null;
         loginOv.classList.add('show');
+        loginOv.style.opacity = '1';
+        loginOv.style.visibility = 'visible';
         document.getElementById('board-wrap').style.display = 'none';
     }
 });
