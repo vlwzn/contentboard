@@ -178,6 +178,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .step-item:hover .step-del { opacity: 1; }
 .drag-handle{color:var(--text-light); font-size:16px; margin-top:2px; cursor:grab; user-select:none; padding: 0 4px;}
 
+/* FLOATING ACTION BUTTON (FIXED) */
+.fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fab:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+
 /* MODAL & PANEL */
 .overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;align-items:center;justify-content:center;padding:20px; backdrop-filter:blur(5px); opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
 .overlay.show{opacity: 1; visibility: visible;}
@@ -240,7 +261,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
-<!-- AUTH OVERLAY -->
 <div class="overlay show" id="login-ov" style="z-index: 9999; background: var(--bg-app); opacity: 1; visibility: visible;">
   <div class="modal" style="padding: 30px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
     
@@ -268,7 +288,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             </div>
 
             <button class="btn-c" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 20px;" onclick="loginGoogle()">
-                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 Lanjutkan dengan Google
             </button>
             <div style="font-size: 13px; color: var(--text-muted);">Belum punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('reg')">Daftar Gratis</span></div>
@@ -280,7 +300,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <input class="fi" type="password" id="reg-pass" placeholder="Kata Sandi (Min. 6 Karakter)" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') registerEmail()">
             <button class="btn-s" style="width: 100%; margin-bottom:16px;" onclick="registerEmail()">Daftar Sekarang</button>
             <button class="btn-c" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 24px;" onclick="loginGoogle()">
-                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 Atau Daftar dengan Google
             </button>
             <div style="font-size: 13px; color: var(--text-muted);">Sudah punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('log')">Masuk di sini</span></div>
@@ -300,7 +320,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand">
-        <!-- MENU AKUN / LOGOUT -->
         <div style="position: relative;">
             <div class="brand-icon" id="user-avatar" onclick="toggleMenu('user-menu', event)" title="Opsi Akun">A</div>
             <div id="user-menu" class="custom-dropdown" style="top: 44px; left: 0; min-width: 200px;">
@@ -316,7 +335,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             </div>
         </div>
         
-        <!-- PROJECT SELECTOR -->
         <div style="position: relative; display: flex; align-items:center;">
             <button id="project-btn" class="proj-selector-btn" onclick="toggleMenu('proj-menu', event)">Project Utama ▾</button>
             <button class="share-btn" onclick="generateShareLink()" title="Undang anggota tim ke project ini">🤝 Bagikan</button>
@@ -338,7 +356,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
     </div>
 
-    <!-- FILTER & ACTIONS -->
     <div class="top-actions">
       <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="renderBoard()">
       
@@ -373,11 +390,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                   </div>
                   <div class="filter-row">
                       <span class="filter-lbl">Urutkan Kartu</span>
-                      <select id="sort-by" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="manual">↕️ Manual (Geser)</option><option value="newest">✨ Paling Baru</option><option value="date-asc">📅 Tanggal Terdekat</option><option value="date-desc">📆 Tanggal Terjauh</option></select>
+                      <select id="sort-by" classAb="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="manual">↕️ Manual (Geser)</option><option value="newest">✨ Paling Baru</option><option value="date-asc">📅 Tanggal Terdekat</option><option value="date-desc">📆 Tanggal Terjauh</option></select>
                   </div>
               </div>
 
-              <!-- TOMBOL RESET FILTER -->
               <div style="border-top: 1px solid var(--input-border); margin-top: 12px; padding-top: 12px;">
                   <button class="btn-c" style="width: 100%; padding: 10px; font-size: 13px;" onclick="resetFilters()">🔄 Reset Semua Filter</button>
               </div>
@@ -392,7 +408,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   
   <div class="board-wrap" id="board-wrap"><div class="board" id="board"></div></div>
 
-  <!-- EMPTY STATE -->
   <div id="empty-state" style="display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
     <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.8; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">✨</div>
     <h3 style="color: var(--text-main); margin-bottom: 12px; font-size: 24px; font-weight: 800;">Ruang Kerja Kosong</h3>
@@ -409,7 +424,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div id="dp-ov" onclick="if(event.target===this) closeDP()"></div>
 
-<!-- DETAIL PANEL -->
 <div class="dp" id="dp">
   <div class="dp-pull-indicator"></div>
   <div class="dp-head" style="padding:20px 24px; border-bottom:1px solid var(--input-border); display:flex; align-items:center;">
@@ -477,7 +491,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- SEMUA MODAL DENGAN FITUR TUTUP SAAT DIKLIK DI LUAR (OVERLAY) -->
 <div class="overlay" id="add-ov" onclick="if(event.target===this) closeAdd()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; font-size:18px; border-bottom:1px solid var(--input-border); color:var(--text-main);">Buat Konten Baru</div>
@@ -617,13 +630,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- MODAL KELOLA TIM -->
 <div class="overlay" id="team-ov" onclick="if(event.target===this) closeTeamModal()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border); color:var(--text-main);">Kelola Anggota Tim</div>
-    <div class="modal-body" id="team-list" style="padding:24px; max-height:400px; overflow-y:auto;">
-        <!-- Daftar anggota akan muncul di sini -->
-    </div>
+    <div class="modal-body" id="team-list" style="padding:24px; max-height:400px; overflow-y:auto;"></div>
     <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; background:var(--input-bg); border-top:1px solid var(--input-border);">
         <button class="btn-s" onclick="closeTeamModal()">Selesai</button>
     </div>
@@ -682,7 +692,6 @@ let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBra
 window.allowDrop = (e) => { e.preventDefault(); };
 window.hideCtxMenu = () => { const ctx = document.getElementById('ctx-menu'); if (ctx) ctx.style.display = 'none'; };
 
-// FIX: Menambahkan #filter-panel ke dalam global listener agar menutup saat klik di luar
 document.addEventListener('click', () => { 
     hideCtxMenu();
     document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('show'));
@@ -690,14 +699,11 @@ document.addEventListener('click', () => {
     if (filterPanel) filterPanel.classList.remove('show');
 });
 
-// FIX: Menyesuaikan toggleMenu agar juga memproses #filter-panel dengan benar
 window.toggleMenu = (id, e) => {
     e.stopPropagation();
     document.querySelectorAll('.custom-dropdown').forEach(d => { if(d.id !== id) d.classList.remove('show') });
-    
     const filterPanel = document.getElementById('filter-panel');
     if (filterPanel && id !== 'filter-panel') filterPanel.classList.remove('show');
-    
     document.getElementById(id).classList.toggle('show');
 };
 
@@ -718,7 +724,6 @@ window.toggleDarkMode = () => {
 };
 if(localStorage.getItem('cb_theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 
-// RESET FILTER FUNGSI
 window.resetFilters = () => {
     document.getElementById('filter-month').value = '';
     document.getElementById('filter-week').value = 'all';
@@ -749,12 +754,9 @@ onAuthStateChanged(auth, (user) => {
         }
         myUser = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email };
         set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email });
-
-        // Fade Out Animasi Login
         loginOv.classList.remove('show');
         loginOv.style.opacity = '0';
         setTimeout(() => { loginOv.style.visibility = 'hidden'; }, 300); 
-        
         initApp(); 
     } else {
         myUser = null;
@@ -786,7 +788,6 @@ window.registerEmail = async () => {
     const name = document.getElementById('reg-name').value.trim(), email = document.getElementById('reg-email').value.trim(), pass = document.getElementById('reg-pass').value.trim();
     if(!name || !email || !pass) return showMsg("Semua kolom wajib diisi.");
     if(pass.length < 6) return showMsg("Sandi minimal 6 karakter.");
-    
     const btn = document.querySelector('#form-register .btn-s'); const ori = btn.innerText; btn.innerText = "⏳"; btn.disabled = true; window.isRegistering = true;
     try {
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
@@ -813,7 +814,6 @@ window.resetPassword = async () => {
 };
 
 window.showLogoutMenu = () => { showMsg(`Yakin ingin keluar?`, () => signOut(auth).then(()=>window.location.reload())); };
-
 window.changeUsername = async () => {
     const newName = prompt("Nama panggilan baru:", myUser.name);
     if(!newName || newName.trim() === '' || newName === myUser.name) return;
@@ -836,156 +836,51 @@ function initApp() {
     
     const urlParams = new URLSearchParams(window.location.search);
     const joinId = urlParams.get('join');
-    if (joinId) {
-        joinProject(joinId);
-        window.history.replaceState({}, document.title, window.location.pathname); 
-    }
+    if (joinId) { joinProject(joinId); window.history.replaceState({}, document.title, window.location.pathname); }
 
-    unsubscribeWs = onValue(ref(db, `users/${myUser.id}/workspaces`), (snap) => {
-        workspaces = snap.val() ? Object.values(snap.val()) : [];
-        checkAndRenderWs();
-    });
-
-    unsubscribeSharedWs = onValue(ref(db, `users/${myUser.id}/shared`), (snap) => {
-        sharedWorkspaces = snap.val() ? Object.values(snap.val()) : [];
-        checkAndRenderWs();
-    });
+    unsubscribeWs = onValue(ref(db, `users/${myUser.id}/workspaces`), (snap) => { workspaces = snap.val() ? Object.values(snap.val()) : []; checkAndRenderWs(); });
+    unsubscribeSharedWs = onValue(ref(db, `users/${myUser.id}/shared`), (snap) => { sharedWorkspaces = snap.val() ? Object.values(snap.val()) : []; checkAndRenderWs(); });
 }
 
 function checkAndRenderWs() {
     renderWsSelector();
+    const e = document.getElementById('empty-state'), b = document.getElementById('board-wrap'), t = document.getElementById('brand-tabs'), f = document.getElementById('fab-add');
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) {
-        document.getElementById('empty-state').style.display = 'flex';
-        document.getElementById('board-wrap').style.display = 'none';
-        document.getElementById('brand-tabs').style.display = 'none';
+        e.style.display = 'flex'; b.style.display = 'none'; t.style.display = 'none'; if(f) f.style.display = 'none';
     } else {
-        document.getElementById('empty-state').style.display = 'none';
-        document.getElementById('board-wrap').style.display = 'flex';
-        document.getElementById('brand-tabs').style.display = 'flex';
-        
+        e.style.display = 'none'; b.style.display = 'flex'; t.style.display = 'flex'; if(f) f.style.display = 'flex';
         const savedWs = localStorage.getItem('cb_active_ws');
-        if (workspaces.some(w => w.id === savedWs)) {
-            switchWorkspace(savedWs, true);
-        } else if (sharedWorkspaces.some(w => w.id === savedWs)) {
-            switchWorkspace(savedWs, false);
-        } else {
-            if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true);
-            else switchWorkspace(sharedWorkspaces[0].id, false);
-        }
+        if (workspaces.some(w => w.id === savedWs)) switchWorkspace(savedWs, true);
+        else if (sharedWorkspaces.some(w => w.id === savedWs)) switchWorkspace(savedWs, false);
+        else { if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true); else switchWorkspace(sharedWorkspaces[0].id, false); }
     }
 }
 
 function renderWsSelector() {
     const btn = document.getElementById('project-btn'), cont = document.getElementById('proj-list-container'), sharedCont = document.getElementById('shared-proj-list'), sharedHead = document.getElementById('shared-proj-header');
-    
-    if (workspaces.length === 0 && sharedWorkspaces.length === 0) {
-        btn.innerHTML = 'Ruang Kosong ▾'; cont.innerHTML = ''; sharedHead.style.display = 'none'; sharedCont.innerHTML = ''; return;
-    }
-
+    if (workspaces.length === 0 && sharedWorkspaces.length === 0) { btn.innerHTML = 'Ruang Kosong ▾'; cont.innerHTML = ''; sharedHead.style.display = 'none'; sharedCont.innerHTML = ''; return; }
     let activeData = workspaces.find(w => w.id === activeWsId) || sharedWorkspaces.find(w => w.id === activeWsId);
     if (activeData) btn.innerHTML = `${activeData.name} ▾`;
-
-    cont.innerHTML = workspaces.map((w, i) => `
-        <div class="proj-item ${w.id === activeWsId ? 'active' : ''}" draggable="true" ondragstart="dragWs(event, ${i})" ondragover="allowDrop(event); dragOverWs(event);" ondragleave="dragLeaveWs(event)" ondrop="dropWs(event, ${i})" onclick="switchWorkspace('${w.id}', true)">
-            <div><span class="proj-drag-handle">⠿</span> ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}
-        </div>`).join('');
-
-    if(sharedWorkspaces.length > 0) {
-        sharedHead.style.display = 'block';
-        sharedCont.innerHTML = sharedWorkspaces.map(w => `
-            <div class="proj-item ${w.id === activeWsId ? 'active' : ''}" onclick="switchWorkspace('${w.id}', false)">
-                <div>👥 ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}
-            </div>`).join('');
-    } else {
-        sharedHead.style.display = 'none'; sharedCont.innerHTML = '';
-    }
+    cont.innerHTML = workspaces.map((w, i) => `<div class="proj-item ${w.id === activeWsId ? 'active' : ''}" draggable="true" ondragstart="dragWs(event, ${i})" ondragover="allowDrop(event); dragOverWs(event);" ondragleave="dragLeaveWs(event)" ondrop="dropWs(event, ${i})" onclick="switchWorkspace('${w.id}', true)"><div><span class="proj-drag-handle">⠿</span> ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}</div>`).join('');
+    if(sharedWorkspaces.length > 0) { sharedHead.style.display = 'block'; sharedCont.innerHTML = sharedWorkspaces.map(w => `<div class="proj-item ${w.id === activeWsId ? 'active' : ''}" onclick="switchWorkspace('${w.id}', false)"><div>👥 ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}</div>`).join(''); } else { sharedHead.style.display = 'none'; sharedCont.innerHTML = ''; }
 }
 
 let draggedWsIdx = null;
 window.dragWs = (e, i) => { e.stopPropagation(); draggedWsIdx = i; e.dataTransfer.setData("text/plain", String(i)); };
 window.dragOverWs = (e) => { e.preventDefault(); const t = e.currentTarget, r = t.getBoundingClientRect(); if(e.clientY < r.y + r.height/2) { t.style.borderTop='2px solid var(--primary)'; t.style.borderBottom='2px solid transparent'; } else { t.style.borderBottom='2px solid var(--primary)'; t.style.borderTop='2px solid transparent'; } };
 window.dragLeaveWs = (e) => { e.currentTarget.style.borderTop='2px solid transparent'; e.currentTarget.style.borderBottom='2px solid transparent'; };
-window.dropWs = (e, targetIdx) => {
-    e.preventDefault(); e.stopPropagation(); e.currentTarget.style.borderTop='2px solid transparent'; e.currentTarget.style.borderBottom='2px solid transparent';
-    if (draggedWsIdx === null || draggedWsIdx === targetIdx) return;
-    const w = workspaces.splice(draggedWsIdx, 1)[0], dropBelow = e.clientY > (e.currentTarget.getBoundingClientRect().y + e.currentTarget.getBoundingClientRect().height/2);
-    let insertIdx = targetIdx;
-    if (draggedWsIdx < targetIdx && !dropBelow) insertIdx--; if (draggedWsIdx > targetIdx && dropBelow) insertIdx++;
-    workspaces.splice(insertIdx, 0, w);
-    set(ref(db, `users/${myUser.id}/workspaces`), workspaces); draggedWsIdx = null;
-};
+window.dropWs = (e, targetIdx) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.style.borderTop='2px solid transparent'; e.currentTarget.style.borderBottom='2px solid transparent'; if (draggedWsIdx === null || draggedWsIdx === targetIdx) return; const w = workspaces.splice(draggedWsIdx, 1)[0], dropBelow = e.clientY > (e.currentTarget.getBoundingClientRect().y + e.currentTarget.getBoundingClientRect().height/2); let insertIdx = targetIdx; if (draggedWsIdx < targetIdx && !dropBelow) insertIdx--; if (draggedWsIdx > targetIdx && dropBelow) insertIdx++; workspaces.splice(insertIdx, 0, w); set(ref(db, `users/${myUser.id}/workspaces`), workspaces); draggedWsIdx = null; };
 
-window.generateShareLink = () => {
-    if(!activeWsId) return;
-    if(!isOwner) return showMsg("Hanya pembuat project yang bisa mengundang orang lain.");
-    
-    update(ref(db, `board_members/${activeWsId}/${myUser.id}`), { role: 'owner' });
-    
-    const link = `${window.location.origin}${window.location.pathname}?join=${activeWsId}`;
-    navigator.clipboard.writeText(link).then(() => {
-        showMsg(`<b>Link Undangan Disalin!</b><br><br>Kirim link ini ke tim Anda:<br><code style="background:var(--input-bg); padding:4px; border-radius:4px; display:block; margin-top:8px; word-break:break-all; font-size:11px;">${link}</code><br>Mereka wajib login/daftar terlebih dahulu sebelum bisa bergabung.`);
-    });
-};
+window.generateShareLink = () => { if(!activeWsId) return; if(!isOwner) return showMsg("Hanya pembuat project yang bisa mengundang orang lain."); update(ref(db, `board_members/${activeWsId}/${myUser.id}`), { role: 'owner' }); const link = `${window.location.origin}${window.location.pathname}?join=${activeWsId}`; navigator.clipboard.writeText(link).then(() => { showMsg(`<b>Link Undangan Disalin!</b><br><br>Kirim link ini ke tim Anda:<br><code style="background:var(--input-bg); padding:4px; border-radius:4px; display:block; margin-top:8px; word-break:break-all; font-size:11px;">${link}</code><br>Mereka wajib login/daftar terlebih dahulu sebelum bisa bergabung.`); }); };
 
-window.joinProject = async (joinId) => {
-    if (!myUser) return;
-    try {
-        const snap = await get(ref(db, `content_board_data_${joinId}/meta`));
-        let projName = "Shared Project";
-        if(snap.exists() && snap.val().name) projName = snap.val().name;
+window.joinProject = async (joinId) => { if (!myUser) return; try { const snap = await get(ref(db, `content_board_data_${joinId}/meta`)); let projName = "Shared Project"; if(snap.exists() && snap.val().name) projName = snap.val().name; const exist = sharedWorkspaces.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId); if(exist) return showMsg("Anda sudah tergabung dalam project ini."); const newShared = [...sharedWorkspaces, { id: joinId, name: projName }]; await set(ref(db, `users/${myUser.id}/shared`), newShared); await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); showMsg("Berhasil bergabung ke project tim!"); switchWorkspace(joinId, false); } catch (e) { showMsg("Link tidak valid atau project sudah dihapus."); } };
 
-        const exist = sharedWorkspaces.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId);
-        if(exist) return showMsg("Anda sudah tergabung dalam project ini.");
-
-        const newShared = [...sharedWorkspaces, { id: joinId, name: projName }];
-        await set(ref(db, `users/${myUser.id}/shared`), newShared);
-        await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' });
-
-        showMsg("Berhasil bergabung ke project tim!");
-        switchWorkspace(joinId, false);
-    } catch (e) { showMsg("Link tidak valid atau project sudah dihapus."); }
-};
-
-
-window.openWsModal = (isEdit = false) => {
-    const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn');
-    if (isEdit) {
-        if(!isOwner) return showMsg("Hanya pemilik yang dapat mengubah nama/menghapus project.");
-        editWsId = activeWsId; titleEl.textContent = "Edit Project";
-        const w = workspaces.find(w => w.id === activeWsId); inputEl.value = w ? w.name : ''; delBtn.style.display = "block"; 
-    } else {
-        editWsId = null; titleEl.textContent = "Project Baru"; inputEl.value = ''; delBtn.style.display = "none";
-    }
-    document.getElementById('ws-ov').classList.add('show');
-};
+window.openWsModal = (isEdit = false) => { const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn'); if (isEdit) { if(!isOwner) return showMsg("Hanya pemilik yang dapat mengubah nama/menghapus project."); editWsId = activeWsId; titleEl.textContent = "Edit Project"; const w = workspaces.find(w => w.id === activeWsId); inputEl.value = w ? w.name : ''; delBtn.style.display = "block"; } else { editWsId = null; titleEl.textContent = "Project Baru"; inputEl.value = ''; delBtn.style.display = "none"; } document.getElementById('ws-ov').classList.add('show'); };
 window.closeWsModal = () => document.getElementById('ws-ov').classList.remove('show');
 
-window.saveWs = () => {
-    const name = document.getElementById('ws-name').value.trim(); if(!name) return;
-    if (editWsId) {
-        const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name;
-        set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
-        set(ref(db, `content_board_data_${editWsId}/meta/name`), name); 
-        closeWsModal();
-    } else {
-        const customId = 'ws_' + Date.now();
-        workspaces.push({id: customId, name: name});
-        set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
-        set(ref(db, `content_board_data_${customId}/meta`), { name: name, owner: myUser.id }); 
-        set(ref(db, `board_members/${customId}/${myUser.id}`), { role: 'owner' }); 
-        closeWsModal(); localStorage.setItem('cb_active_ws', customId);
-    }
-};
+window.saveWs = () => { const name = document.getElementById('ws-name').value.trim(); if(!name) return; if (editWsId) { const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name; set(ref(db, `users/${myUser.id}/workspaces`), workspaces); set(ref(db, `content_board_data_${editWsId}/meta/name`), name); closeWsModal(); } else { const customId = 'ws_' + Date.now(); workspaces.push({id: customId, name: name}); set(ref(db, `users/${myUser.id}/workspaces`), workspaces); set(ref(db, `content_board_data_${customId}/meta`), { name: name, owner: myUser.id }); set(ref(db, `board_members/${customId}/${myUser.id}`), { role: 'owner' }); closeWsModal(); localStorage.setItem('cb_active_ws', customId); } };
 
-window.confirmDelWs = () => {
-    showMsg("Hapus project ini beserta seluruh kontennya secara permanen?", () => {
-        workspaces = workspaces.filter(w => w.id !== activeWsId);
-        set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
-        remove(ref(db, `content_board_data_${activeWsId}`)); 
-        remove(ref(db, `board_members/${activeWsId}`)); 
-        closeWsModal(); if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true);
-    });
-};
+window.confirmDelWs = () => { showMsg("Hapus project ini beserta seluruh kontennya secara permanen?", () => { workspaces = workspaces.filter(w => w.id !== activeWsId); set(ref(db, `users/${myUser.id}/workspaces`), workspaces); remove(ref(db, `content_board_data_${activeWsId}`)); remove(ref(db, `board_members/${activeWsId}`)); closeWsModal(); if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true); }); };
 
 window.switchWorkspace = (wsId, ownerFlag) => {
     if(unsubscribeBoard) unsubscribeBoard(); 
@@ -993,20 +888,15 @@ window.switchWorkspace = (wsId, ownerFlag) => {
     localStorage.setItem('cb_active_ws', wsId); 
     aB = 'all';
     document.getElementById('btn-edit-ws').style.display = isOwner ? 'flex' : 'none';
-    
     onValue(ref(db, `board_members/${wsId}`), async (snap) => {
         wsMembers = {};
         if(snap.val()) {
             const memIds = Object.keys(snap.val());
-            for(let id of memIds) {
-                const uSnap = await get(ref(db, `public_users/${id}`));
-                if(uSnap.exists()) wsMembers[id] = { id: id, name: uSnap.val().name };
-            }
+            for(let id of memIds) { const uSnap = await get(ref(db, `public_users/${id}`)); if(uSnap.exists()) wsMembers[id] = { id: id, name: uSnap.val().name }; }
         }
         updateAssigneeDropdowns(); renderBoard();
         if(document.getElementById('team-ov').classList.contains('show')) window.renderTeamList();
     });
-
     const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
     unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
         const data = snapshot.val() || {};
@@ -1017,16 +907,13 @@ window.switchWorkspace = (wsId, ownerFlag) => {
     });
 };
 
-// --- FUNGSI KELOLA TIM ---
 window.openTeamModal = () => { window.renderTeamList(); document.getElementById('team-ov').classList.add('show'); };
 window.closeTeamModal = () => document.getElementById('team-ov').classList.remove('show');
-
 window.renderTeamList = () => {
     const container = document.getElementById('team-list'); if(!container) return;
     let html = '';
     for(let id in wsMembers) {
-        const isMe = id === myUser.id;
-        const canRemove = isOwner && !isMe;
+        const isMe = id === myUser.id; const canRemove = isOwner && !isMe;
         html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--input-border);">
             <div style="display:flex; align-items:center; gap:10px;">
                 <div class="pic-avatar-mini" style="margin:0;">${wsMembers[id].name.charAt(0).toUpperCase()}</div>
@@ -1038,20 +925,7 @@ window.renderTeamList = () => {
     container.innerHTML = html || '<div class="empty">Belum ada anggota.</div>';
 };
 
-window.removeMember = (id) => {
-    showMsg("Keluarkan anggota ini dari project? (Nama mereka akan dihapus dari semua tugas)", () => {
-        remove(ref(db, `board_members/${activeWsId}/${id}`)); 
-        get(ref(db, `users/${id}/shared`)).then(snap => {
-            if(snap.exists()) {
-                const shared = snap.val().filter(w => w.id !== activeWsId);
-                set(ref(db, `users/${id}/shared`), shared); 
-            }
-        });
-        cards.forEach(c => { if(c.assignee === id) c.assignee = ''; });
-        syncToFirebase();
-        showMsg("Anggota berhasil dikeluarkan.");
-    });
-};
+window.removeMember = (id) => { showMsg("Keluarkan anggota ini dari project? (Nama mereka akan dihapus dari semua tugas)", () => { remove(ref(db, `board_members/${activeWsId}/${id}`)); get(ref(db, `users/${id}/shared`)).then(snap => { if(snap.exists()) { const shared = snap.val().filter(w => w.id !== activeWsId); set(ref(db, `users/${id}/shared`), shared); } }); cards.forEach(c => { if(c.assignee === id) c.assignee = ''; }); syncToFirebase(); showMsg("Anggota berhasil dikeluarkan."); }); };
 
 function updateAssigneeDropdowns() {
     let opts = `<option value="">Belum Ada PIC</option>`;
@@ -1061,21 +935,14 @@ function updateAssigneeDropdowns() {
     if(dpAss) { dpAss.innerHTML = opts; if(selId){ const c = cards.find(x=>x.id===selId); if(c) dpAss.value = c.assignee || '';} }
 }
 
-function syncToFirebase() { 
-    if(!activeWsId) return;
-    const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`;
-    const updates = { brands, cards, columns, theme: themeSettings };
-    update(ref(db, dbPath), updates); 
-}
+function syncToFirebase() { if(!activeWsId) return; const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`; update(ref(db, dbPath), { brands, cards, columns, theme: themeSettings }); }
 
 function applyTheme() {
-    const root = document.documentElement;
-    root.style.setProperty('--primary', themeSettings.color || '#534AB7');
+    const root = document.documentElement; root.style.setProperty('--primary', themeSettings.color || '#534AB7');
     let lightColor = themeSettings.color || '#534AB7'; if(lightColor.length === 7) lightColor += '20'; 
     root.style.setProperty('--primary-light', lightColor);
     const appEl = document.querySelector('.app'), bgP = document.getElementById('bg-preview');
-    if(themeSettings.bg) { appEl.style.backgroundImage = `url('${themeSettings.bg}')`; if(bgP) bgP.style.backgroundImage = `url('${themeSettings.bg}')`; } 
-    else { appEl.style.backgroundImage = 'none'; if(bgP) bgP.style.backgroundImage = 'none'; }
+    if(themeSettings.bg) { appEl.style.backgroundImage = `url('${themeSettings.bg}')`; if(bgP) bgP.style.backgroundImage = `url('${themeSettings.bg}')`; } else { appEl.style.backgroundImage = 'none'; if(bgP) bgP.style.backgroundImage = 'none'; }
 }
 
 // ================= FUNGSI PAPAN & KARTU =================
@@ -1086,178 +953,34 @@ window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelec
 window.applyBgUrl = () => { const u = document.getElementById('bg-url-input').value.trim(); if(u) { themeSettings.bg = u; applyTheme(); syncToFirebase(); }};
 window.removeBg = () => { themeSettings.bg = ''; document.getElementById('bg-url-input').value = ''; applyTheme(); syncToFirebase(); };
 
-window.openMoveWsModal = (cardId) => {
-    cardToMoveId = cardId;
-    const availableWs = workspaces.filter(w => w.id !== activeWsId);
-    if(availableWs.length === 0) return showMsg("Buat Project lain dulu untuk memindahkan.");
-    document.getElementById('move-ws-select').innerHTML = availableWs.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
-    document.getElementById('move-ws-ov').classList.add('show');
-};
+window.openMoveWsModal = (cardId) => { cardToMoveId = cardId; const availableWs = workspaces.filter(w => w.id !== activeWsId); if(availableWs.length === 0) return showMsg("Buat Project lain dulu untuk memindahkan."); document.getElementById('move-ws-select').innerHTML = availableWs.map(w => `<option value="${w.id}">${w.name}</option>`).join(''); document.getElementById('move-ws-ov').classList.add('show'); };
 window.closeMoveWsModal = () => { document.getElementById('move-ws-ov').classList.remove('show'); cardToMoveId = null; };
-window.moveCardToWs = async () => {
-    const targetWsId = document.getElementById('move-ws-select').value;
-    const cIdx = cards.findIndex(x => x.id === cardToMoveId); if(cIdx === -1) return;
-    const cardToMove = JSON.parse(JSON.stringify(cards[cIdx]));
-    const btn = document.getElementById('move-ws-btn');
-    try {
-        btn.textContent = 'Memindahkan...'; btn.disabled = true;
-        cards.splice(cIdx, 1); syncToFirebase();
-        const destPath = targetWsId === 'default' ? 'content_board_data' : `content_board_data_${targetWsId}`;
-        const destSnap = await get(ref(db, destPath));
-        let destData = destSnap.val() || { cards: [], columns: [], brands: [] };
-        if(!destData.cards) destData.cards = [];
-        cardToMove.bId = ""; 
-        cardToMove.status = (destData.columns && destData.columns.length > 0) ? destData.columns[0].id : 'review';
-        destData.cards.unshift(cardToMove);
-        await set(ref(db, destPath), destData);
-        closeMoveWsModal(); showMsg("Berhasil dipindahkan!"); renderBoard(); 
-    } catch(e) { cards.splice(cIdx, 0, cardToMove); syncToFirebase(); renderBoard(); showMsg("Gagal: " + e.message); } 
-    finally { btn.textContent = 'Pindahkan'; btn.disabled = false; }
-};
+window.moveCardToWs = async () => { const targetWsId = document.getElementById('move-ws-select').value; const cIdx = cards.findIndex(x => x.id === cardToMoveId); if(cIdx === -1) return; const cardToMove = JSON.parse(JSON.stringify(cards[cIdx])); const btn = document.getElementById('move-ws-btn'); try { btn.textContent = 'Memindahkan...'; btn.disabled = true; cards.splice(cIdx, 1); syncToFirebase(); const destPath = targetWsId === 'default' ? 'content_board_data' : `content_board_data_${targetWsId}`; const destSnap = await get(ref(db, destPath)); let destData = destSnap.val() || { cards: [], columns: [], brands: [] }; if(!destData.cards) destData.cards = []; cardToMove.bId = ""; cardToMove.status = (destData.columns && destData.columns.length > 0) ? destData.columns[0].id : 'review'; destData.cards.unshift(cardToMove); await set(ref(db, destPath), destData); closeMoveWsModal(); showMsg("Berhasil dipindahkan!"); renderBoard(); } catch(e) { cards.splice(cIdx, 0, cardToMove); syncToFirebase(); renderBoard(); showMsg("Gagal: " + e.message); } finally { btn.textContent = 'Pindahkan'; btn.disabled = false; } };
 
-window.showCtxMenu = (e, type, id) => {
-    e.preventDefault(); e.stopPropagation();
-    const ctx = document.getElementById('ctx-menu'); ctx.style.display = 'flex';
-    if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`;
-    else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`;
-    else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;hideCtxMenu()">📄 Duplikat Konten</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();hideCtxMenu()">🗑️ Hapus Konten</button>`;
-    let x = e.clientX, y = e.clientY;
-    if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10;
-    if (y + ctx.offsetHeight > window.innerHeight) y = window.innerHeight - ctx.offsetHeight - 10;
-    ctx.style.left = x + 'px'; ctx.style.top = y + 'px';
-};
+window.showCtxMenu = (e, type, id) => { e.preventDefault(); e.stopPropagation(); const ctx = document.getElementById('ctx-menu'); ctx.style.display = 'flex'; if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`; else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`; else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;hideCtxMenu()">📄 Duplikat Konten</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();hideCtxMenu()">🗑️ Hapus Konten</button>`; let x = e.clientX, y = e.clientY; if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10; if (y + ctx.offsetHeight > window.innerHeight) y = window.innerHeight - ctx.offsetHeight - 10; ctx.style.left = x + 'px'; ctx.style.top = y + 'px'; };
 
 window.cols = (t) => columns; 
 window.renderAll = () => { renderTabs(); renderBoard(); };
-window.renderTabs = () => {
-  document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>`
-    + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('')
-    + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`;
-  const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join('');
-  document.getElementById('m-brand').innerHTML = opts; document.getElementById('dp-fbrand').innerHTML = opts;
-};
+window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); document.getElementById('m-brand').innerHTML = opts; document.getElementById('dp-fbrand').innerHTML = opts; };
 
-window.renderBoard = () => {
-  if (workspaces.length === 0 && sharedWorkspaces.length === 0) return;
-  const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, sortBy = document.getElementById('sort-by').value, sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
-        
-  const vis = cards.filter(c => {
-    let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true;
-    if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); }
-    return mB && mT && mM && mW && mU && mObj && mS;
-  });
-  
-  document.getElementById('board').innerHTML = columns.map((col, idx) => {
-    let cc = vis.filter(c => c.status===col.id);
-    if (sortBy !== 'manual') cc.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); });
-    
-    if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`;
-    
-    return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" style="border-top:4px solid ${col.c}" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`;
-  }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`;
-};
+window.renderBoard = () => { if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, sortBy = document.getElementById('sort-by').value, sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim(); const vis = cards.filter(c => { let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); } return mB && mT && mM && mW && mU && mObj && mS; }); document.getElementById('board').innerHTML = columns.map((col, idx) => { let cc = vis.filter(c => c.status===col.id); if (sortBy !== 'manual') cc.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" style="border-top:4px solid ${col.c}" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`; };
 
-window.cardH = (c) => {
-  const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status);
-  
-  let urgBadge = '';
-  if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`;
-  else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`;
-  else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`;
+window.cardH = (c) => { const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status); let urgBadge = ''; if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`; else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`; else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`; let objBadge = ''; if (c.type !== 'Catatan' && c.type !== 'To-Do') { const obj = c.objective || 'Konten'; if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`; else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`; else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`; } let dateStyle="color:var(--text-light);", alert=""; if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) { const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5; if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; } else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; } } const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : ''; const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; let picHtml = ''; if (c.assignee && wsMembers[c.assignee]) { const init = wsMembers[c.assignee].name.charAt(0); picHtml = `<div class="pic-avatar-mini" title="Ditugaskan ke: ${wsMembers[c.assignee].name}">${init}</div>`; } return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n || 'Umum'}</span>${picHtml}</div></div>`; };
 
-  let objBadge = '';
-  if (c.type !== 'Catatan' && c.type !== 'To-Do') {
-      const obj = c.objective || 'Konten';
-      if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`;
-      else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`;
-      else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`;
-  }
-
-  let dateStyle="color:var(--text-light);", alert="";
-  if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) {
-      const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5;
-      if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; }
-      else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; }
-  }
-  const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : '';
-  const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : '';
-  
-  const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts';
-  
-  // PIC AVATAR
-  let picHtml = '';
-  if (c.assignee && wsMembers[c.assignee]) {
-      const init = wsMembers[c.assignee].name.charAt(0);
-      picHtml = `<div class="pic-avatar-mini" title="Ditugaskan ke: ${wsMembers[c.assignee].name}">${init}</div>`;
-  }
-
-  return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')">
-    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-        <span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}
-    </div>
-    ${dt}<div class="card-title">${c.title}</div>${prog}
-    <div class="card-foot">
-        ${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;"></span>`:''}
-        <span class="cfoot-name">${b.n || 'Umum'}</span>
-        ${picHtml}
-    </div>
-  </div>`;
-};
-
-// LOGIKA DRAG & DROP BRAND TABS
 let draggedBrandIdx = null; window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); };
 window.dropB = (e, targetIdx) => { e.preventDefault(); e.stopPropagation(); if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return; brands.splice(targetIdx, 0, brands.splice(draggedBrandIdx, 1)[0]); syncToFirebase(); renderAll(); draggedBrandIdx = null; };
 
 window.setB = (id) => { aB=id; renderAll(); };
 window.toggleCol = (id) => { const col = columns.find(c=>c.id===id); if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } };
 
-window.openAdd = (s) => { 
-    document.getElementById('add-ov').classList.add('show'); 
-    selType('Video'); renderMStatus('Video', s || columns[0].id); 
-    document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; 
-    document.getElementById('m-title').value = ''; 
-    document.getElementById('m-objective').value = 'Konten';
-};
+window.openAdd = (s) => { document.getElementById('add-ov').classList.add('show'); selType('Video'); renderMStatus('Video', s || columns[0].id); document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; document.getElementById('m-title').value = ''; document.getElementById('m-objective').value = 'Konten'; };
 window.closeAdd = () => document.getElementById('add-ov').classList.remove('show');
-window.selType = (t) => { 
-    mType=t; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); 
-    document.getElementById('btn-' + (t==='To-Do' ? 't' : t[0].toLowerCase())).style.background='var(--primary-light)'; 
-    document.getElementById('m-datetime-container').style.display=(t==='Catatan'||t==='To-Do')?'none':'block'; 
-    document.getElementById('m-objective').parentElement.style.display=(t==='Catatan'||t==='To-Do')?'none':'flex'; 
-    renderMStatus(t,''); 
-};
+window.selType = (t) => { mType=t; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); document.getElementById('btn-' + (t==='To-Do' ? 't' : t[0].toLowerCase())).style.background='var(--primary-light)'; document.getElementById('m-datetime-container').style.display=(t==='Catatan'||t==='To-Do')?'none':'block'; document.getElementById('m-objective').parentElement.style.display=(t==='Catatan'||t==='To-Do')?'none':'flex'; renderMStatus(t,''); };
 window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; };
 
-window.saveCard = () => { 
-    const t=document.getElementById('m-title').value.trim(); if(!t)return; 
-    cards.unshift({
-        id:'c'+Date.now(), title:t, bId:document.getElementById('m-brand').value, type:mType,
-        date:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-date').value,
-        time:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-time').value,
-        week:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-week').value,
-        urgency:document.getElementById('m-urgency').value,
-        objective:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-objective').value,
-        status:document.getElementById('m-status').value, assignee: document.getElementById('m-assignee').value,
-        notes:'',images:[],steps:[]
-    }); 
-    closeAdd(); syncToFirebase(); 
-};
+window.saveCard = () => { const t=document.getElementById('m-title').value.trim(); if(!t)return; cards.unshift({ id:'c'+Date.now(), title:t, bId:document.getElementById('m-brand').value, type:mType, date:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-date').value, time:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-time').value, week:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-week').value, urgency:document.getElementById('m-urgency').value, objective:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-objective').value, status:document.getElementById('m-status').value, assignee: document.getElementById('m-assignee').value, notes:'',images:[],steps:[] }); closeAdd(); syncToFirebase(); };
 
-window.selCard = (id) => { 
-    selId=id; const c=cards.find(x=>x.id===id); if(!c)return; 
-    document.getElementById('dp-title').textContent=c.title; document.getElementById('dp-ftitle').value=c.title; 
-    document.getElementById('dp-fdate').value=c.date||''; document.getElementById('dp-ftime').value=c.time||''; document.getElementById('dp-fweek').value=c.week||'1'; 
-    document.getElementById('dp-ftype').value=c.type; document.getElementById('dp-fbrand').value=c.bId; document.getElementById('dp-furgency').value=c.urgency||'normal'; 
-    document.getElementById('dp-fobjective').value=c.objective||'Konten'; document.getElementById('dp-fassignee').value=c.assignee||'';
-    
-    document.getElementById('dp-datetime-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'block'; 
-    document.getElementById('dp-obj-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'flex'; 
-
-    const s=document.getElementById('dp-fstatus'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); s.value=c.status; 
-    document.getElementById('dp-notes').value=c.notes||''; document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; 
-    renderSteps(c); renderAtt(c.images); 
-    document.getElementById('dp').classList.add('open'); document.getElementById('dp-ov').classList.add('show'); 
-};
+window.selCard = (id) => { selId=id; const c=cards.find(x=>x.id===id); if(!c)return; document.getElementById('dp-title').textContent=c.title; document.getElementById('dp-ftitle').value=c.title; document.getElementById('dp-fdate').value=c.date||''; document.getElementById('dp-ftime').value=c.time||''; document.getElementById('dp-fweek').value=c.week||'1'; document.getElementById('dp-ftype').value=c.type; document.getElementById('dp-fbrand').value=c.bId; document.getElementById('dp-furgency').value=c.urgency||'normal'; document.getElementById('dp-fobjective').value=c.objective||'Konten'; document.getElementById('dp-fassignee').value=c.assignee||''; document.getElementById('dp-datetime-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'block'; document.getElementById('dp-obj-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'flex'; const s=document.getElementById('dp-fstatus'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); s.value=c.status; document.getElementById('dp-notes').value=c.notes||''; document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; renderSteps(c); renderAtt(c.images); document.getElementById('dp').classList.add('open'); document.getElementById('dp-ov').classList.add('show'); };
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
 window.dps = (f,v) => { const c=cards.find(x=>x.id===selId); if(c){c[f]=v; renderBoard(); syncToFirebase();} };
 window.dpChType = (v) => { const c=cards.find(x=>x.id===selId); if(c){c.type=v; if(v==='Catatan' || v==='To-Do'){c.date='';c.time='';c.week=''; c.objective='';} syncToFirebase(); selCard(selId);} };
@@ -1267,16 +990,9 @@ window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" targ
 window.editNotes = () => { document.getElementById('dp-notes-display').style.display='none'; const ta=document.getElementById('dp-notes'); ta.style.display='block'; ta.focus(); };
 window.saveNotes = (v) => { dps('notes',v); document.getElementById('dp-notes-display').innerHTML=v?linkify(v):'Klik tambah catatan...'; document.getElementById('dp-notes-display').style.display='block'; document.getElementById('dp-notes').style.display='none'; };
 
-window.addToGCal = () => {
-    const c = cards.find(x => x.id === selId); if(!c) return;
-    const title = encodeURIComponent(`Konten: ${c.title}`), details = encodeURIComponent(`Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}\n\nCatatan:\n${c.notes||''}`);
-    let dates = ""; if (c.date) { const d = new Date(`${c.date}T${c.time||'09:00'}:00`), d2 = new Date(d.getTime() + 36e5), f = x => x.toISOString().replace(/-|:|\.\d\d\d/g, ''); dates = `&dates=${f(d)}/${f(d2)}`; }
-    window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`, '_blank');
-};
+window.addToGCal = () => { const c = cards.find(x => x.id === selId); if(!c) return; const title = encodeURIComponent(`Konten: ${c.title}`), details = encodeURIComponent(`Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}\n\nCatatan:\n${c.notes||''}`); let dates = ""; if (c.date) { const d = new Date(`${c.date}T${c.time||'09:00'}:00`), d2 = new Date(d.getTime() + 36e5), f = x => x.toISOString().replace(/-|:|\.\d\d\d/g, ''); dates = `&dates=${f(d)}/${f(d2)}`; } window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`, '_blank'); };
 
-window.renderSteps = (c) => { 
-    document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`<div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})"><span class="drag-handle">⠿</span><input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})"><input class="step-input" type="text" value="${s.text.replace(/"/g, '&quot;')}" onchange="updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:var(--text-light);':''}"><button class="step-del" onclick="delStep(${i})">×</button></div>`).join(''); 
-};
+window.renderSteps = (c) => { document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`<div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})"><span class="drag-handle">⠿</span><input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})"><input class="step-input" type="text" value="${s.text.replace(/"/g, '&quot;')}" onchange="updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:var(--text-light);':''}"><button class="step-del" onclick="delStep(${i})">×</button></div>`).join(''); };
 window.updateStepText = (i, v) => { const c = cards.find(x => x.id === selId); if(c && v.trim()){ c.steps[i].text = v.trim(); syncToFirebase(); } else if(c) renderSteps(c); };
 window.toggleStep = (i) => { const c=cards.find(x=>x.id===selId); c.steps[i].done=!c.steps[i].done; syncToFirebase(); renderSteps(c); renderBoard(); };
 window.addStep = () => { const i=document.getElementById('new-step-input'); if(!i.value.trim())return; const c=cards.find(x=>x.id===selId); if(!c.steps)c.steps=[]; c.steps.push({text:i.value.trim(),done:false}); i.value=''; syncToFirebase(); renderSteps(c); renderBoard(); };
@@ -1287,23 +1003,9 @@ window.dragStep = (e, i) => { e.stopPropagation(); draggedStepIdx = i; e.dataTra
 window.dragEndStep = (e) => { e.target.style.opacity = '1'; draggedStepIdx = null; document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = ''); };
 window.dragOverStep = (e) => { e.preventDefault(); e.stopPropagation(); if(draggedStepIdx === null) return; const el = e.target.closest('.step-item'); if(!el) return; if (e.clientY - (el.getBoundingClientRect().y + el.getBoundingClientRect().height/2) > 0) el.style.boxShadow = '0 2px 0 var(--primary)'; else el.style.boxShadow = '0 -2px 0 var(--primary)'; };
 window.dragLeaveStep = (e) => { const el = e.target.closest('.step-item'); if(el) el.style.boxShadow = ''; };
-window.dropStep = (e, t) => {
-    e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = '');
-    if (draggedStepIdx === null || draggedStepIdx === t) return;
-    const c = cards.find(x => x.id === selId); if (!c) return;
-    const dropBelow = e.clientY - (e.target.closest('.step-item').getBoundingClientRect().y + e.target.closest('.step-item').getBoundingClientRect().height/2) > 0;
-    const step = c.steps.splice(draggedStepIdx, 1)[0];
-    let nt = t; if (draggedStepIdx < t) nt--; if (dropBelow) nt++;
-    c.steps.splice(nt, 0, step); draggedStepIdx = null; syncToFirebase(); renderSteps(c);
-};
+window.dropStep = (e, t) => { e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = ''); if (draggedStepIdx === null || draggedStepIdx === t) return; const c = cards.find(x => x.id === selId); if (!c) return; const dropBelow = e.clientY - (e.target.closest('.step-item').getBoundingClientRect().y + e.target.closest('.step-item').getBoundingClientRect().height/2) > 0; const step = c.steps.splice(draggedStepIdx, 1)[0]; let nt = t; if (draggedStepIdx < t) nt--; if (dropBelow) nt++; c.steps.splice(nt, 0, step); draggedStepIdx = null; syncToFirebase(); renderSteps(c); };
 
-window.addImageUrl = () => {
-    const url = prompt("Paste link gambar di sini (contoh dari Pinterest, Google Drive, atau Web):");
-    if (url && url.trim() !== '' && selId) {
-        const c = cards.find(x => x.id === selId); if (!c.images) c.images = [];
-        c.images.push(url.trim()); syncToFirebase(); renderAtt(c.images);
-    }
-};
+window.addImageUrl = () => { const url = prompt("Paste link gambar di sini (contoh dari Pinterest, Google Drive, atau Web):"); if (url && url.trim() !== '' && selId) { const c = cards.find(x => x.id === selId); if (!c.images) c.images = []; c.images.push(url.trim()); syncToFirebase(); renderAtt(c.images); } };
 window.renderAtt = (imgs) => { document.getElementById('dp-attachments').innerHTML=(imgs||[]).map((u,i)=>`<div class="att-item"><img src="${u}" onclick="window.open('${u}','_blank')" onerror="this.src='https://via.placeholder.com/60?text=Gagal+Dimuat'"><button class="att-del" onclick="event.stopPropagation();delImg(${i})">×</button></div>`).join(''); };
 window.delImg = (i) => { const c=cards.find(x=>x.id===selId); c.images.splice(i,1); syncToFirebase(); renderAtt(c.images); };
 
@@ -1323,36 +1025,13 @@ window.dragCard = (e, id) => { e.stopPropagation(); draggedCardId = id; e.dataTr
 window.dragEndCard = (e) => { e.target.style.opacity = '1'; draggedCardId = null; document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); };
 window.dragOverCard = (e, id) => { e.preventDefault(); e.stopPropagation(); if(!draggedCardId || draggedCardId === id) return; const t = e.currentTarget; if (e.clientY - (t.getBoundingClientRect().y + t.getBoundingClientRect().height/2) > 0) t.style.boxShadow = '0 4px 0 var(--primary)'; else t.style.boxShadow = '0 -4px 0 var(--primary)'; };
 window.dragLeaveCard = (e) => { if(e.currentTarget) e.currentTarget.style.boxShadow = ''; };
-window.dropOnCard = (e, targetId) => {
-    e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.card').forEach(c => c.style.boxShadow = '');
-    if (!draggedCardId || draggedCardId === targetId) return;
-    const cIdx = cards.findIndex(x => x.id === draggedCardId), tIdx = cards.findIndex(x => x.id === targetId);
-    if (cIdx === -1 || tIdx === -1) return;
-    const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + e.currentTarget.getBoundingClientRect().height/2) > 0;
-    const card = cards.splice(cIdx, 1)[0]; card.status = cards[tIdx].status; 
-    let newIdx = cards.findIndex(x => x.id === targetId); if (dropBelow) newIdx++;
-    cards.splice(newIdx, 0, card); document.getElementById('sort-by').value = 'manual'; draggedCardId = null; renderBoard(); syncToFirebase();
-};
-window.dropCard = (e, colId) => { 
-    e.preventDefault(); e.stopPropagation(); const id = e.dataTransfer.getData("text/plain") || draggedCardId; if(!id) return;
-    const cIdx = cards.findIndex(x => x.id === id);
-    if(cIdx > -1) { const card = cards.splice(cIdx, 1)[0]; card.status = colId; cards.push(card); document.getElementById('sort-by').value = 'manual'; renderBoard(); syncToFirebase(); }
-    draggedCardId = null;
-};
+window.dropOnCard = (e, targetId) => { e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); if (!draggedCardId || draggedCardId === targetId) return; const cIdx = cards.findIndex(x => x.id === draggedCardId), tIdx = cards.findIndex(x => x.id === targetId); if (cIdx === -1 || tIdx === -1) return; const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + e.currentTarget.getBoundingClientRect().height/2) > 0; const card = cards.splice(cIdx, 1)[0]; card.status = cards[tIdx].status; let newIdx = cards.findIndex(x => x.id === targetId); if (dropBelow) newIdx++; cards.splice(newIdx, 0, card); document.getElementById('sort-by').value = 'manual'; draggedCardId = null; renderBoard(); syncToFirebase(); };
+window.dropCard = (e, colId) => { e.preventDefault(); e.stopPropagation(); const id = e.dataTransfer.getData("text/plain") || draggedCardId; if(!id) return; const cIdx = cards.findIndex(x => x.id === id); if(cIdx > -1) { const card = cards.splice(cIdx, 1)[0]; card.status = colId; cards.push(card); document.getElementById('sort-by').value = 'manual'; renderBoard(); syncToFirebase(); } draggedCardId = null; };
 
-window.exportToPDF=()=>{
-  try {
-      const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20);
-      doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
-      const data=cards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]);
-      doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } });
-      doc.save("Content_Plan.pdf");
-  } catch(err) { showMsg("Gagal membuat PDF."); }
-};
+window.exportToPDF=()=>{ try { const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20); doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28); const data=cards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]); doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } }); doc.save("Content_Plan.pdf"); } catch(err) { showMsg("Gagal membuat PDF."); } };
 
 window.syncColor = (v, idS, p='bm') => { if(p==='bm') bCol=v; else cCol=v; const el = document.getElementById(p + '-color-' + idS); if(el) el.value = v; };
 
-// SWIPE PANEL
 let dpTx = 0, dpTy = 0; const dpEl = document.getElementById('dp'), dpBody = document.querySelector('.dp-body');
 dpEl.addEventListener('touchstart', e => { dpTx = e.changedTouches[0].screenX; dpTy = e.changedTouches[0].screenY; }, {passive: true});
 dpEl.addEventListener('touchend', e => { let dx = e.changedTouches[0].screenX - dpTx, dy = e.changedTouches[0].screenY - dpTy; if (dx > 80 && Math.abs(dy) < 100) closeDP(); if (dy > 80 && Math.abs(dx) < 100 && dpBody.scrollTop <= 10) closeDP(); });
