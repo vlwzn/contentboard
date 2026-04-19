@@ -40,9 +40,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 }
 .topbar-left { display: flex; align-items: center; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 8px; }
-.brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: background 0.3s; flex-shrink: 0; cursor: pointer; }
+.brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: background 0.3s; flex-shrink: 0; cursor: pointer; user-select: none; }
 .brand-icon:hover { opacity: 0.8; }
-#project-selector { font-weight: 700; font-size: 15px; color: #1a1a1a; border: none; background: transparent; outline: none; cursor: pointer; max-width: 150px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+
+/* CUSTOM DROPDOWNS (NEW) */
+.custom-dropdown { position: absolute; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 12px; padding: 6px; z-index: 5000; display: none; flex-direction: column; }
+.custom-dropdown.show { display: flex; }
+.proj-selector-btn { font-weight: 700; font-size: 15px; color: #1a1a1a; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; outline: none; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
+.proj-selector-btn:hover { background: rgba(0,0,0,0.05); }
+.proj-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #444; transition: all 0.2s; border-top: 2px solid transparent; border-bottom: 2px solid transparent; }
+.proj-item:hover { background: #f5f5f3; color: #1a1a1a; }
+.proj-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+.proj-drag-handle { cursor: grab; color: #ccc; margin-right: 8px; font-size: 14px; user-select: none; }
 
 .top-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
 .topbtn { height: 36px; padding: 0 12px; display: inline-flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; background: rgba(255,255,255,0.8); font-size: 12px; white-space: nowrap; cursor: pointer; transition: all 0.2s; outline: none; color: #444; }
@@ -242,13 +251,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand">
-        <!-- ICON AVATAR SEKARANG BISA DIKLIK UNTUK LOGOUT -->
-        <div class="brand-icon" id="user-avatar" onclick="showLogoutMenu()" title="Klik untuk opsi Akun / Keluar">A</div>
-        <div class="brand-selector-wrap" oncontextmenu="showCtxMenu(event, 'project', null)" title="Klik kanan untuk opsi Project">
-          <select id="project-selector" onchange="handleProjectChange(this.value)">
-              <option value="default">Project Utama</option>
-          </select>
+        
+        <!-- NEW: MENU AKUN / LOGOUT -->
+        <div style="position: relative;">
+            <div class="brand-icon" id="user-avatar" onclick="toggleUserMenu(event)" title="Opsi Akun">A</div>
+            <div id="user-menu" class="custom-dropdown" style="top: 40px; left: 0; min-width: 180px;">
+                <div style="padding: 8px 12px; border-bottom: 1px solid #eee; margin-bottom: 4px;">
+                    <div style="font-weight: 600; color: #222; font-size: 13px;" id="user-menu-name">Nama</div>
+                    <div style="font-size: 11px; color: #888;" id="user-menu-email">user@email.com</div>
+                </div>
+                <button class="ctx-item danger" onclick="showLogoutMenu()" style="width: 100%; justify-content: flex-start;">🚪 Keluar (Logout)</button>
+            </div>
         </div>
+        
+        <!-- NEW: PROJECT SELECTOR CUSTOM (BISA DRAG & DROP) -->
+        <div style="position: relative;">
+            <button id="project-btn" class="proj-selector-btn" onclick="toggleProjMenu(event)">Project Utama ▾</button>
+            <div id="proj-menu" class="custom-dropdown" style="top: 36px; left: 0; min-width: 220px; max-height: 400px; overflow-y: auto;">
+                <div id="proj-list-container" style="display:flex; flex-direction:column; gap:2px;"></div>
+                <div style="border-top: 1px solid #eee; margin-top: 4px; padding-top: 4px;">
+                    <button class="ctx-item" onclick="openWsModal(false)" style="width: 100%; justify-content: flex-start;">➕ Buat Project Baru</button>
+                    <button class="ctx-item" onclick="openWsModal(true)" style="width: 100%; justify-content: flex-start;">✏️ Edit Nama Project</button>
+                </div>
+            </div>
+        </div>
+
       </div>
     </div>
 
@@ -340,7 +367,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="dp-pull-indicator"></div>
   <div class="dp-head" style="padding:16px 20px; border-bottom:1px solid #f0f0ee; display:flex; align-items:center;">
     <div class="dp-title" id="dp-title" style="flex:1; font-weight:700; font-size:15px; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
-    <!-- NEW: TOMBOL GOOGLE CALENDAR -->
     <button onclick="addToGCal()" style="border:none; background:none; cursor:pointer; color:#1D9E75; margin-right:12px; font-size:15px;" title="Tambahkan ke Google Calendar">📅</button>
     <button onclick="dupCard()" style="border:none; background:none; cursor:pointer; color:#185FA5; margin-right:12px; font-size:15px;" title="Duplikat Konten">📄</button>
     <button onclick="delCurCard()" style="border:none; background:none; cursor:pointer; color:#e24b4a; margin-right:12px; font-size:15px;" title="Hapus Konten">🗑️</button>
@@ -565,7 +591,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-// IMPORT FIREBASE AUTHENTICATION (NEW!)
+// IMPORT FIREBASE AUTHENTICATION
 import { 
     getAuth, 
     signInWithPopup, 
@@ -591,11 +617,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
-const auth = getAuth(app); // INISIALISASI AUTH
+const auth = getAuth(app); 
 const googleProvider = new GoogleAuthProvider();
 
 // Global State
-let myUser = null; // Menyimpan data akun yang login
+let myUser = null; 
 let workspaces = [];
 let activeWsId = null;
 let unsubscribeWs = null;
@@ -616,14 +642,12 @@ window.showMsg = (txt, cb) => {
     document.getElementById('msg-ov').classList.add('show');
 };
 
-// ================= SISTEM AUTHENTICATION FIREBASE (NEW) =================
+// ================= SISTEM AUTHENTICATION FIREBASE =================
 
-// Pantau status login pengguna setiap saat
 onAuthStateChanged(auth, (user) => {
     const loginOv = document.getElementById('login-ov');
     
     if (user) {
-        // Jika login pakai Email/Password, WAJIB verifikasi email dulu!
         if (user.providerData[0].providerId === 'password' && !user.emailVerified) {
             loginOv.classList.add('show');
             showMsg("Email Anda belum diverifikasi. Silakan cek kotak masuk/spam di email Anda, lalu coba masuk lagi.");
@@ -631,16 +655,14 @@ onAuthStateChanged(auth, (user) => {
             return;
         }
         
-        // Pengguna sah dan berhasil masuk
         myUser = { 
             id: user.uid, 
             name: user.displayName || user.email.split('@')[0],
             email: user.email
         };
         loginOv.classList.remove('show');
-        initApp(); // Jalankan aplikasi
+        initApp(); 
     } else {
-        // Jika belum login / logout
         myUser = null;
         loginOv.classList.add('show');
         document.getElementById('board-wrap').style.display = 'none';
@@ -649,7 +671,6 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Fungsi Toggle (Pindah antara form Login & Register)
 window.toggleAuth = (type) => {
     if(type === 'reg') {
         document.getElementById('form-login').style.display = 'none';
@@ -664,25 +685,31 @@ window.toggleAuth = (type) => {
     }
 };
 
-// Fungsi Login Google
 window.loginGoogle = () => {
     signInWithPopup(auth, googleProvider).catch((error) => {
         showMsg("Gagal masuk dengan Google: " + error.message);
     });
 };
 
-// Fungsi Login Email
 window.loginEmail = () => {
     const email = document.getElementById('log-email').value.trim();
     const pass = document.getElementById('log-pass').value.trim();
     if(!email || !pass) return showMsg("Email dan kata sandi harus diisi.");
     
+    // Ubah tombol jadi "Memproses..."
+    const btn = document.querySelector('#form-login .btn-s');
+    const originalText = btn.innerText;
+    btn.innerText = "Memproses...";
+    btn.disabled = true;
+
     signInWithEmailAndPassword(auth, email, pass).catch((error) => {
+        // Kembalikan tombol jika gagal
+        btn.innerText = originalText;
+        btn.disabled = false;
         showMsg("Gagal masuk: Periksa kembali email dan kata sandi Anda.");
     });
 };
 
-// Fungsi Register (Daftar) Email
 window.registerEmail = () => {
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
@@ -691,33 +718,41 @@ window.registerEmail = () => {
     if(!name || !email || !pass) return showMsg("Semua kolom (Nama, Email, Sandi) wajib diisi.");
     if(pass.length < 6) return showMsg("Kata sandi minimal 6 karakter.");
     
+    // Ubah tombol jadi "Memproses..."
+    const btn = document.querySelector('#form-register .btn-s');
+    const originalText = btn.innerText;
+    btn.innerText = "Memproses...";
+    btn.disabled = true;
+    
     createUserWithEmailAndPassword(auth, email, pass).then((userCredential) => {
-        // Simpan nama pengguna ke profil Firebase
         updateProfile(userCredential.user, { displayName: name });
-        // Kirim email verifikasi
         sendEmailVerification(userCredential.user).then(() => {
             showMsg("Pendaftaran sukses!<br><b>Link verifikasi telah dikirim ke email Anda.</b> Silakan klik link tersebut sebelum masuk.", () => {
-                toggleAuth('log'); // Balik ke halaman login
+                toggleAuth('log'); 
             });
-            signOut(auth); // Paksa keluar sampai mereka verifikasi
+            signOut(auth); 
+            // Kembalikan tombol setelah sukses
+            btn.innerText = originalText;
+            btn.disabled = false;
         });
     }).catch((error) => {
+        // Kembalikan tombol jika gagal
+        btn.innerText = originalText;
+        btn.disabled = false;
         if(error.code === 'auth/email-already-in-use') showMsg("Email ini sudah pernah terdaftar.");
         else showMsg("Gagal mendaftar: " + error.message);
     });
 };
 
-// Fungsi Logout / Keluar
 window.showLogoutMenu = () => {
     if(!myUser) return;
-    showMsg(`Akun: <b>${myUser.email}</b><br><br>Apakah Anda ingin keluar (Log out) dari aplikasi?`, () => {
+    showMsg(`Apakah Anda yakin ingin keluar (Log out) dari aplikasi?`, () => {
         signOut(auth).then(() => {
             window.location.reload();
         });
     });
 };
 
-// Fungsi Opsional (Memindahkan data lama tanpa login ke akun baru)
 window.restoreLegacy = () => {
     get(ref(db, 'content_board_workspaces_list')).then(snap => {
         let oldWs = snap.val() || [{id: 'default', name: 'Project Utama'}];
@@ -728,14 +763,40 @@ window.restoreLegacy = () => {
     });
 };
 
+// ================= CUSTOM MENU (USER & PROJECT) =================
+window.toggleUserMenu = (e) => {
+    e.stopPropagation();
+    document.getElementById('user-menu').classList.toggle('show');
+    const pm = document.getElementById('proj-menu');
+    if(pm) pm.classList.remove('show');
+};
+
+window.toggleProjMenu = (e) => {
+    e.stopPropagation();
+    document.getElementById('proj-menu').classList.toggle('show');
+    const um = document.getElementById('user-menu');
+    if(um) um.classList.remove('show');
+};
+
+// Menutup menu jika klik di luar
+document.addEventListener('click', (e) => {
+    const uMenu = document.getElementById('user-menu');
+    const pMenu = document.getElementById('proj-menu');
+    if(uMenu && !e.target.closest('#user-avatar')) uMenu.classList.remove('show');
+    if(pMenu && !e.target.closest('#project-btn')) pMenu.classList.remove('show');
+    hideCtxMenu();
+});
+
+
 // ================= INISIALISASI APLIKASI UTAMA =================
 
 function initApp() {
-    // Set Inisial Avatar
     const avatarEl = document.getElementById('user-avatar');
     if(avatarEl) avatarEl.textContent = myUser.name.charAt(0).toUpperCase();
     
-    // Dengarkan khusus project milik Akun ini saja
+    document.getElementById('user-menu-name').textContent = myUser.name;
+    document.getElementById('user-menu-email').textContent = myUser.email;
+    
     const userWsRef = ref(db, `users/${myUser.id}/workspaces`);
     unsubscribeWs = onValue(userWsRef, (snapshot) => {
         const data = snapshot.val();
@@ -764,18 +825,80 @@ function initApp() {
 }
 
 function renderWsSelector() {
-    const selector = document.getElementById('project-selector');
-    if(selector) {
-        if(workspaces.length === 0) {
-            selector.innerHTML = '<option value="">Belum ada Project</option>';
-        } else {
-            selector.innerHTML = workspaces.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
-            if(workspaces.some(w => w.id === activeWsId)) selector.value = activeWsId;
-        }
+    const btn = document.getElementById('project-btn');
+    const container = document.getElementById('proj-list-container');
+    
+    if (workspaces.length === 0) {
+        if(btn) btn.innerHTML = 'Belum ada Project ▾';
+        if(container) container.innerHTML = '<div style="padding:8px 12px; font-size:12px; color:#888;">Kosong</div>';
+        return;
+    }
+
+    const activeWs = workspaces.find(w => w.id === activeWsId) || workspaces[0];
+    if (activeWs && btn) btn.innerHTML = `${activeWs.name} ▾`;
+
+    if(container) {
+        container.innerHTML = workspaces.map((w, i) => `
+            <div class="proj-item ${w.id === activeWsId ? 'active' : ''}" 
+                 draggable="true" 
+                 ondragstart="dragWs(event, ${i})" 
+                 ondragover="dragOverWs(event)" 
+                 ondragleave="dragLeaveWs(event)"
+                 ondrop="dropWs(event, ${i})" 
+                 onclick="switchWorkspace('${w.id}')">
+                <div><span class="proj-drag-handle" title="Tarik untuk memindahkan">⠿</span> ${w.name}</div>
+                ${w.id === activeWsId ? '<span>✓</span>' : ''}
+            </div>
+        `).join('');
     }
 }
 
-window.handleProjectChange = (val) => { if(val) switchWorkspace(val); };
+// LOGIKA DRAG & DROP UNTUK PROJECT (WORKSPACE)
+let draggedWsIdx = null;
+window.dragWs = (e, idx) => { 
+    draggedWsIdx = idx; 
+    e.dataTransfer.setData("text/plain", idx);
+    setTimeout(() => e.target.style.opacity = '0.5', 0);
+};
+window.dragOverWs = (e) => {
+    e.preventDefault();
+    const target = e.currentTarget;
+    const rect = target.getBoundingClientRect();
+    const offset = rect.y + (rect.height / 2);
+    if (e.clientY < offset) {
+        target.style.borderTop = '2px solid var(--primary)';
+        target.style.borderBottom = '2px solid transparent';
+    } else {
+        target.style.borderBottom = '2px solid var(--primary)';
+        target.style.borderTop = '2px solid transparent';
+    }
+};
+window.dragLeaveWs = (e) => {
+    e.currentTarget.style.borderTop = '2px solid transparent';
+    e.currentTarget.style.borderBottom = '2px solid transparent';
+};
+window.dropWs = (e, targetIdx) => {
+    e.preventDefault();
+    e.currentTarget.style.borderTop = '2px solid transparent';
+    e.currentTarget.style.borderBottom = '2px solid transparent';
+    document.querySelectorAll('.proj-item').forEach(el => el.style.opacity = '1');
+    
+    if (draggedWsIdx === null || draggedWsIdx === targetIdx) return;
+    
+    const w = workspaces.splice(draggedWsIdx, 1)[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const dropBelow = e.clientY > (rect.y + rect.height / 2);
+    
+    let insertIdx = targetIdx;
+    if (draggedWsIdx < targetIdx && !dropBelow) insertIdx = targetIdx - 1;
+    if (draggedWsIdx > targetIdx && dropBelow) insertIdx = targetIdx + 1;
+    
+    workspaces.splice(insertIdx, 0, w);
+    set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
+    renderWsSelector();
+    draggedWsIdx = null;
+};
+
 
 window.openWsModal = (isEdit = false) => {
     const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn');
@@ -816,7 +939,7 @@ window.confirmDelWs = () => {
     });
 };
 
-function switchWorkspace(wsId) {
+window.switchWorkspace = (wsId) => {
     if(unsubscribeBoard) unsubscribeBoard(); 
     activeWsId = wsId; 
     localStorage.setItem('cb_active_ws', wsId); 
@@ -836,8 +959,9 @@ function switchWorkspace(wsId) {
         ];
         themeSettings = data.theme || { color: '#534AB7', bg: '' };
         applyTheme(); renderAll();
+        renderWsSelector(); // Update the dropdown button name
     });
-}
+};
 
 function syncToFirebase() { 
     if(!activeWsId) return;
@@ -928,15 +1052,12 @@ window.showCtxMenu = (e, type, id) => {
     const ctx = document.getElementById('ctx-menu'); ctx.style.display = 'flex';
     if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`;
     else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`;
-    else if (type === 'project') ctx.innerHTML = `<button class="ctx-item" onclick="openWsModal(true); hideCtxMenu()">✏️ Edit Project Nama</button><div class="ctx-hr"></div><button class="ctx-item" onclick="openWsModal(false); hideCtxMenu()">➕ Buat Project Personal Baru</button>`;
     else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;hideCtxMenu()">📄 Duplikat</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();hideCtxMenu()">🗑️ Hapus</button>`;
     let x = e.clientX, y = e.clientY;
     if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10;
     if (y + ctx.offsetHeight > window.innerHeight) y = window.innerHeight - ctx.offsetHeight - 10;
     ctx.style.left = x + 'px'; ctx.style.top = y + 'px';
 };
-window.hideCtxMenu = () => { document.getElementById('ctx-menu').style.display = 'none'; };
-document.addEventListener('click', hideCtxMenu);
 
 window.cols = (t) => columns; 
 window.renderAll = () => { renderTabs(); renderBoard(); };
@@ -1019,20 +1140,6 @@ window.cardH = (c) => {
   return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${c.type==='Video'?'tv':c.type==='Feed'?'tf':c.type==='Catatan'?'tc':'ts'}">${c.type}</span>${objBadge}${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
 };
 
-let draggedBrandIdx = null;
-window.dragB = (e, idx) => { draggedBrandIdx = idx; e.dataTransfer.setData("text/plain", idx); };
-window.dropB = (e, targetIdx) => {
-    e.preventDefault();
-    if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return;
-    const b = brands.splice(draggedBrandIdx, 1)[0];
-    brands.splice(targetIdx, 0, b);
-    syncToFirebase();
-    renderAll();
-    draggedBrandIdx = null;
-};
-
-window.setB = (id) => { aB=id; renderAll(); };
-window.toggleCol = (id) => { const col = columns.find(c=>c.id===id); if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } };
 window.openAdd = (s) => { 
     document.getElementById('add-ov').classList.add('show'); 
     const curType = document.getElementById('filter-type').value;
@@ -1248,69 +1355,6 @@ window.mv = (id, d) => {
   const c = cards.find(x=>x.id===id); if(!c) return;
   const cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status), ni = ci+d;
   if(ni>=0 && ni<cl.length) { c.status = cl[ni].id; renderBoard(); syncToFirebase(); }
-};
-
-let draggedCardId = null;
-window.dragCard = (e, id) => { 
-    draggedCardId = id; 
-    e.dataTransfer.setData("text", id); 
-    setTimeout(() => { e.target.style.opacity = '0.5'; }, 0); 
-};
-window.dragEndCard = (e) => { 
-    e.target.style.opacity = '1'; 
-    draggedCardId = null; 
-    document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); 
-};
-window.dragOverCard = (e, id) => {
-    e.preventDefault(); e.stopPropagation();
-    if(!draggedCardId || draggedCardId === id) return;
-    const target = e.currentTarget;
-    const offset = target.getBoundingClientRect().y + (target.getBoundingClientRect().height / 2);
-    if (e.clientY - offset > 0) target.style.boxShadow = '0 4px 0 var(--primary)';
-    else target.style.boxShadow = '0 -4px 0 var(--primary)';
-};
-window.dragLeaveCard = (e) => { if(e.currentTarget) e.currentTarget.style.boxShadow = ''; };
-
-window.dropOnCard = (e, targetId) => {
-    e.preventDefault(); e.stopPropagation();
-    document.querySelectorAll('.card').forEach(c => c.style.boxShadow = '');
-    if (!draggedCardId || draggedCardId === targetId) return;
-
-    const cIdx = cards.findIndex(x => x.id === draggedCardId);
-    const tIdx = cards.findIndex(x => x.id === targetId);
-    if (cIdx === -1 || tIdx === -1) return;
-
-    const targetStatus = cards[tIdx].status;
-    const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + (e.currentTarget.getBoundingClientRect().height / 2)) > 0;
-
-    const draggedCard = cards.splice(cIdx, 1)[0];
-    draggedCard.status = targetStatus; 
-
-    let newTargetIdx = cards.findIndex(x => x.id === targetId);
-    if (dropBelow) newTargetIdx++;
-
-    cards.splice(newTargetIdx, 0, draggedCard);
-    
-    document.getElementById('sort-by').value = 'manual'; 
-    draggedCardId = null;
-    
-    renderBoard(); syncToFirebase();
-};
-
-window.dropCard = (e, colId) => { 
-    e.preventDefault(); 
-    const id = e.dataTransfer.getData("text") || draggedCardId; 
-    if(!id) return;
-    
-    const cIdx = cards.findIndex(x => x.id === id);
-    if(cIdx > -1) {
-        const card = cards.splice(cIdx, 1)[0];
-        card.status = colId;
-        cards.push(card); 
-        document.getElementById('sort-by').value = 'manual';
-        renderBoard(); syncToFirebase();
-    }
-    draggedCardId = null;
 };
 
 window.exportToPDF=()=>{
