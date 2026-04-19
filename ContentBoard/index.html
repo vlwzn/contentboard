@@ -43,7 +43,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: background 0.3s; flex-shrink: 0; cursor: pointer; user-select: none; }
 .brand-icon:hover { opacity: 0.8; }
 
-/* CUSTOM DROPDOWNS (NEW) */
+/* CUSTOM DROPDOWNS */
 .custom-dropdown { position: absolute; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 12px; padding: 6px; z-index: 5000; display: none; flex-direction: column; }
 .custom-dropdown.show { display: flex; }
 .proj-selector-btn { font-weight: 700; font-size: 15px; color: #1a1a1a; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; outline: none; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
@@ -180,6 +180,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-c:hover{background:#f5f5f3;}
 .btn-s{padding:10px 20px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer; transition: opacity 0.2s;}
 .btn-s:hover{opacity: 0.9;}
+.btn-s:disabled { opacity: 0.5; cursor: not-allowed; }
 .empty{text-align:center; padding:20px; color:#ccc; font-size:12px; font-style:italic;}
 
 /* CONTEXT MENU */
@@ -220,7 +221,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <!-- LOGIN FORM -->
     <div id="form-login" style="display: block;">
         <input class="fi" type="email" id="log-email" placeholder="Alamat Email" style="margin-bottom: 10px; text-align:left;">
-        <input class="fi" type="password" id="log-pass" placeholder="Kata Sandi" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') loginEmail()">
+        <input class="fi" type="password" id="log-pass" placeholder="Kata Sandi" style="margin-bottom: 10px; text-align:left;" onkeypress="if(event.key==='Enter') loginEmail()">
+        
+        <div style="font-size: 12px; color: #666; margin-bottom: 16px; text-align: right;">
+            <span style="color: var(--primary); cursor: pointer; font-weight: 500;" onclick="toggleAuth('reset')">Lupa kata sandi?</span>
+        </div>
+
         <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 12px; font-size: 14px; box-shadow: 0 4px 10px rgba(83, 74, 183, 0.3);" onclick="loginEmail()">Masuk</button>
         
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
@@ -244,6 +250,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 20px; font-size: 14px;" onclick="registerEmail()">Daftar Akun Baru</button>
         <div style="font-size: 12px; color: #666;">Sudah punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('log')">Masuk di sini</span></div>
     </div>
+
+    <!-- RESET PASSWORD FORM -->
+    <div id="form-reset" style="display: none;">
+        <p style="font-size: 12px; color: #666; margin-bottom: 16px; text-align: left;">Masukkan email Anda yang terdaftar. Kami akan mengirimkan tautan untuk mengatur ulang kata sandi.</p>
+        <input class="fi" type="email" id="res-email" placeholder="Alamat Email" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') resetPassword()">
+        <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 20px; font-size: 14px;" onclick="resetPassword()">Kirim Link Reset</button>
+        <div style="font-size: 12px; color: #666;"><span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('log')">← Kembali ke Login</span></div>
+    </div>
   </div>
 </div>
 
@@ -252,7 +266,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="topbar-left">
       <div class="brand">
         
-        <!-- NEW: MENU AKUN / LOGOUT -->
+        <!-- MENU AKUN / LOGOUT -->
         <div style="position: relative;">
             <div class="brand-icon" id="user-avatar" onclick="toggleUserMenu(event)" title="Opsi Akun">A</div>
             <div id="user-menu" class="custom-dropdown" style="top: 40px; left: 0; min-width: 180px;">
@@ -264,7 +278,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             </div>
         </div>
         
-        <!-- NEW: PROJECT SELECTOR CUSTOM (BISA DRAG & DROP) -->
+        <!-- PROJECT SELECTOR CUSTOM (BISA DRAG & DROP) -->
         <div style="position: relative;">
             <button id="project-btn" class="proj-selector-btn" onclick="toggleProjMenu(event)">Project Utama ▾</button>
             <div id="proj-menu" class="custom-dropdown" style="top: 36px; left: 0; min-width: 220px; max-height: 400px; overflow-y: auto;">
@@ -348,10 +362,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div id="empty-state" style="display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
     <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.8;">📦</div>
     <h3 style="color: #222; margin-bottom: 12px; font-size: 20px;">Ruang Kerja Kosong</h3>
-    <p style="color: #666; font-size: 14px; max-width: 320px; margin-bottom: 24px; line-height: 1.5;">Anda belum memiliki project di akun ini. Silakan buat project personal baru, atau pulihkan data lama Anda.</p>
+    <p style="color: #666; font-size: 14px; max-width: 320px; margin-bottom: 24px; line-height: 1.5;">Anda belum memiliki project di akun ini. Silakan buat project personal baru.</p>
     <div style="display:flex; flex-direction:column; gap:12px; width: 100%; max-width: 250px;">
         <button class="btn-s" style="padding: 12px 24px; font-size: 14px; box-shadow: 0 4px 12px rgba(83,74,183,0.3);" onclick="openWsModal()">+ Buat Project Baru</button>
-        <button class="btn-c" style="padding: 10px 24px; font-size: 13px;" onclick="restoreLegacy()">📥 Pulihkan Data Lama</button>
     </div>
   </div>
 </div>
@@ -519,7 +532,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="modal">
     <div class="modal-head" id="ws-title" style="padding:16px 20px; font-weight:700; border-bottom:1px solid #f0f0f0;">Project Baru</div>
     <div class="modal-body" style="padding:20px;">
-      <input class="fi" type="text" id="ws-name" placeholder="Nama Project..."/>
+      <input class="fi" type="text" id="ws-name" placeholder="Nama Project..." onkeyup="autoFillId(this.value)"/>
+      <div id="ws-id-container" style="margin-top: 4px;">
+          <span style="font-size: 11px; color: #888; font-weight: 600;">ID PROJECT (URL & Database):</span>
+          <input class="fi" type="text" id="ws-id" placeholder="id-unik-project" style="font-family: monospace; font-size: 13px; background: #f9f9f9; margin-top: 6px; margin-bottom: 0;"/>
+      </div>
     </div>
     <div class="modal-foot" style="padding:16px 20px; display:flex; justify-content:flex-end; gap:10px; background:#fafafa; border-top:1px solid #f0f0f0;">
       <button id="ws-del-btn" class="btn-c" style="color:#e24b4a; margin-right:auto; display:none;" onclick="confirmDelWs()">Hapus</button>
@@ -575,7 +592,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div id="ctx-menu" class="ctx-menu"></div>
 
 <!-- KUSTOM MODAL ALERT -->
-<div class="overlay" id="msg-ov" style="z-index: 4000;">
+<div class="overlay" id="msg-ov" style="z-index: 10000;">
   <div class="modal" style="max-width: 320px; text-align: center;">
     <div style="padding: 24px 20px 10px;"><div id="msg-text" style="font-weight: 500; font-size: 14px; color: #222; line-height: 1.5;"></div></div>
     <div style="padding: 16px 20px 20px; display: flex; gap: 10px; justify-content: center;">
@@ -595,10 +612,11 @@ import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://ww
 import { 
     getAuth, 
     signInWithPopup, 
-    GoogleAuthProvider, 
+    GoogleAuthProvider,
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
     sendEmailVerification, 
+    sendPasswordResetEmail,
     onAuthStateChanged, 
     signOut,
     updateProfile
@@ -630,6 +648,15 @@ let unsubscribeBoard = null;
 let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '' };
 let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
 
+// GLOBAL HIDE CONTEXT MENU FIX
+window.hideCtxMenu = () => {
+    const ctx = document.getElementById('ctx-menu');
+    if (ctx) ctx.style.display = 'none';
+};
+
+// GLOBAL DRAG AND DROP ALLOWANCE (PENCEGAH ERROR BROWSER)
+window.allowDrop = (e) => { e.preventDefault(); };
+
 // FUNGSI PESAN ALERT / CONFIRM KUSTOM
 window.showMsg = (txt, cb) => {
     const msgText = document.getElementById('msg-text');
@@ -644,7 +671,11 @@ window.showMsg = (txt, cb) => {
 
 // ================= SISTEM AUTHENTICATION FIREBASE =================
 
+window.isRegistering = false; // Flag khusus agar tidak bertabrakan saat daftar
+
 onAuthStateChanged(auth, (user) => {
+    if (window.isRegistering) return; // Abaikan jika sedang dalam proses pendaftaran
+
     const loginOv = document.getElementById('login-ov');
     
     if (user) {
@@ -672,13 +703,19 @@ onAuthStateChanged(auth, (user) => {
 });
 
 window.toggleAuth = (type) => {
+    document.getElementById('form-login').style.display = 'none';
+    document.getElementById('form-register').style.display = 'none';
+    document.getElementById('form-reset').style.display = 'none';
+
     if(type === 'reg') {
-        document.getElementById('form-login').style.display = 'none';
         document.getElementById('form-register').style.display = 'block';
         document.getElementById('auth-title').innerText = "Buat Akun Baru";
         document.getElementById('auth-desc').innerText = "Daftar untuk membuat ruang kerja personal.";
+    } else if(type === 'reset') {
+        document.getElementById('form-reset').style.display = 'block';
+        document.getElementById('auth-title').innerText = "Atur Ulang Sandi";
+        document.getElementById('auth-desc').innerText = "Jangan khawatir, mari kita pulihkan akses Anda.";
     } else {
-        document.getElementById('form-register').style.display = 'none';
         document.getElementById('form-login').style.display = 'block';
         document.getElementById('auth-title').innerText = "Selamat Datang!";
         document.getElementById('auth-desc').innerText = "Masuk untuk mengelola ruang kerja Anda.";
@@ -696,21 +733,19 @@ window.loginEmail = () => {
     const pass = document.getElementById('log-pass').value.trim();
     if(!email || !pass) return showMsg("Email dan kata sandi harus diisi.");
     
-    // Ubah tombol jadi "Memproses..."
     const btn = document.querySelector('#form-login .btn-s');
     const originalText = btn.innerText;
     btn.innerText = "Memproses...";
     btn.disabled = true;
 
     signInWithEmailAndPassword(auth, email, pass).catch((error) => {
-        // Kembalikan tombol jika gagal
         btn.innerText = originalText;
         btn.disabled = false;
         showMsg("Gagal masuk: Periksa kembali email dan kata sandi Anda.");
     });
 };
 
-window.registerEmail = () => {
+window.registerEmail = async () => {
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const pass = document.getElementById('reg-pass').value.trim();
@@ -718,30 +753,60 @@ window.registerEmail = () => {
     if(!name || !email || !pass) return showMsg("Semua kolom (Nama, Email, Sandi) wajib diisi.");
     if(pass.length < 6) return showMsg("Kata sandi minimal 6 karakter.");
     
-    // Ubah tombol jadi "Memproses..."
     const btn = document.querySelector('#form-register .btn-s');
     const originalText = btn.innerText;
     btn.innerText = "Memproses...";
     btn.disabled = true;
     
-    createUserWithEmailAndPassword(auth, email, pass).then((userCredential) => {
-        updateProfile(userCredential.user, { displayName: name });
-        sendEmailVerification(userCredential.user).then(() => {
-            showMsg("Pendaftaran sukses!<br><b>Link verifikasi telah dikirim ke email Anda.</b> Silakan klik link tersebut sebelum masuk.", () => {
-                toggleAuth('log'); 
-            });
-            signOut(auth); 
-            // Kembalikan tombol setelah sukses
-            btn.innerText = originalText;
-            btn.disabled = false;
+    window.isRegistering = true; // Kunci sistem onAuthStateChanged
+    
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(userCredential.user, { displayName: name });
+        await sendEmailVerification(userCredential.user);
+        await signOut(auth); // Keluar agar wajib verifikasi
+        
+        window.isRegistering = false; // Buka kembali sistem
+        
+        showMsg("Pendaftaran sukses!<br><b>Link verifikasi telah dikirim ke email Anda.</b> Silakan cek kotak masuk/spam dan klik link tersebut sebelum masuk.", () => {
+            toggleAuth('log'); 
         });
-    }).catch((error) => {
-        // Kembalikan tombol jika gagal
-        btn.innerText = originalText;
-        btn.disabled = false;
+    } catch(error) {
+        window.isRegistering = false;
         if(error.code === 'auth/email-already-in-use') showMsg("Email ini sudah pernah terdaftar.");
         else showMsg("Gagal mendaftar: " + error.message);
-    });
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+};
+
+window.resetPassword = async () => {
+    const email = document.getElementById('res-email').value.trim() || document.getElementById('log-email').value.trim();
+    if(!email) {
+        document.getElementById('res-email').focus();
+        return showMsg("Harap masukkan alamat email Anda terlebih dahulu.");
+    }
+    
+    const btn = document.querySelector('#form-reset .btn-s');
+    const originalText = btn.innerText;
+    btn.innerText = "Mengirim...";
+    btn.disabled = true;
+    
+    try {
+        await sendPasswordResetEmail(auth, email);
+        showMsg(`Tautan reset kata sandi telah dikirim ke <b>${email}</b>.<br>Silakan periksa kotak masuk atau folder spam Anda.`, () => {
+            toggleAuth('log'); 
+        });
+        document.getElementById('res-email').value = '';
+    } catch(error) {
+        if(error.code === 'auth/user-not-found') showMsg("Email tidak terdaftar di sistem kami.");
+        else if(error.code === 'auth/invalid-email') showMsg("Format email tidak valid.");
+        else showMsg("Gagal mengirim email: " + error.message);
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 };
 
 window.showLogoutMenu = () => {
@@ -749,16 +814,6 @@ window.showLogoutMenu = () => {
     showMsg(`Apakah Anda yakin ingin keluar (Log out) dari aplikasi?`, () => {
         signOut(auth).then(() => {
             window.location.reload();
-        });
-    });
-};
-
-window.restoreLegacy = () => {
-    get(ref(db, 'content_board_workspaces_list')).then(snap => {
-        let oldWs = snap.val() || [{id: 'default', name: 'Project Utama'}];
-        set(ref(db, `users/${myUser.id}/workspaces`), oldWs).then(() => {
-            localStorage.setItem('cb_active_ws', oldWs[0].id);
-            showMsg("Project lama Anda berhasil dipulihkan!");
         });
     });
 };
@@ -842,7 +897,7 @@ function renderWsSelector() {
             <div class="proj-item ${w.id === activeWsId ? 'active' : ''}" 
                  draggable="true" 
                  ondragstart="dragWs(event, ${i})" 
-                 ondragover="dragOverWs(event)" 
+                 ondragover="allowDrop(event); dragOverWs(event);" 
                  ondragleave="dragLeaveWs(event)"
                  ondrop="dropWs(event, ${i})" 
                  onclick="switchWorkspace('${w.id}')">
@@ -856,12 +911,12 @@ function renderWsSelector() {
 // LOGIKA DRAG & DROP UNTUK PROJECT (WORKSPACE)
 let draggedWsIdx = null;
 window.dragWs = (e, idx) => { 
+    e.stopPropagation();
     draggedWsIdx = idx; 
-    e.dataTransfer.setData("text/plain", idx);
+    e.dataTransfer.setData("text/plain", String(idx));
     setTimeout(() => e.target.style.opacity = '0.5', 0);
 };
 window.dragOverWs = (e) => {
-    e.preventDefault();
     const target = e.currentTarget;
     const rect = target.getBoundingClientRect();
     const offset = rect.y + (rect.height / 2);
@@ -878,7 +933,7 @@ window.dragLeaveWs = (e) => {
     e.currentTarget.style.borderBottom = '2px solid transparent';
 };
 window.dropWs = (e, targetIdx) => {
-    e.preventDefault();
+    e.preventDefault(); e.stopPropagation();
     e.currentTarget.style.borderTop = '2px solid transparent';
     e.currentTarget.style.borderBottom = '2px solid transparent';
     document.querySelectorAll('.proj-item').forEach(el => el.style.opacity = '1');
@@ -901,30 +956,53 @@ window.dropWs = (e, targetIdx) => {
 
 
 window.openWsModal = (isEdit = false) => {
-    const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn');
+    const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), idEl = document.getElementById('ws-id'), idContainer = document.getElementById('ws-id-container'), delBtn = document.getElementById('ws-del-btn');
     if (isEdit) {
         editWsId = activeWsId; titleEl.textContent = "Edit Project";
-        const currentWs = workspaces.find(w => w.id === activeWsId); inputEl.value = currentWs ? currentWs.name : '';
+        const currentWs = workspaces.find(w => w.id === activeWsId); 
+        inputEl.value = currentWs ? currentWs.name : '';
+        idEl.value = currentWs ? currentWs.id : '';
+        idEl.disabled = true;
+        idEl.style.opacity = '0.6';
         delBtn.style.display = "block"; 
     } else {
-        editWsId = null; titleEl.textContent = "Project Baru"; inputEl.value = ''; delBtn.style.display = "none";
+        editWsId = null; titleEl.textContent = "Project Baru"; 
+        inputEl.value = ''; 
+        idEl.value = '';
+        idEl.disabled = false;
+        idEl.style.opacity = '1';
+        delBtn.style.display = "none";
     }
     document.getElementById('ws-ov').classList.add('show');
 };
+
 window.closeWsModal = () => { document.getElementById('ws-ov').classList.remove('show'); };
+
+// AUTO FILL ID PROJECT
+window.autoFillId = (val) => {
+    if (!editWsId) {
+        document.getElementById('ws-id').value = val.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    }
+};
 
 window.saveWs = () => {
     const name = document.getElementById('ws-name').value.trim();
+    let customId = document.getElementById('ws-id').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
     if(!name) return;
+    
     if (editWsId) {
         const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name;
         set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { closeWsModal(); renderWsSelector(); });
     } else {
-        const newId = 'ws_' + Date.now(); 
-        workspaces.push({id: newId, name: name});
+        if (!customId) customId = 'ws_' + Date.now();
+        if (workspaces.some(w => w.id === customId)) {
+            showMsg("ID Project sudah digunakan. Silakan gunakan ID lain.");
+            return;
+        }
+        workspaces.push({id: customId, name: name});
         set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { 
             closeWsModal(); 
-            localStorage.setItem('cb_active_ws', newId);
+            localStorage.setItem('cb_active_ws', customId);
         });
     }
 };
@@ -989,7 +1067,7 @@ function applyTheme() {
     }
 }
 
-// ================= FUNGSI-FUNGSI PAPAN KERJA (TETAP SAMA) =================
+// ================= FUNGSI-FUNGSI PAPAN KERJA =================
 
 window.openThemeModal = () => { 
     document.getElementById('bg-url-input').value = themeSettings.bg || '';
@@ -1018,7 +1096,6 @@ window.removeBg = () => {
     syncToFirebase(); 
 };
 
-// Card Transfer
 window.openMoveWsModal = (cardId) => {
     cardToMoveId = cardId;
     const availableWs = workspaces.filter(w => w.id !== activeWsId);
@@ -1047,30 +1124,18 @@ window.moveCardToWs = async () => {
     finally { btn.textContent = 'Pindahkan'; btn.disabled = false; }
 };
 
-window.showCtxMenu = (e, type, id) => {
-    e.preventDefault(); e.stopPropagation();
-    const ctx = document.getElementById('ctx-menu'); ctx.style.display = 'flex';
-    if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`;
-    else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`;
-    else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;hideCtxMenu()">📄 Duplikat</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();hideCtxMenu()">🗑️ Hapus</button>`;
-    let x = e.clientX, y = e.clientY;
-    if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10;
-    if (y + ctx.offsetHeight > window.innerHeight) y = window.innerHeight - ctx.offsetHeight - 10;
-    ctx.style.left = x + 'px'; ctx.style.top = y + 'px';
-};
-
 window.cols = (t) => columns; 
 window.renderAll = () => { renderTabs(); renderBoard(); };
 window.renderTabs = () => {
   document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua</div>`
-    + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="event.preventDefault()" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('')
+    + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('')
     + `<div class="add-btab" onclick="openBrand()">+</div>`;
   const opts = `<option value="">Tanpa Brand</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join('');
   document.getElementById('m-brand').innerHTML = opts; document.getElementById('dp-fbrand').innerHTML = opts;
 };
 
 window.renderBoard = () => {
-  if (workspaces.length === 0) return; // Mencegah render jika kosong
+  if (workspaces.length === 0) return;
 
   const fMonth = document.getElementById('filter-month').value, 
         fWeek = document.getElementById('filter-week').value, 
@@ -1107,8 +1172,8 @@ window.renderBoard = () => {
             return a.type.localeCompare(b.type);
         });
     }
-    if(col.collapsed) return `<div class="col collapsed" ondragover="event.preventDefault()" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`;
-    return `<div class="col" ondragover="event.preventDefault()" ondrop="dropCard(event, '${col.id}')"><div class="col-head" style="border-top:3px solid ${col.c}" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle" onclick="toggleCol('${col.id}')">▼</button><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><div style="display:flex;gap:2px;margin-left:auto;"><button class="ca" onclick="mvCol(${idx},-1)" ${idx===0?'disabled':''}>◀</button><button class="ca" onclick="mvCol(${idx},1)" ${idx===columns.length-1?'disabled':''}>▶</button></div></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`;
+    if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`;
+    return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" style="border-top:3px solid ${col.c}" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle" onclick="toggleCol('${col.id}')">▼</button><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><div style="display:flex;gap:2px;margin-left:auto;"><button class="ca" onclick="mvCol(${idx},-1)" ${idx===0?'disabled':''}>◀</button><button class="ca" onclick="mvCol(${idx},1)" ${idx===columns.length-1?'disabled':''}>▶</button></div></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`;
   }).join('') + `<div class="col" style="justify-content:center; width:270px; min-width:270px;"><button class="add-col-btn" style="height:100px; border:2px dashed #ccc; font-weight:bold; font-size:13px;" onclick="openCol()">+ Tambah Status Baru</button></div>`;
 };
 
@@ -1120,7 +1185,6 @@ window.cardH = (c) => {
   else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;margin-left:4px;">⚡ Penting</span>`;
   else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;margin-left:4px;">🐢 Santai</span>`;
 
-  // BADGE UNTUK JALUR/OBJECTIVE
   let objBadge = '';
   const obj = c.objective || 'Konten';
   if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;margin-left:4px;">📢 Ads</span>`;
@@ -1140,6 +1204,25 @@ window.cardH = (c) => {
   return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${c.type==='Video'?'tv':c.type==='Feed'?'tf':c.type==='Catatan'?'tc':'ts'}">${c.type}</span>${objBadge}${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
 };
 
+// LOGIKA DRAG & DROP BRAND TABS (FIXED DATA TYPE)
+let draggedBrandIdx = null;
+window.dragB = (e, idx) => { 
+    e.stopPropagation();
+    draggedBrandIdx = idx; 
+    e.dataTransfer.setData("text/plain", String(idx)); // <- HARUS STRING (TEKS)
+};
+window.dropB = (e, targetIdx) => {
+    e.preventDefault(); e.stopPropagation();
+    if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return;
+    const b = brands.splice(draggedBrandIdx, 1)[0];
+    brands.splice(targetIdx, 0, b);
+    syncToFirebase();
+    renderAll();
+    draggedBrandIdx = null;
+};
+
+window.setB = (id) => { aB=id; renderAll(); };
+window.toggleCol = (id) => { const col = columns.find(c=>c.id===id); if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } };
 window.openAdd = (s) => { 
     document.getElementById('add-ov').classList.add('show'); 
     const curType = document.getElementById('filter-type').value;
@@ -1164,7 +1247,7 @@ window.saveCard = () => {
         time:mType==='Catatan'?'':document.getElementById('m-time').value,
         week:mType==='Catatan'?'':document.getElementById('m-week').value,
         urgency:document.getElementById('m-urgency').value,
-        objective:document.getElementById('m-objective').value, // Simpan objective
+        objective:document.getElementById('m-objective').value,
         status:document.getElementById('m-status').value,
         notes:'',images:[],steps:[]
     }); 
@@ -1182,7 +1265,7 @@ window.selCard = (id) => {
     document.getElementById('dp-ftype').value=c.type; 
     document.getElementById('dp-fbrand').value=c.bId; 
     document.getElementById('dp-furgency').value=c.urgency||'normal'; 
-    document.getElementById('dp-fobjective').value=c.objective||'Konten'; // Tampilkan objective
+    document.getElementById('dp-fobjective').value=c.objective||'Konten'; 
     const s=document.getElementById('dp-fstatus'); 
     s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); 
     s.value=c.status; 
@@ -1226,7 +1309,7 @@ window.addToGCal = () => {
 
 window.renderSteps = (c) => { 
     document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`
-    <div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="dragOverStep(event)" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})">
+    <div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})">
         <span class="drag-handle" title="Tarik untuk memindahkan">⠿</span>
         <input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})">
         <input class="step-input" type="text" value="${s.text.replace(/"/g, '&quot;')}" onchange="updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:#aaa;':''}" title="Klik untuk mengedit judul tugas">
@@ -1245,7 +1328,12 @@ window.addStep = () => { const i=document.getElementById('new-step-input'); if(!
 window.delStep = (i) => { const c=cards.find(x=>x.id===selId); c.steps.splice(i,1); syncToFirebase(); renderSteps(c); renderBoard(); };
 
 let draggedStepIdx = null;
-window.dragStep = (e, idx) => { draggedStepIdx = idx; e.stopPropagation(); setTimeout(() => { e.target.style.opacity = '0.4'; }, 0); };
+window.dragStep = (e, idx) => { 
+    e.stopPropagation(); 
+    draggedStepIdx = idx; 
+    e.dataTransfer.setData("text/plain", String(idx)); // <- HARUS STRING (TEKS)
+    setTimeout(() => { e.target.style.opacity = '0.4'; }, 0); 
+};
 window.dragEndStep = (e) => { e.target.style.opacity = '1'; draggedStepIdx = null; document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = ''); };
 window.dragOverStep = (e) => {
     e.preventDefault(); e.stopPropagation(); if(draggedStepIdx === null) return;
@@ -1355,6 +1443,71 @@ window.mv = (id, d) => {
   const c = cards.find(x=>x.id===id); if(!c) return;
   const cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status), ni = ci+d;
   if(ni>=0 && ni<cl.length) { c.status = cl[ni].id; renderBoard(); syncToFirebase(); }
+};
+
+// LOGIKA DRAG & DROP KARTU (FIXED DATA TYPE)
+let draggedCardId = null;
+window.dragCard = (e, id) => { 
+    e.stopPropagation();
+    draggedCardId = id; 
+    e.dataTransfer.setData("text/plain", String(id)); // <- HARUS STRING (TEKS)
+    setTimeout(() => { e.target.style.opacity = '0.5'; }, 0); 
+};
+window.dragEndCard = (e) => { 
+    e.target.style.opacity = '1'; 
+    draggedCardId = null; 
+    document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); 
+};
+window.dragOverCard = (e, id) => {
+    e.preventDefault(); e.stopPropagation();
+    if(!draggedCardId || draggedCardId === id) return;
+    const target = e.currentTarget;
+    const offset = target.getBoundingClientRect().y + (target.getBoundingClientRect().height / 2);
+    if (e.clientY - offset > 0) target.style.boxShadow = '0 4px 0 var(--primary)';
+    else target.style.boxShadow = '0 -4px 0 var(--primary)';
+};
+window.dragLeaveCard = (e) => { if(e.currentTarget) e.currentTarget.style.boxShadow = ''; };
+
+window.dropOnCard = (e, targetId) => {
+    e.preventDefault(); e.stopPropagation();
+    document.querySelectorAll('.card').forEach(c => c.style.boxShadow = '');
+    if (!draggedCardId || draggedCardId === targetId) return;
+
+    const cIdx = cards.findIndex(x => x.id === draggedCardId);
+    const tIdx = cards.findIndex(x => x.id === targetId);
+    if (cIdx === -1 || tIdx === -1) return;
+
+    const targetStatus = cards[tIdx].status;
+    const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + (e.currentTarget.getBoundingClientRect().height / 2)) > 0;
+
+    const draggedCard = cards.splice(cIdx, 1)[0];
+    draggedCard.status = targetStatus; 
+
+    let newTargetIdx = cards.findIndex(x => x.id === targetId);
+    if (dropBelow) newTargetIdx++;
+
+    cards.splice(newTargetIdx, 0, draggedCard);
+    
+    document.getElementById('sort-by').value = 'manual'; 
+    draggedCardId = null;
+    
+    renderBoard(); syncToFirebase();
+};
+
+window.dropCard = (e, colId) => { 
+    e.preventDefault(); e.stopPropagation();
+    const id = e.dataTransfer.getData("text/plain") || draggedCardId; 
+    if(!id) return;
+    
+    const cIdx = cards.findIndex(x => x.id === id);
+    if(cIdx > -1) {
+        const card = cards.splice(cIdx, 1)[0];
+        card.status = colId;
+        cards.push(card); 
+        document.getElementById('sort-by').value = 'manual';
+        renderBoard(); syncToFirebase();
+    }
+    draggedCardId = null;
 };
 
 window.exportToPDF=()=>{
