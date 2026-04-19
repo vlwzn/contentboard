@@ -46,6 +46,12 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-app);color:var(--text-main);font-size:14px;overflow:hidden; transition: background-color 0.3s ease, color 0.3s ease;}
 
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
 /* LAYOUT */
 .app{display:flex;flex-direction:column;height:100vh;overflow:hidden; background-size: cover; background-position: center; background-attachment: fixed; transition: background 0.4s ease;}
 
@@ -132,7 +138,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .col-toggle:hover { color: var(--primary); }
 .col-lbl-vert { writing-mode: vertical-rl; transform: rotate(180deg); margin: 16px 0; font-size: 13px; font-weight: 700; color: var(--text-main); white-space: nowrap; letter-spacing: 0.5px;}
 
-/* CARD (TOMBOL KIRI KANAN DIHAPUS) */
+/* CARD */
 .card{background:var(--card-bg); border:1px solid var(--glass-border); border-radius:12px;padding:14px;cursor:grab;box-shadow:0 4px 10px rgba(0,0,0,0.03); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative;}
 .card:active{cursor:grabbing; transform: scale(0.98);}
 .card:hover{transform:translateY(-4px); box-shadow:0 12px 20px rgba(0,0,0,0.08); border-color: var(--primary-light);}
@@ -172,7 +178,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .step-item:hover .step-del { opacity: 1; }
 .drag-handle{color:var(--text-light); font-size:16px; margin-top:2px; cursor:grab; user-select:none; padding: 0 4px;}
 
-/* MODAL & PANEL (SMOOTH ANIMATIONS) */
+/* MODAL & PANEL */
 .overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;align-items:center;justify-content:center;padding:20px; backdrop-filter:blur(5px); opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
 .overlay.show{opacity: 1; visibility: visible;}
 .modal{background:var(--modal-bg);border-radius:20px;width:100%;max-width:400px;overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.3); transform: scale(0.95) translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
@@ -196,8 +202,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* USER ASSIGNEE (PIC) DI DETAIL PANEL */
 .pic-selector { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border: 1px solid var(--input-border); padding: 4px 8px; border-radius: 20px; cursor: pointer; transition: border 0.2s; }
 .pic-selector:hover { border-color: var(--primary); }
-.pic-avatar { width: 24px; height: 24px; border-radius: 50%; background: #ddd; color: #555; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
-.pic-name { font-size: 13px; font-weight: 500; color: var(--text-main); }
 
 .fi{padding:14px;border:1px solid var(--input-border);border-radius:10px;width:100%;outline:none;margin-bottom:14px; font-size:14px; transition: all 0.2s; background: var(--input-bg); color: var(--text-main);}
 .fi:focus{border-color:var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: var(--modal-bg);}
@@ -217,6 +221,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ctx-item.danger { color: #e24b4a; }
 .ctx-hr { height: 1px; background: var(--input-border); margin: 4px 0; }
 
+/* THEME PICKER */
+.theme-option { width:32px; height:32px; border-radius:50%; cursor:pointer; border:2px solid transparent; }
+.theme-option.active { border-color:#222; }
+
 /* FIX RESPONSIVE MOBILE */
 @media (max-width: 800px) { 
   .topbar { padding: 12px; }
@@ -232,48 +240,63 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
-<div class="overlay" id="login-ov" style="z-index: 9999; background: var(--bg-app); opacity: 1; visibility: visible;">
-  <div class="modal" style="padding: 30px; text-align: center;">
-    <div style="width: 64px; height: 64px; background: var(--primary); color: #fff; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; margin: 0 auto 20px; box-shadow: 0 10px 20px var(--primary-light);">C</div>
-    <h2 id="auth-title" style="margin-bottom: 8px; color: var(--text-main); font-weight: 800;">ContentBoard Pro</h2>
-    <p id="auth-desc" style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;">Kolaborasi cerdas untuk tim kreatif.</p>
+<!-- AUTH OVERLAY (Sekarang menggunakan layar Loading default untuk cegah flicker) -->
+<div class="overlay show" id="login-ov" style="z-index: 9999; background: var(--bg-app); opacity: 1; visibility: visible;">
+  <div class="modal" style="padding: 30px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
     
-    <div id="form-login" style="display: block;">
-        <input class="fi" type="email" id="log-email" placeholder="Alamat Email" style="text-align:left;">
-        <input class="fi" type="password" id="log-pass" placeholder="Kata Sandi" style="text-align:left; margin-bottom: 8px;" onkeypress="if(event.key==='Enter') loginEmail()">
-        <div style="font-size: 12px; margin-bottom: 20px; text-align: right;"><span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('reset')">Lupa sandi?</span></div>
-        <button class="btn-s" style="width: 100%;" onclick="loginEmail()">Masuk</button>
+    <!-- LOADING STATE (Mencegah tampilan login berkedip saat refresh browser) -->
+    <div id="auth-loading" style="display: block; padding: 20px 0;">
+        <div style="font-size: 40px; animation: pulse 1.5s infinite;">⏳</div>
+        <h3 style="color: var(--text-main); margin-top: 16px; font-weight: 800;">Memuat Sesi...</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Mengecek kredensial Anda yang tersimpan</p>
+    </div>
+
+    <!-- SEMUA FORM LOGIN DISIMPAN DI SINI, HANYA TAMPIL JIKA USER BENAR-BENAR LOGOUT -->
+    <div id="auth-content" style="display: none;">
+        <div style="width: 64px; height: 64px; background: var(--primary); color: #fff; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; margin: 0 auto 20px; box-shadow: 0 10px 20px var(--primary-light);">C</div>
+        <h2 id="auth-title" style="margin-bottom: 8px; color: var(--text-main); font-weight: 800;">ContentBoard Pro</h2>
+        <p id="auth-desc" style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;">Kolaborasi cerdas untuk tim kreatif.</p>
         
-        <div style="display:flex; align-items:center; gap:10px; margin: 16px 0;">
-            <hr style="flex:1; border:none; border-top:1px solid var(--input-border);">
-            <span style="font-size:11px; color:var(--text-light); font-weight:600;">ATAU</span>
-            <hr style="flex:1; border:none; border-top:1px solid var(--input-border);">
+        <!-- LOGIN FORM -->
+        <div id="form-login" style="display: block;">
+            <input class="fi" type="email" id="log-email" placeholder="Alamat Email" style="text-align:left;">
+            <input class="fi" type="password" id="log-pass" placeholder="Kata Sandi" style="text-align:left; margin-bottom: 8px;" onkeypress="if(event.key==='Enter') loginEmail()">
+            <div style="font-size: 12px; margin-bottom: 20px; text-align: right;"><span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('reset')">Lupa sandi?</span></div>
+            <button class="btn-s" style="width: 100%;" onclick="loginEmail()">Masuk</button>
+            
+            <div style="display:flex; align-items:center; gap:10px; margin: 16px 0;">
+                <hr style="flex:1; border:none; border-top:1px solid var(--input-border);">
+                <span style="font-size:11px; color:var(--text-light); font-weight:600;">ATAU</span>
+                <hr style="flex:1; border:none; border-top:1px solid var(--input-border);">
+            </div>
+
+            <button class="btn-c" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 20px;" onclick="loginGoogle()">
+                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Lanjutkan dengan Google
+            </button>
+            <div style="font-size: 13px; color: var(--text-muted);">Belum punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('reg')">Daftar Gratis</span></div>
         </div>
 
-        <button class="btn-c" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 20px;" onclick="loginGoogle()">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Lanjutkan dengan Google
-        </button>
-        <div style="font-size: 13px; color: var(--text-muted);">Belum punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('reg')">Daftar Gratis</span></div>
-    </div>
+        <!-- REGISTER FORM -->
+        <div id="form-register" style="display: none;">
+            <input class="fi" type="text" id="reg-name" placeholder="Nama Lengkap" style="text-align:left;">
+            <input class="fi" type="email" id="reg-email" placeholder="Alamat Email" style="text-align:left;">
+            <input class="fi" type="password" id="reg-pass" placeholder="Kata Sandi (Min. 6 Karakter)" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') registerEmail()">
+            <button class="btn-s" style="width: 100%; margin-bottom:16px;" onclick="registerEmail()">Daftar Sekarang</button>
+            <button class="btn-c" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 24px;" onclick="loginGoogle()">
+                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Atau Daftar dengan Google
+            </button>
+            <div style="font-size: 13px; color: var(--text-muted);">Sudah punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('log')">Masuk di sini</span></div>
+        </div>
 
-    <div id="form-register" style="display: none;">
-        <input class="fi" type="text" id="reg-name" placeholder="Nama Lengkap" style="text-align:left;">
-        <input class="fi" type="email" id="reg-email" placeholder="Alamat Email" style="text-align:left;">
-        <input class="fi" type="password" id="reg-pass" placeholder="Kata Sandi (Min. 6 Karakter)" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') registerEmail()">
-        <button class="btn-s" style="width: 100%; margin-bottom:16px;" onclick="registerEmail()">Daftar Sekarang</button>
-        <button class="btn-c" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 24px;" onclick="loginGoogle()">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Atau Daftar dengan Google
-        </button>
-        <div style="font-size: 13px; color: var(--text-muted);">Sudah punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('log')">Masuk di sini</span></div>
-    </div>
-
-    <div id="form-reset" style="display: none;">
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; text-align: left; line-height:1.5;">Masukkan email terdaftar Anda. Kami akan mengirimkan tautan aman untuk membuat kata sandi baru.</p>
-        <input class="fi" type="email" id="res-email" placeholder="Alamat Email" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') resetPassword()">
-        <button class="btn-s" style="width: 100%; margin-bottom: 24px;" onclick="resetPassword()">Kirim Tautan Reset</button>
-        <div style="font-size: 13px; color: var(--text-muted);"><span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('log')">← Kembali ke Login</span></div>
+        <!-- RESET PASSWORD FORM -->
+        <div id="form-reset" style="display: none;">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; text-align: left; line-height:1.5;">Masukkan email terdaftar Anda. Kami akan mengirimkan tautan aman untuk membuat kata sandi baru.</p>
+            <input class="fi" type="email" id="res-email" placeholder="Alamat Email" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') resetPassword()">
+            <button class="btn-s" style="width: 100%; margin-bottom: 24px;" onclick="resetPassword()">Kirim Tautan Reset</button>
+            <div style="font-size: 13px; color: var(--text-muted);"><span style="color: var(--primary); cursor: pointer; font-weight: 700;" onclick="toggleAuth('log')">← Kembali ke Login</span></div>
+        </div>
     </div>
   </div>
 </div>
@@ -282,6 +305,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand">
+        <!-- MENU AKUN / LOGOUT -->
         <div style="position: relative;">
             <div class="brand-icon" id="user-avatar" onclick="toggleMenu('user-menu', event)" title="Opsi Akun">A</div>
             <div id="user-menu" class="custom-dropdown" style="top: 44px; left: 0; min-width: 200px;">
@@ -292,10 +316,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                 <button class="ctx-item" onclick="toggleDarkMode()">🌓 Mode Terang/Gelap</button>
                 <button class="ctx-item" onclick="changeUsername()">✏️ Ubah Nama Profil</button>
                 <div class="ctx-hr"></div>
+                <!-- TOMBOL AJAIB UNTUK MEMULIHKAN DATA LAMA -->
+                <button class="ctx-item" onclick="restoreLegacy()">📥 Pulihkan Data Lama</button>
+                <div class="ctx-hr"></div>
                 <button class="ctx-item danger" onclick="showLogoutMenu()">🚪 Keluar (Logout)</button>
             </div>
         </div>
         
+        <!-- PROJECT SELECTOR -->
         <div style="position: relative; display: flex; align-items:center;">
             <button id="project-btn" class="proj-selector-btn" onclick="toggleMenu('proj-menu', event)">Project Utama ▾</button>
             <button class="share-btn" onclick="generateShareLink()" title="Undang anggota tim ke project ini">🤝 Bagikan</button>
@@ -316,6 +344,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
     </div>
 
+    <!-- FILTER & ACTIONS -->
     <div class="top-actions">
       <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="renderBoard()">
       
@@ -356,6 +385,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                       <select id="sort-by" class="fi" style="margin:0; padding:8px 10px;" onchange="renderBoard()"><option value="manual">Manual (Geser)</option><option value="newest">Paling Baru</option><option value="date-asc">Tanggal Terdekat</option><option value="date-desc">Tanggal Terjauh</option></select>
                   </div>
               </div>
+
+              <!-- TOMBOL RESET FILTER -->
+              <div style="border-top: 1px solid var(--input-border); margin-top: 8px; padding-top: 12px;">
+                  <button class="btn-c" style="width: 100%; padding: 8px; font-size: 12px;" onclick="resetFilters()">🔄 Reset Semua Filter</button>
+              </div>
           </div>
       </div>
 
@@ -368,11 +402,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   
   <div class="board-wrap" id="board-wrap"><div class="board" id="board"></div></div>
 
+  <!-- EMPTY STATE -->
   <div id="empty-state" style="display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
     <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.8; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">✨</div>
     <h3 style="color: var(--text-main); margin-bottom: 12px; font-size: 24px; font-weight: 800;">Ruang Kerja Kosong</h3>
-    <p style="color: var(--text-muted); font-size: 15px; max-width: 380px; margin-bottom: 30px; line-height: 1.6;">Selamat datang di ContentBoard Pro! Silakan buat project personal baru, atau minta rekan tim Anda untuk mengirimkan link undangan project mereka.</p>
-    <button class="btn-s" style="padding: 14px 30px; font-size: 15px;" onclick="openWsModal()">+ Buat Project Baru</button>
+    <p style="color: var(--text-muted); font-size: 15px; max-width: 380px; margin-bottom: 30px; line-height: 1.6;">Selamat datang di ContentBoard Pro! Silakan buat project personal baru, atau pulihkan data Anda yang sudah ada.</p>
+    <div style="display:flex; flex-direction:column; gap:12px; width: 100%; max-width: 250px;">
+        <button class="btn-s" style="padding: 14px 30px; font-size: 15px;" onclick="openWsModal()">+ Buat Project Baru</button>
+        <button class="btn-c" style="padding: 12px 30px; font-size: 14px;" onclick="restoreLegacy()">📥 Pulihkan Data Lama</button>
+    </div>
   </div>
 </div>
 
@@ -382,6 +420,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div id="dp-ov" onclick="closeDP()"></div>
 
+<!-- DETAIL PANEL -->
 <div class="dp" id="dp">
   <div class="dp-pull-indicator"></div>
   <div class="dp-head" style="padding:20px 24px; border-bottom:1px solid var(--input-border); display:flex; align-items:center;">
@@ -397,7 +436,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <span style="font-size: 12px; font-weight: 700; color: var(--primary);">👤 DITUGASKAN KE (PIC):</span>
         <select id="dp-fassignee" style="background: transparent; border: none; font-weight: 700; color: var(--text-main); font-size: 14px; cursor: pointer; outline: none; text-align: right; max-width: 150px;" onchange="dps('assignee', this.value)">
             <option value="">Belum Ada PIC</option>
-            </select>
+        </select>
     </div>
 
     <div class="dp-field"><span class="dp-fl">Judul</span><div class="dp-fv"><input type="text" id="dp-ftitle" onblur="dps('title',this.value)"/></div></div>
@@ -609,11 +648,11 @@ const googleProvider = new GoogleAuthProvider();
 
 // GLOBAL STATE
 let myUser = null; 
-let workspaces = []; // Project Pribadi
-let sharedWorkspaces = []; // Project Orang Lain
+let workspaces = []; 
+let sharedWorkspaces = []; 
 let activeWsId = null;
-let isOwner = true; // Status akses
-let wsMembers = {}; // Daftar PIC/Anggota
+let isOwner = true; 
+let wsMembers = {}; 
 
 let unsubscribeWs = null;
 let unsubscribeSharedWs = null;
@@ -646,7 +685,6 @@ window.showMsg = (txt, cb) => {
     document.getElementById('msg-ov').classList.add('show');
 };
 
-// DARK MODE
 window.toggleDarkMode = () => {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
@@ -654,34 +692,48 @@ window.toggleDarkMode = () => {
 };
 if(localStorage.getItem('cb_theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 
+// RESET FILTER FUNGSI
+window.resetFilters = () => {
+    document.getElementById('filter-month').value = '';
+    document.getElementById('filter-week').value = 'all';
+    document.getElementById('filter-type').value = 'semua';
+    document.getElementById('filter-objective').value = 'all';
+    document.getElementById('filter-urgency').value = 'all';
+    document.getElementById('sort-by').value = 'manual';
+    document.getElementById('search-input').value = '';
+    renderBoard();
+    document.getElementById('filter-panel').classList.remove('show');
+};
+
 // ================= AUTHENTICATION =================
 window.isRegistering = false;
 
 onAuthStateChanged(auth, (user) => {
     if (window.isRegistering) return;
     const loginOv = document.getElementById('login-ov');
+    const authContent = document.getElementById('auth-content');
+    const authLoading = document.getElementById('auth-loading');
     
     if (user) {
         if (user.providerData[0] && user.providerData[0].providerId === 'password' && !user.emailVerified) {
-            loginOv.classList.add('show');
-            loginOv.style.opacity = '1';
-            loginOv.style.visibility = 'visible';
+            authLoading.style.display = 'none';
+            authContent.style.display = 'block';
             showMsg("Email Anda belum diverifikasi. Silakan cek inbox/spam, lalu coba masuk lagi.");
             signOut(auth); return;
         }
         myUser = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email };
-        
-        // Simpan data user ke DB publik agar bisa ditarik sebagai PIC
         set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email });
 
-        // Pastikan overlay login benar-benar hilang dengan animasi
+        // Fade Out Animasi Login
         loginOv.classList.remove('show');
         loginOv.style.opacity = '0';
-        setTimeout(() => { loginOv.style.visibility = 'hidden'; }, 300); // Sinkron dengan durasi transisi CSS
+        setTimeout(() => { loginOv.style.visibility = 'hidden'; }, 300); 
         
         initApp(); 
     } else {
         myUser = null;
+        authLoading.style.display = 'none';
+        authContent.style.display = 'block';
         loginOv.classList.add('show');
         loginOv.style.opacity = '1';
         loginOv.style.visibility = 'visible';
@@ -741,11 +793,31 @@ window.changeUsername = async () => {
     try {
         await updateProfile(auth.currentUser, { displayName: newName.trim() });
         myUser.name = newName.trim();
-        set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email }); // Update public DB
+        set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email });
         document.getElementById('user-avatar').textContent = myUser.name.charAt(0).toUpperCase();
         document.getElementById('user-menu-name').textContent = myUser.name;
         showMsg("Nama berhasil diperbarui!");
     } catch(e) { showMsg("Gagal: " + e.message); }
+};
+
+// SCRIPT PEMULIHAN DATA LAMA
+window.restoreLegacy = async () => {
+    try {
+        const snap = await get(ref(db, 'content_board_workspaces_list'));
+        const oldWs = snap.val();
+        if (oldWs && oldWs.length > 0) {
+            let currentWs = [...workspaces];
+            oldWs.forEach(ow => {
+                if (!currentWs.find(cw => cw.id === ow.id)) currentWs.push(ow);
+            });
+            await set(ref(db, `users/${myUser.id}/workspaces`), currentWs);
+            showMsg("Berhasil! Data project lama Anda telah dipulihkan.");
+        } else {
+            showMsg("Tidak ditemukan data lama di database.");
+        }
+    } catch (e) {
+        showMsg("Gagal memulihkan: " + e.message);
+    }
 };
 
 // ================= SISTEM PROJECT & COLLABORATION =================
@@ -755,21 +827,18 @@ function initApp() {
     document.getElementById('user-menu-name').textContent = myUser.name;
     document.getElementById('user-menu-email').textContent = myUser.email;
     
-    // CEK APAKAH ADA LINK INVITE DI URL ?join=xxx
     const urlParams = new URLSearchParams(window.location.search);
     const joinId = urlParams.get('join');
     if (joinId) {
         joinProject(joinId);
-        window.history.replaceState({}, document.title, window.location.pathname); // Bersihkan URL
+        window.history.replaceState({}, document.title, window.location.pathname); 
     }
 
-    // Dengarkan Project Pribadi
     unsubscribeWs = onValue(ref(db, `users/${myUser.id}/workspaces`), (snap) => {
         workspaces = snap.val() ? Object.values(snap.val()) : [];
         checkAndRenderWs();
     });
 
-    // Dengarkan Project Kolaborasi (Shared)
     unsubscribeSharedWs = onValue(ref(db, `users/${myUser.id}/shared`), (snap) => {
         sharedWorkspaces = snap.val() ? Object.values(snap.val()) : [];
         checkAndRenderWs();
@@ -787,7 +856,6 @@ function checkAndRenderWs() {
         document.getElementById('board-wrap').style.display = 'flex';
         document.getElementById('brand-tabs').style.display = 'flex';
         
-        // Coba buka project yang terakhir dibuka, jika tidak ada, buka yang pertama
         const savedWs = localStorage.getItem('cb_active_ws');
         if (workspaces.some(w => w.id === savedWs)) {
             switchWorkspace(savedWs, true);
@@ -810,13 +878,11 @@ function renderWsSelector() {
     let activeData = workspaces.find(w => w.id === activeWsId) || sharedWorkspaces.find(w => w.id === activeWsId);
     if (activeData) btn.innerHTML = `${activeData.name} ▾`;
 
-    // Render Project Pribadi
     cont.innerHTML = workspaces.map((w, i) => `
         <div class="proj-item ${w.id === activeWsId ? 'active' : ''}" draggable="true" ondragstart="dragWs(event, ${i})" ondragover="allowDrop(event); dragOverWs(event);" ondragleave="dragLeaveWs(event)" ondrop="dropWs(event, ${i})" onclick="switchWorkspace('${w.id}', true)">
             <div><span class="proj-drag-handle">⠿</span> ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}
         </div>`).join('');
 
-    // Render Project Tim (Shared)
     if(sharedWorkspaces.length > 0) {
         sharedHead.style.display = 'block';
         sharedCont.innerHTML = sharedWorkspaces.map(w => `
@@ -828,7 +894,6 @@ function renderWsSelector() {
     }
 }
 
-// LOGIKA DRAG WS SAMA SEPERTI SEBELUMNYA
 let draggedWsIdx = null;
 window.dragWs = (e, i) => { e.stopPropagation(); draggedWsIdx = i; e.dataTransfer.setData("text/plain", String(i)); };
 window.dragOverWs = (e) => { e.preventDefault(); const t = e.currentTarget, r = t.getBoundingClientRect(); if(e.clientY < r.y + r.height/2) { t.style.borderTop='2px solid var(--primary)'; t.style.borderBottom='2px solid transparent'; } else { t.style.borderBottom='2px solid var(--primary)'; t.style.borderTop='2px solid transparent'; } };
@@ -843,12 +908,10 @@ window.dropWs = (e, targetIdx) => {
     set(ref(db, `users/${myUser.id}/workspaces`), workspaces); draggedWsIdx = null;
 };
 
-// BAGIKAN & GABUNG PROJECT
 window.generateShareLink = () => {
     if(!activeWsId) return;
     if(!isOwner) return showMsg("Hanya pembuat project yang bisa mengundang orang lain.");
     
-    // Tambahkan diri sendiri ke daftar member (jika belum)
     update(ref(db, `board_members/${activeWsId}/${myUser.id}`), { role: 'owner' });
     
     const link = `${window.location.origin}${window.location.pathname}?join=${activeWsId}`;
@@ -860,20 +923,15 @@ window.generateShareLink = () => {
 window.joinProject = async (joinId) => {
     if (!myUser) return;
     try {
-        // Cek apakah project exist dengan membaca meta-nya (Aman karena database belum dikunci penuh per node di client ini)
         const snap = await get(ref(db, `content_board_data_${joinId}/meta`));
         let projName = "Shared Project";
         if(snap.exists() && snap.val().name) projName = snap.val().name;
 
-        // Cek apakah sudah join
         const exist = sharedWorkspaces.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId);
         if(exist) return showMsg("Anda sudah tergabung dalam project ini.");
 
-        // Tambahkan ke daftar shared user
         const newShared = [...sharedWorkspaces, { id: joinId, name: projName }];
         await set(ref(db, `users/${myUser.id}/shared`), newShared);
-        
-        // Daftarkan user ini sebagai member di board tersebut
         await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' });
 
         showMsg("Berhasil bergabung ke project tim!");
@@ -901,14 +959,14 @@ window.saveWs = () => {
     if (editWsId) {
         const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name;
         set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
-        set(ref(db, `content_board_data_${editWsId}/meta/name`), name); // Update public name
+        set(ref(db, `content_board_data_${editWsId}/meta/name`), name); 
         closeWsModal();
     } else {
         const customId = 'ws_' + Date.now();
         workspaces.push({id: customId, name: name});
         set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
-        set(ref(db, `content_board_data_${customId}/meta`), { name: name, owner: myUser.id }); // Set owner
-        set(ref(db, `board_members/${customId}/${myUser.id}`), { role: 'owner' }); // Set initial member
+        set(ref(db, `content_board_data_${customId}/meta`), { name: name, owner: myUser.id }); 
+        set(ref(db, `board_members/${customId}/${myUser.id}`), { role: 'owner' }); 
         closeWsModal(); localStorage.setItem('cb_active_ws', customId);
     }
 };
@@ -917,7 +975,7 @@ window.confirmDelWs = () => {
     showMsg("Hapus project ini beserta seluruh kontennya secara permanen?", () => {
         workspaces = workspaces.filter(w => w.id !== activeWsId);
         set(ref(db, `users/${myUser.id}/workspaces`), workspaces);
-        remove(ref(db, `content_board_data_${activeWsId}`)); // Hapus dari DB Publik
+        remove(ref(db, `content_board_data_${activeWsId}`)); 
         remove(ref(db, `board_members/${activeWsId}`)); 
         closeWsModal(); if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true);
     });
@@ -930,7 +988,6 @@ window.switchWorkspace = (wsId, ownerFlag) => {
     aB = 'all';
     document.getElementById('btn-edit-ws').style.display = isOwner ? 'flex' : 'none';
     
-    // Dengarkan Member (PIC) Board Ini
     onValue(ref(db, `board_members/${wsId}`), async (snap) => {
         wsMembers = {};
         if(snap.val()) {
