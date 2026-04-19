@@ -872,11 +872,24 @@ function initApp() {
         renderWsSelector();
 
         if (workspaces.length === 0) {
-            document.getElementById('empty-state').style.display = 'flex';
-            document.getElementById('board-wrap').style.display = 'none';
-            document.getElementById('brand-tabs').style.display = 'none';
-            document.getElementById('fab-add').style.display = 'none';
+            // SCRIPT MIGRASI OTOMATIS DATA LAMA KE AKUN BARU
+            get(ref(db, 'content_board_workspaces_list')).then(snap => {
+                const oldData = snap.val();
+                if (oldData) {
+                    // Pindahkan data lama ke laci pribadi akun baru Anda
+                    set(ref(db, `users/${myUser.id}/workspaces`), oldData).then(() => {
+                        showMsg("Selamat datang kembali! Data lama Anda berhasil ditemukan dan dipulihkan ke akun ini.");
+                    });
+                } else {
+                    // Tampilan Kosong (Jika memang benar-benar pengguna baru dan tidak ada data lama)
+                    document.getElementById('empty-state').style.display = 'flex';
+                    document.getElementById('board-wrap').style.display = 'none';
+                    document.getElementById('brand-tabs').style.display = 'none';
+                    document.getElementById('fab-add').style.display = 'none';
+                }
+            });
         } else {
+            // Tampilan Normal (Data sudah ada)
             document.getElementById('empty-state').style.display = 'none';
             document.getElementById('board-wrap').style.display = 'flex';
             document.getElementById('brand-tabs').style.display = 'flex';
