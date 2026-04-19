@@ -40,7 +40,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 }
 .topbar-left { display: flex; align-items: center; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 8px; }
-.brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: background 0.3s; flex-shrink: 0; }
+.brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: background 0.3s; flex-shrink: 0; cursor: pointer; }
+.brand-icon:hover { opacity: 0.8; }
 #project-selector { font-weight: 700; font-size: 15px; color: #1a1a1a; border: none; background: transparent; outline: none; cursor: pointer; max-width: 150px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
 
 .top-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
@@ -164,10 +165,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .dp-fv{flex:1}
 .dp-fv input, .dp-fv select{width:100%;border:none;outline:none;font-size:13px; color:#222; background:transparent;}
 
-.fi{padding:12px;border:1px solid #e5e5e3;border-radius:8px;width:100%;outline:none;margin-bottom:12px; font-size:13px;}
+.fi{padding:12px;border:1px solid #e5e5e3;border-radius:8px;width:100%;outline:none;margin-bottom:12px; font-size:13px; transition: border 0.2s;}
 .fi:focus{border-color:var(--primary);}
-.btn-c{padding:10px 16px;border:1px solid #ddd;border-radius:10px;background:#fff;font-weight:600;cursor:pointer; color:#444;}
-.btn-s{padding:10px 20px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer;}
+.btn-c{padding:10px 16px;border:1px solid #ddd;border-radius:10px;background:#fff;font-weight:600;cursor:pointer; color:#444; transition: background 0.2s;}
+.btn-c:hover{background:#f5f5f3;}
+.btn-s{padding:10px 20px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer; transition: opacity 0.2s;}
+.btn-s:hover{opacity: 0.9;}
 .empty{text-align:center; padding:20px; color:#ccc; font-size:12px; font-style:italic;}
 
 /* CONTEXT MENU */
@@ -197,11 +200,50 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </style>
 </head>
 <body>
+
+<!-- AUTH OVERLAY (LOGIN / REGISTER) -->
+<div class="overlay" id="login-ov" style="z-index: 9999; background: var(--bg-app);">
+  <div class="modal" style="padding: 30px; text-align: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
+    <div style="width: 60px; height: 60px; background: var(--primary); color: #fff; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; margin: 0 auto 16px;">C</div>
+    <h2 id="auth-title" style="margin-bottom: 8px; color: #222;">Selamat Datang!</h2>
+    <p id="auth-desc" style="font-size: 13px; color: #666; margin-bottom: 24px; line-height: 1.5;">Masuk untuk mengelola ruang kerja Anda.</p>
+    
+    <!-- LOGIN FORM -->
+    <div id="form-login" style="display: block;">
+        <input class="fi" type="email" id="log-email" placeholder="Alamat Email" style="margin-bottom: 10px; text-align:left;">
+        <input class="fi" type="password" id="log-pass" placeholder="Kata Sandi" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') loginEmail()">
+        <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 12px; font-size: 14px; box-shadow: 0 4px 10px rgba(83, 74, 183, 0.3);" onclick="loginEmail()">Masuk</button>
+        
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+            <hr style="flex:1; border:none; border-top:1px solid #ddd;">
+            <span style="font-size:11px; color:#888;">ATAU</span>
+            <hr style="flex:1; border:none; border-top:1px solid #ddd;">
+        </div>
+
+        <button class="btn-c" style="width: 100%; padding: 10px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:8px; font-size: 13px;" onclick="loginGoogle()">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Masuk dengan Google
+        </button>
+        <div style="font-size: 12px; color: #666;">Belum punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('reg')">Daftar di sini</span></div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="form-register" style="display: none;">
+        <input class="fi" type="text" id="reg-name" placeholder="Nama Lengkap" style="margin-bottom: 10px; text-align:left;">
+        <input class="fi" type="email" id="reg-email" placeholder="Alamat Email" style="margin-bottom: 10px; text-align:left;">
+        <input class="fi" type="password" id="reg-pass" placeholder="Kata Sandi (Min. 6 Karakter)" style="margin-bottom: 20px; text-align:left;" onkeypress="if(event.key==='Enter') registerEmail()">
+        <button class="btn-s" style="width: 100%; padding: 12px; margin-bottom: 20px; font-size: 14px;" onclick="registerEmail()">Daftar Akun Baru</button>
+        <div style="font-size: 12px; color: #666;">Sudah punya akun? <span style="color: var(--primary); cursor: pointer; font-weight: 600;" onclick="toggleAuth('log')">Masuk di sini</span></div>
+    </div>
+  </div>
+</div>
+
 <div class="app">
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand">
-        <div class="brand-icon">A</div>
+        <!-- ICON AVATAR SEKARANG BISA DIKLIK UNTUK LOGOUT -->
+        <div class="brand-icon" id="user-avatar" onclick="showLogoutMenu()" title="Klik untuk opsi Akun / Keluar">A</div>
         <div class="brand-selector-wrap" oncontextmenu="showCtxMenu(event, 'project', null)" title="Klik kanan untuk opsi Project">
           <select id="project-selector" onchange="handleProjectChange(this.value)">
               <option value="default">Project Utama</option>
@@ -267,12 +309,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <button class="export-btn" onclick="exportToPDF()">📑 PDF</button>
     </div>
   </div>
+  
   <div class="brand-tabs" id="brand-tabs"></div>
-  <div class="board-wrap"><div class="board" id="board"></div></div>
+  
+  <!-- BOARD AREA -->
+  <div class="board-wrap" id="board-wrap">
+      <div class="board" id="board"></div>
+  </div>
+
+  <!-- EMPTY STATE (KOSONG) -->
+  <div id="empty-state" style="display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
+    <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.8;">📦</div>
+    <h3 style="color: #222; margin-bottom: 12px; font-size: 20px;">Ruang Kerja Kosong</h3>
+    <p style="color: #666; font-size: 14px; max-width: 320px; margin-bottom: 24px; line-height: 1.5;">Anda belum memiliki project di akun ini. Silakan buat project personal baru, atau pulihkan data lama Anda.</p>
+    <div style="display:flex; flex-direction:column; gap:12px; width: 100%; max-width: 250px;">
+        <button class="btn-s" style="padding: 12px 24px; font-size: 14px; box-shadow: 0 4px 12px rgba(83,74,183,0.3);" onclick="openWsModal()">+ Buat Project Baru</button>
+        <button class="btn-c" style="padding: 10px 24px; font-size: 13px;" onclick="restoreLegacy()">📥 Pulihkan Data Lama</button>
+    </div>
+  </div>
 </div>
 
 <!-- FLOATING ACTION BUTTON -->
-<button class="fab" onclick="openAdd()" title="Buat Konten Baru">+</button>
+<button class="fab" id="fab-add" onclick="openAdd()" title="Buat Konten Baru">+</button>
 
 <!-- OVERLAY UNTUK PANEL -->
 <div id="dp-ov" onclick="closeDP()"></div>
@@ -502,9 +560,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script type="module">
+// IMPORT FIREBASE CORE & DATABASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+// IMPORT FIREBASE AUTHENTICATION (NEW!)
+import { 
+    getAuth, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    sendEmailVerification, 
+    onAuthStateChanged, 
+    signOut,
+    updateProfile
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCrOAzCGHAyZENhjU9Qlhf1SD0CbFQloq8",
@@ -519,12 +591,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
+const auth = getAuth(app); // INISIALISASI AUTH
+const googleProvider = new GoogleAuthProvider();
 
 // Global State
+let myUser = null; // Menyimpan data akun yang login
+let workspaces = [];
+let activeWsId = null;
+let unsubscribeWs = null;
+let unsubscribeBoard = null;
+
 let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '' };
 let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
 
-// FUNGSI PESAN ALERT / CONFIRM KUSTOM (Agar pop-up tidak error)
+// FUNGSI PESAN ALERT / CONFIRM KUSTOM
 window.showMsg = (txt, cb) => {
     const msgText = document.getElementById('msg-text');
     if(msgText) msgText.innerHTML = txt;
@@ -536,67 +616,214 @@ window.showMsg = (txt, cb) => {
     document.getElementById('msg-ov').classList.add('show');
 };
 
-// Workspace Logic
-let workspaces = [];
-let activeWsId = localStorage.getItem('cb_active_ws') || 'default';
-let unsubscribeCurrentData = null;
-const wsListRef = ref(db, 'content_board_workspaces_list');
+// ================= SISTEM AUTHENTICATION FIREBASE (NEW) =================
 
-onValue(wsListRef, (snapshot) => {
-    const data = snapshot.val();
-    if(data) workspaces = Object.values(data);
-    else workspaces = [{id: 'default', name: 'Project Utama'}];
-    renderWsSelector();
+// Pantau status login pengguna setiap saat
+onAuthStateChanged(auth, (user) => {
+    const loginOv = document.getElementById('login-ov');
+    
+    if (user) {
+        // Jika login pakai Email/Password, WAJIB verifikasi email dulu!
+        if (user.providerData[0].providerId === 'password' && !user.emailVerified) {
+            loginOv.classList.add('show');
+            showMsg("Email Anda belum diverifikasi. Silakan cek kotak masuk/spam di email Anda, lalu coba masuk lagi.");
+            signOut(auth);
+            return;
+        }
+        
+        // Pengguna sah dan berhasil masuk
+        myUser = { 
+            id: user.uid, 
+            name: user.displayName || user.email.split('@')[0],
+            email: user.email
+        };
+        loginOv.classList.remove('show');
+        initApp(); // Jalankan aplikasi
+    } else {
+        // Jika belum login / logout
+        myUser = null;
+        loginOv.classList.add('show');
+        document.getElementById('board-wrap').style.display = 'none';
+        document.getElementById('brand-tabs').style.display = 'none';
+        document.getElementById('fab-add').style.display = 'none';
+    }
 });
+
+// Fungsi Toggle (Pindah antara form Login & Register)
+window.toggleAuth = (type) => {
+    if(type === 'reg') {
+        document.getElementById('form-login').style.display = 'none';
+        document.getElementById('form-register').style.display = 'block';
+        document.getElementById('auth-title').innerText = "Buat Akun Baru";
+        document.getElementById('auth-desc').innerText = "Daftar untuk membuat ruang kerja personal.";
+    } else {
+        document.getElementById('form-register').style.display = 'none';
+        document.getElementById('form-login').style.display = 'block';
+        document.getElementById('auth-title').innerText = "Selamat Datang!";
+        document.getElementById('auth-desc').innerText = "Masuk untuk mengelola ruang kerja Anda.";
+    }
+};
+
+// Fungsi Login Google
+window.loginGoogle = () => {
+    signInWithPopup(auth, googleProvider).catch((error) => {
+        showMsg("Gagal masuk dengan Google: " + error.message);
+    });
+};
+
+// Fungsi Login Email
+window.loginEmail = () => {
+    const email = document.getElementById('log-email').value.trim();
+    const pass = document.getElementById('log-pass').value.trim();
+    if(!email || !pass) return showMsg("Email dan kata sandi harus diisi.");
+    
+    signInWithEmailAndPassword(auth, email, pass).catch((error) => {
+        showMsg("Gagal masuk: Periksa kembali email dan kata sandi Anda.");
+    });
+};
+
+// Fungsi Register (Daftar) Email
+window.registerEmail = () => {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass = document.getElementById('reg-pass').value.trim();
+    
+    if(!name || !email || !pass) return showMsg("Semua kolom (Nama, Email, Sandi) wajib diisi.");
+    if(pass.length < 6) return showMsg("Kata sandi minimal 6 karakter.");
+    
+    createUserWithEmailAndPassword(auth, email, pass).then((userCredential) => {
+        // Simpan nama pengguna ke profil Firebase
+        updateProfile(userCredential.user, { displayName: name });
+        // Kirim email verifikasi
+        sendEmailVerification(userCredential.user).then(() => {
+            showMsg("Pendaftaran sukses!<br><b>Link verifikasi telah dikirim ke email Anda.</b> Silakan klik link tersebut sebelum masuk.", () => {
+                toggleAuth('log'); // Balik ke halaman login
+            });
+            signOut(auth); // Paksa keluar sampai mereka verifikasi
+        });
+    }).catch((error) => {
+        if(error.code === 'auth/email-already-in-use') showMsg("Email ini sudah pernah terdaftar.");
+        else showMsg("Gagal mendaftar: " + error.message);
+    });
+};
+
+// Fungsi Logout / Keluar
+window.showLogoutMenu = () => {
+    if(!myUser) return;
+    showMsg(`Akun: <b>${myUser.email}</b><br><br>Apakah Anda ingin keluar (Log out) dari aplikasi?`, () => {
+        signOut(auth).then(() => {
+            window.location.reload();
+        });
+    });
+};
+
+// Fungsi Opsional (Memindahkan data lama tanpa login ke akun baru)
+window.restoreLegacy = () => {
+    get(ref(db, 'content_board_workspaces_list')).then(snap => {
+        let oldWs = snap.val() || [{id: 'default', name: 'Project Utama'}];
+        set(ref(db, `users/${myUser.id}/workspaces`), oldWs).then(() => {
+            localStorage.setItem('cb_active_ws', oldWs[0].id);
+            showMsg("Project lama Anda berhasil dipulihkan!");
+        });
+    });
+};
+
+// ================= INISIALISASI APLIKASI UTAMA =================
+
+function initApp() {
+    // Set Inisial Avatar
+    const avatarEl = document.getElementById('user-avatar');
+    if(avatarEl) avatarEl.textContent = myUser.name.charAt(0).toUpperCase();
+    
+    // Dengarkan khusus project milik Akun ini saja
+    const userWsRef = ref(db, `users/${myUser.id}/workspaces`);
+    unsubscribeWs = onValue(userWsRef, (snapshot) => {
+        const data = snapshot.val();
+        workspaces = data ? Object.values(data) : [];
+        renderWsSelector();
+
+        if (workspaces.length === 0) {
+            document.getElementById('empty-state').style.display = 'flex';
+            document.getElementById('board-wrap').style.display = 'none';
+            document.getElementById('brand-tabs').style.display = 'none';
+            document.getElementById('fab-add').style.display = 'none';
+        } else {
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('board-wrap').style.display = 'flex';
+            document.getElementById('brand-tabs').style.display = 'flex';
+            document.getElementById('fab-add').style.display = 'flex';
+            
+            const savedWs = localStorage.getItem('cb_active_ws');
+            if (workspaces.some(w => w.id === savedWs)) {
+                switchWorkspace(savedWs);
+            } else {
+                switchWorkspace(workspaces[0].id);
+            }
+        }
+    });
+}
 
 function renderWsSelector() {
     const selector = document.getElementById('project-selector');
     if(selector) {
-        selector.innerHTML = workspaces.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
-        if(workspaces.some(w => w.id === activeWsId)) selector.value = activeWsId;
-        else { selector.value = 'default'; activeWsId = 'default'; }
+        if(workspaces.length === 0) {
+            selector.innerHTML = '<option value="">Belum ada Project</option>';
+        } else {
+            selector.innerHTML = workspaces.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+            if(workspaces.some(w => w.id === activeWsId)) selector.value = activeWsId;
+        }
     }
 }
 
-window.handleProjectChange = (val) => { switchWorkspace(val); };
+window.handleProjectChange = (val) => { if(val) switchWorkspace(val); };
+
 window.openWsModal = (isEdit = false) => {
     const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn');
     if (isEdit) {
         editWsId = activeWsId; titleEl.textContent = "Edit Project";
         const currentWs = workspaces.find(w => w.id === activeWsId); inputEl.value = currentWs ? currentWs.name : '';
-        delBtn.style.display = workspaces.length > 1 ? "block" : "none"; 
+        delBtn.style.display = "block"; 
     } else {
         editWsId = null; titleEl.textContent = "Project Baru"; inputEl.value = ''; delBtn.style.display = "none";
     }
     document.getElementById('ws-ov').classList.add('show');
 };
 window.closeWsModal = () => { document.getElementById('ws-ov').classList.remove('show'); };
+
 window.saveWs = () => {
     const name = document.getElementById('ws-name').value.trim();
     if(!name) return;
     if (editWsId) {
         const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name;
-        set(wsListRef, workspaces).then(() => { closeWsModal(); renderWsSelector(); });
+        set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { closeWsModal(); renderWsSelector(); });
     } else {
-        const newId = 'ws_' + Date.now(); workspaces.push({id: newId, name: name});
-        set(wsListRef, workspaces).then(() => { closeWsModal(); switchWorkspace(newId); });
+        const newId = 'ws_' + Date.now(); 
+        workspaces.push({id: newId, name: name});
+        set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { 
+            closeWsModal(); 
+            localStorage.setItem('cb_active_ws', newId);
+        });
     }
 };
+
 window.confirmDelWs = () => {
-    if (workspaces.length <= 1) return;
-    showMsg("Yakin ingin menghapus project ini secara permanen?", () => {
-        const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`;
-        set(ref(db, dbPath), null); 
+    showMsg("Hapus project ini dari ruang kerja Anda?", () => {
         workspaces = workspaces.filter(w => w.id !== activeWsId);
-        set(wsListRef, workspaces).then(() => { closeWsModal(); switchWorkspace(workspaces[0].id); });
+        set(ref(db, `users/${myUser.id}/workspaces`), workspaces).then(() => { 
+            closeWsModal(); 
+            if(workspaces.length > 0) localStorage.setItem('cb_active_ws', workspaces[0].id);
+        });
     });
 };
 
 function switchWorkspace(wsId) {
-    if(unsubscribeCurrentData) unsubscribeCurrentData(); 
-    activeWsId = wsId; localStorage.setItem('cb_active_ws', wsId); aB = 'all';
+    if(unsubscribeBoard) unsubscribeBoard(); 
+    activeWsId = wsId; 
+    localStorage.setItem('cb_active_ws', wsId); 
+    aB = 'all';
+    
     const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
-    unsubscribeCurrentData = onValue(ref(db, dbPath), (snapshot) => {
+    unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
         const data = snapshot.val() || {};
         brands = data.brands || []; cards = data.cards || [];
         columns = (data.columns && data.columns.length > 0) ? data.columns : [
@@ -611,33 +838,35 @@ function switchWorkspace(wsId) {
         applyTheme(); renderAll();
     });
 }
-switchWorkspace(activeWsId);
 
 function syncToFirebase() { 
+    if(!activeWsId) return;
     const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`;
     set(ref(db, dbPath), { brands, cards, columns, theme: themeSettings }); 
 }
 
 function applyTheme() {
     const root = document.documentElement;
-    root.style.setProperty('--primary', themeSettings.color);
-    let lightColor = themeSettings.color;
+    root.style.setProperty('--primary', themeSettings.color || '#534AB7');
+    let lightColor = themeSettings.color || '#534AB7';
     if(lightColor.length === 7) lightColor += '20'; 
     root.style.setProperty('--primary-light', lightColor);
     const appEl = document.querySelector('.app');
     if(appEl) {
         if(themeSettings.bg) {
             appEl.style.backgroundImage = `url('${themeSettings.bg}')`;
-            document.getElementById('bg-preview').style.backgroundImage = `url('${themeSettings.bg}')`;
+            const bgPreview = document.getElementById('bg-preview');
+            if (bgPreview) bgPreview.style.backgroundImage = `url('${themeSettings.bg}')`;
         } else {
             appEl.style.backgroundImage = 'none';
-            document.getElementById('bg-preview').style.backgroundImage = 'none';
+            const bgPreview = document.getElementById('bg-preview');
+            if (bgPreview) bgPreview.style.backgroundImage = 'none';
         }
     }
 }
 
+// ================= FUNGSI-FUNGSI PAPAN KERJA (TETAP SAMA) =================
 
-// FAB & Modals
 window.openThemeModal = () => { 
     document.getElementById('bg-url-input').value = themeSettings.bg || '';
     document.getElementById('theme-ov').classList.add('show'); 
@@ -694,13 +923,12 @@ window.moveCardToWs = async () => {
     finally { btn.textContent = 'Pindahkan'; btn.disabled = false; }
 };
 
-// UI Core
 window.showCtxMenu = (e, type, id) => {
     e.preventDefault(); e.stopPropagation();
     const ctx = document.getElementById('ctx-menu'); ctx.style.display = 'flex';
     if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`;
     else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`;
-    else if (type === 'project') ctx.innerHTML = `<button class="ctx-item" onclick="openWsModal(true); hideCtxMenu()">✏️ Edit Project</button><div class="ctx-hr"></div><button class="ctx-item" onclick="openWsModal(false); hideCtxMenu()">➕ Buat Project Baru</button>`;
+    else if (type === 'project') ctx.innerHTML = `<button class="ctx-item" onclick="openWsModal(true); hideCtxMenu()">✏️ Edit Project Nama</button><div class="ctx-hr"></div><button class="ctx-item" onclick="openWsModal(false); hideCtxMenu()">➕ Buat Project Personal Baru</button>`;
     else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;hideCtxMenu()">📄 Duplikat</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();hideCtxMenu()">🗑️ Hapus</button>`;
     let x = e.clientX, y = e.clientY;
     if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10;
@@ -721,6 +949,8 @@ window.renderTabs = () => {
 };
 
 window.renderBoard = () => {
+  if (workspaces.length === 0) return; // Mencegah render jika kosong
+
   const fMonth = document.getElementById('filter-month').value, 
         fWeek = document.getElementById('filter-week').value, 
         fUrg = document.getElementById('filter-urgency').value,
@@ -786,13 +1016,11 @@ window.cardH = (c) => {
   const dt = c.date ? `<div style="float:right;display:flex;align-items:center;">${c.week?`<span style="font-size:10px;background:var(--primary-light);color:var(--primary);padding:2px 6px;border-radius:4px;margin-right:6px;font-weight:600;">P${c.week}</span>`:''}<span style="font-size:10px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:10px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : '';
   const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Selesai</div>` : '';
   
-  // Masukkan objBadge di samping typeBadge
   return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><span class="tbadge ${c.type==='Video'?'tv':c.type==='Feed'?'tf':c.type==='Catatan'?'tc':'ts'}">${c.type}</span>${objBadge}${urgBadge}${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:8px;height:8px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n}</span><div class="cfoot-btns"><button class="ca" onclick="event.stopPropagation();mv('${c.id}',-1)" ${ci<=0?'disabled':''} title="Geser Kiri">←</button><button class="ca" onclick="event.stopPropagation();mv('${c.id}',1)" ${ci>=cl.length-1?'disabled':''} title="Geser Kanan">→</button></div></div></div>`;
 };
 
-// FITUR DRAG N DROP BRAND (TABS)
 let draggedBrandIdx = null;
-window.dragB = (e, idx) => { draggedBrandIdx = idx; };
+window.dragB = (e, idx) => { draggedBrandIdx = idx; e.dataTransfer.setData("text/plain", idx); };
 window.dropB = (e, targetIdx) => {
     e.preventDefault();
     if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return;
@@ -803,7 +1031,6 @@ window.dropB = (e, targetIdx) => {
     draggedBrandIdx = null;
 };
 
-// Minimal Logic
 window.setB = (id) => { aB=id; renderAll(); };
 window.toggleCol = (id) => { const col = columns.find(c=>c.id===id); if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } };
 window.openAdd = (s) => { 
@@ -862,40 +1089,34 @@ window.selCard = (id) => {
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
 window.dps = (f,v) => { const c=cards.find(x=>x.id===selId); if(c){c[f]=v; renderBoard(); syncToFirebase();} };
 window.dpChType = (v) => { const c=cards.find(x=>x.id===selId); if(c){c.type=v; if(v==='Catatan'){c.date='';c.time='';c.week='';} syncToFirebase(); selCard(selId);} };
+window.dupCard = () => { const c = cards.find(x=>x.id===selId); if(!c) return; const newC = JSON.parse(JSON.stringify(c)); newC.id = 'c'+Date.now(); newC.title += " (Copy)"; cards.unshift(newC); closeDP(); syncToFirebase(); };
 window.delCurCard = () => { showMsg("Hapus konten ini?",()=>{cards=cards.filter(x=>x.id!==selId); closeDP(); syncToFirebase();}); };
 window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" target="_blank" style="color:var(--primary);font-weight:600;">${u}</a>`);
 window.editNotes = () => { document.getElementById('dp-notes-display').style.display='none'; const ta=document.getElementById('dp-notes'); ta.style.display='block'; ta.focus(); };
 window.saveNotes = (v) => { dps('notes',v); document.getElementById('dp-notes-display').innerHTML=v?linkify(v):'Klik tambah catatan...'; document.getElementById('dp-notes-display').style.display='block'; document.getElementById('dp-notes').style.display='none'; };
 
-// INTEGRASI GOOGLE CALENDAR
 window.addToGCal = () => {
     const c = cards.find(x => x.id === selId);
     if(!c) return;
-    
     const title = encodeURIComponent(`Konten: ${c.title}`);
     let details = `Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}`;
-    if (c.notes) details += `\n\nCatatan:\n${c.notes}`;
+    if (c.notes) details += `\n\nCatatan Naskah:\n${c.notes}`;
     details = encodeURIComponent(details);
 
     let dates = "";
     if (c.date) {
         try {
-            // Setup Format Waktu (UTC/Universal agar aman di browser apapun)
-            const dt = new Date(c.date + 'T' + (c.time || '09:00') + ':00');
-            const start = dt.toISOString().replace(/-|:|\.\d\d\d/g, '');
-            const endDt = new Date(dt.getTime() + 60 * 60 * 1000); // Durasi otomatis 1 jam
-            const end = endDt.toISOString().replace(/-|:|\.\d\d\d/g, '');
-            dates = `&dates=${start}/${end}`;
-        } catch(e) { 
-            console.error("Format tanggal tidak valid", e); 
-        }
+            const timeStr = c.time ? c.time : '09:00';
+            const startDt = new Date(`${c.date}T${timeStr}:00`);
+            const endDt = new Date(startDt.getTime() + (60 * 60 * 1000));
+            const formatGcal = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
+            dates = `&dates=${formatGcal(startDt)}/${formatGcal(endDt)}`;
+        } catch(e) { console.error("Format tanggal tidak valid", e); }
     }
-    
     const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`;
     window.open(url, '_blank');
 };
 
-// SISTEM RENDER & EDIT TASK INLINE
 window.renderSteps = (c) => { 
     document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`
     <div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="dragOverStep(event)" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})">
@@ -1029,7 +1250,6 @@ window.mv = (id, d) => {
   if(ni>=0 && ni<cl.length) { c.status = cl[ni].id; renderBoard(); syncToFirebase(); }
 };
 
-// SISTEM DRAG & DROP BARU (BISA URUTAN)
 let draggedCardId = null;
 window.dragCard = (e, id) => { 
     draggedCardId = id; 
@@ -1063,16 +1283,14 @@ window.dropOnCard = (e, targetId) => {
     const targetStatus = cards[tIdx].status;
     const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + (e.currentTarget.getBoundingClientRect().height / 2)) > 0;
 
-    // Pindahkan kartu dari susunan array
     const draggedCard = cards.splice(cIdx, 1)[0];
-    draggedCard.status = targetStatus; // Sesuaikan status dengan tempatnya mendarat
+    draggedCard.status = targetStatus; 
 
     let newTargetIdx = cards.findIndex(x => x.id === targetId);
     if (dropBelow) newTargetIdx++;
 
     cards.splice(newTargetIdx, 0, draggedCard);
     
-    // Otomatis pindah ke mode Urutan Bebas
     document.getElementById('sort-by').value = 'manual'; 
     draggedCardId = null;
     
@@ -1084,12 +1302,11 @@ window.dropCard = (e, colId) => {
     const id = e.dataTransfer.getData("text") || draggedCardId; 
     if(!id) return;
     
-    // Ini berjalan kalau dijatuhkan di kolom yang kosong (bukan di atas kartu lain)
     const cIdx = cards.findIndex(x => x.id === id);
     if(cIdx > -1) {
         const card = cards.splice(cIdx, 1)[0];
         card.status = colId;
-        cards.push(card); // Taruh di paling bawah
+        cards.push(card); 
         document.getElementById('sort-by').value = 'manual';
         renderBoard(); syncToFirebase();
     }
@@ -1098,7 +1315,7 @@ window.dropCard = (e, colId) => {
 
 window.exportToPDF=()=>{
   try {
-      const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Abdi", 14, 20);
+      const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan", 14, 20);
       const fMonth = document.getElementById('filter-month').value; 
       const fWeek = document.getElementById('filter-week').value; 
       const fUrg = document.getElementById('filter-urgency').value;
@@ -1125,10 +1342,9 @@ window.exportToPDF=()=>{
       });
       if (sortBy !== 'manual') { vis.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); }
       
-      // Menambahkan kolom Jalur Distribusi (Tujuan) ke dalam tabel PDF
       const data=vis.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective === 'Konten' ? 'Organik' : c.objective || 'Organik'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') + (c.time ? ` ${c.time}` : '') ]);
       doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } });
-      doc.save("Content_Plan_Abdi.pdf");
+      doc.save("Content_Plan.pdf");
   } catch(err) { showMsg("Gagal membuat PDF."); }
 };
 
@@ -1138,29 +1354,16 @@ window.syncColor = (v, targetIdSuffix, p='bm') => {
     if(el) el.value = v;
 };
 
-// AKSELERASI: SWIPE UNTUK MENUTUP PANEL
-let dpTouchStartX = 0;
-let dpTouchStartY = 0;
-const dpEl = document.getElementById('dp');
-const dpBody = document.querySelector('.dp-body');
+// SWIPE UNTUK MENUTUP PANEL
+let dpTouchStartX = 0, dpTouchStartY = 0;
+const dpEl = document.getElementById('dp'), dpBody = document.querySelector('.dp-body');
 
-dpEl.addEventListener('touchstart', e => {
-    dpTouchStartX = e.changedTouches[0].screenX;
-    dpTouchStartY = e.changedTouches[0].screenY;
-}, {passive: true});
-
+dpEl.addEventListener('touchstart', e => { dpTouchStartX = e.changedTouches[0].screenX; dpTouchStartY = e.changedTouches[0].screenY; }, {passive: true});
 dpEl.addEventListener('touchend', e => {
-    let dpTouchEndX = e.changedTouches[0].screenX;
-    let dpTouchEndY = e.changedTouches[0].screenY;
-    let deltaX = dpTouchEndX - dpTouchStartX;
-    let deltaY = dpTouchEndY - dpTouchStartY;
-
-    if (deltaX > 80 && Math.abs(deltaY) < 100) {
-        closeDP();
-    }
-    if (deltaY > 80 && Math.abs(deltaX) < 100 && dpBody.scrollTop <= 10) {
-        closeDP();
-    }
+    let deltaX = e.changedTouches[0].screenX - dpTouchStartX;
+    let deltaY = e.changedTouches[0].screenY - dpTouchStartY;
+    if (deltaX > 80 && Math.abs(deltaY) < 100) closeDP();
+    if (deltaY > 80 && Math.abs(deltaX) < 100 && dpBody.scrollTop <= 10) closeDP();
 });
 </script>
 </body>
