@@ -681,14 +681,23 @@ let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBra
 // HELPER: UTILS & UI
 window.allowDrop = (e) => { e.preventDefault(); };
 window.hideCtxMenu = () => { const ctx = document.getElementById('ctx-menu'); if (ctx) ctx.style.display = 'none'; };
+
+// FIX: Menambahkan #filter-panel ke dalam global listener agar menutup saat klik di luar
 document.addEventListener('click', () => { 
     hideCtxMenu();
     document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('show'));
+    const filterPanel = document.getElementById('filter-panel');
+    if (filterPanel) filterPanel.classList.remove('show');
 });
 
+// FIX: Menyesuaikan toggleMenu agar juga memproses #filter-panel dengan benar
 window.toggleMenu = (id, e) => {
     e.stopPropagation();
     document.querySelectorAll('.custom-dropdown').forEach(d => { if(d.id !== id) d.classList.remove('show') });
+    
+    const filterPanel = document.getElementById('filter-panel');
+    if (filterPanel && id !== 'filter-panel') filterPanel.classList.remove('show');
+    
     document.getElementById(id).classList.toggle('show');
 };
 
