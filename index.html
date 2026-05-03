@@ -949,14 +949,18 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         }
         updateAssigneeDropdowns(); renderBoard();
         if(document.getElementById('team-ov').classList.contains('show')) window.renderTeamList();
+        
+        // Memuat tema personal spesifik untuk perangkat Anda di workspace ini
+        if(window.loadLocalTheme) window.loadLocalTheme();
     });
     const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
     unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
         const data = snapshot.val() || {};
         brands = data.brands || []; cards = data.cards || [];
         columns = (data.columns && data.columns.length > 0) ? data.columns : [{id:'review',lbl:'Review',c:'#534AB7', collapsed: false}];
-        themeSettings = data.theme || { color: '#534AB7', bg: '' };
-        applyTheme(); renderAll(); renderWsSelector();
+        
+        // Tema tidak lagi diambil dari database publik agar tidak menimpa pengaturan personal
+        renderAll(); renderWsSelector();
     });
 };
 
@@ -988,7 +992,7 @@ function updateAssigneeDropdowns() {
     if(dpAss) { dpAss.innerHTML = opts; if(selId){ const c = cards.find(x=>x.id===selId); if(c) dpAss.value = c.assignee || '';} }
 }
 
-function syncToFirebase() { if(!activeWsId) return; const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`; update(ref(db, dbPath), { brands, cards, columns, theme: themeSettings }); }
+function syncToFirebase() { if(!activeWsId) return; const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`; update(ref(db, dbPath), { brands, cards, columns }); }
 
 function applyTheme() {
     const root = document.documentElement; root.style.setProperty('--primary', themeSettings.color || '#534AB7');
@@ -1000,11 +1004,14 @@ function applyTheme() {
 
 // ================= FUNGSI PAPAN & KARTU =================
 
+window.saveLocalTheme = () => { localStorage.setItem('cb_theme_' + activeWsId, JSON.stringify(themeSettings)); };
+window.loadLocalTheme = () => { const saved = localStorage.getItem('cb_theme_' + activeWsId); themeSettings = saved ? JSON.parse(saved) : { color: '#534AB7', bg: '' }; applyTheme(); };
+
 window.openThemeModal = () => { document.getElementById('bg-url-input').value = themeSettings.bg || ''; document.getElementById('theme-ov').classList.add('show'); };
 window.closeThemeModal = () => document.getElementById('theme-ov').classList.remove('show');
-window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelectorAll('.theme-option').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); applyTheme(); syncToFirebase(); };
-window.applyBgUrl = () => { const u = document.getElementById('bg-url-input').value.trim(); if(u) { themeSettings.bg = u; applyTheme(); syncToFirebase(); }};
-window.removeBg = () => { themeSettings.bg = ''; document.getElementById('bg-url-input').value = ''; applyTheme(); syncToFirebase(); };
+window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelectorAll('.theme-option').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); applyTheme(); window.saveLocalTheme(); };
+window.applyBgUrl = () => { const u = document.getElementById('bg-url-input').value.trim(); if(u) { themeSettings.bg = u; applyTheme(); window.saveLocalTheme(); }};
+window.removeBg = () => { themeSettings.bg = ''; document.getElementById('bg-url-input').value = ''; applyTheme(); window.saveLocalTheme(); };
 
 // --- FUNGSI UPLOAD GAMBAR LOKAL ---
 window.applyBgFile = (input) => { 
@@ -1019,7 +1026,7 @@ window.applyBgFile = (input) => {
         reader.onload = function(e) { 
             themeSettings.bg = e.target.result; 
             applyTheme(); 
-            syncToFirebase(); 
+            window.saveLocalTheme(); 
             input.value = ''; 
         }; 
         reader.readAsDataURL(file); 
