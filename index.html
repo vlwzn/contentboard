@@ -1054,6 +1054,51 @@ window.syncColor = (v, idS, p='bm') => { if(p==='bm') bCol=v; else cCol=v; const
 let dpTx = 0, dpTy = 0; const dpEl = document.getElementById('dp'), dpBody = document.querySelector('.dp-body');
 dpEl.addEventListener('touchstart', e => { dpTx = e.changedTouches[0].screenX; dpTy = e.changedTouches[0].screenY; }, {passive: true});
 dpEl.addEventListener('touchend', e => { let dx = e.changedTouches[0].screenX - dpTx, dy = e.changedTouches[0].screenY - dpTy; if (dx > 80 && Math.abs(dy) < 100) closeDP(); if (dy > 80 && Math.abs(dx) < 100 && dpBody.scrollTop <= 10) closeDP(); });
+
+// --- SETUP PWA INSTAN ---
+const setupPWA = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#534AB7';
+    ctx.fillRect(0, 0, 512, 512);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 300px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('C', 256, 280);
+    const iconBase64 = canvas.toDataURL('image/png');
+    
+    let appleIcon = document.getElementById('pwa-apple-icon');
+    if (!appleIcon) {
+        appleIcon = document.createElement('link');
+        appleIcon.rel = 'apple-touch-icon';
+        appleIcon.id = 'pwa-apple-icon';
+        document.head.appendChild(appleIcon);
+    }
+    appleIcon.href = iconBase64;
+    
+    const manifest = {
+        name: "ContentBoard Pro",
+        short_name: "CB Pro",
+        start_url: window.location.pathname,
+        display: "standalone",
+        background_color: "#f5f5f3",
+        theme_color: "#534AB7",
+        icons: [{ src: iconBase64, sizes: "512x512", type: "image/png" }]
+    };
+    const manifestStr = JSON.stringify(manifest);
+    
+    let manifestLink = document.getElementById('pwa-manifest');
+    if (!manifestLink) {
+        manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.id = 'pwa-manifest';
+        document.head.appendChild(manifestLink);
+    }
+    manifestLink.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(manifestStr);
+};
+setupPWA();
 </script>
 </body>
 </html>
