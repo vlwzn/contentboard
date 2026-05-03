@@ -1068,6 +1068,11 @@ window.switchWorkspace = (wsId, ownerFlag) => {
     aB = 'all';
     document.getElementById('btn-edit-ws').style.display = isOwner ? 'flex' : 'none';
     
+    // Perbarui status Owner di database jika memang Owner
+    if (isOwner && myUser) {
+        update(ref(db, `board_members/${wsId}/${myUser.id}`), { role: 'owner' }).catch(()=>{});
+    }
+
     const handleKick = (err) => {
         if(err.message && err.message.toLowerCase().includes('permission_denied')) {
             showMsg("Akses ditutup. Anda telah dikeluarkan dari project ini.", () => {
@@ -1124,6 +1129,10 @@ window.renderTeamList = () => {
 window.removeMember = (id) => { 
     showMsg("Keluarkan anggota ini dari project? (Nama mereka akan dihapus dari semua tugas)", async () => { 
         try {
+            // BUGFIX: Pastikan diri sendiri tervalidasi sebagai owner di database sebelum menghapus orang lain
+            if (isOwner) {
+                await update(ref(db, `board_members/${activeWsId}/${myUser.id}`), { role: 'owner' });
+            }
             await remove(ref(db, `board_members/${activeWsId}/${id}`)); 
             cards.forEach(c => { if(c.assignee === id) c.assignee = ''; }); 
             syncToFirebase(); 
