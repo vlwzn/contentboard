@@ -83,7 +83,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 }
 .topbar-left { display: flex; align-items: center; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 8px; }
-.brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; flex-shrink: 0; cursor: pointer; user-select: none; }
+.brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; flex-shrink: 0; cursor: pointer; user-select: none; overflow:hidden; }
 .brand-icon:hover { transform: scale(1.05); opacity: 0.9; }
 
 /* CUSTOM DROPDOWNS */
@@ -189,6 +189,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     box-shadow: 0 2px 5px rgba(0,0,0,0.15); 
     text-transform: uppercase;
 }
+img.pic-avatar-mini { object-fit: cover; } /* Khusus untuk gambar asli */
 
 /* ATTACHMENT & STEPS */
 .att-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -374,6 +375,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                 <button class="ctx-item" onclick="toggleDarkMode()">🌓 Mode Terang/Gelap</button>
                 <button class="ctx-item" onclick="openThemeModal()">🎨 Tema & Wallpaper</button>
                 <button class="ctx-item" onclick="changeUsername()">✏️ Ubah Nama Profil</button>
+                <button class="ctx-item" onclick="changeAvatar()">🖼️ Ubah Foto Profil</button>
                 <div class="ctx-hr"></div>
                 <button class="ctx-item danger" onclick="showLogoutMenu()">🚪 Keluar (Logout)</button>
             </div>
@@ -824,6 +826,15 @@ window.resetFilters = () => {
 // ================= AUTHENTICATION (KEMBALI FULL 100%) =================
 window.isRegistering = false;
 
+window.updateMyAvatarUI = () => {
+    const av = document.getElementById('user-avatar');
+    if(myUser && myUser.photoURL) {
+        av.innerHTML = `<img src="${myUser.photoURL}" style="width:100%; height:100%; border-radius:inherit; object-fit:cover;" onerror="this.outerHTML='${myUser.name.charAt(0).toUpperCase()}'">`;
+    } else {
+        av.textContent = myUser ? myUser.name.charAt(0).toUpperCase() : 'A';
+    }
+};
+
 onAuthStateChanged(auth, (user) => {
     if (window.isRegistering) return;
     const loginOv = document.getElementById('login-ov');
@@ -837,8 +848,8 @@ onAuthStateChanged(auth, (user) => {
             showMsg("Email Anda belum diverifikasi. Silakan cek inbox/spam, lalu coba masuk lagi.");
             signOut(auth); return;
         }
-        myUser = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email };
-        set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email });
+        myUser = { id: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email, photoURL: user.photoURL || null };
+        set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email, photoURL: myUser.photoURL });
         loginOv.classList.remove('show');
         loginOv.style.opacity = '0';
         setTimeout(() => { loginOv.style.visibility = 'hidden'; }, 300); 
@@ -905,17 +916,32 @@ window.changeUsername = async () => {
     try {
         await updateProfile(auth.currentUser, { displayName: newName.trim() });
         myUser.name = newName.trim();
-        set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email });
-        document.getElementById('user-avatar').textContent = myUser.name.charAt(0).toUpperCase();
+        set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email, photoURL: myUser.photoURL });
+        window.updateMyAvatarUI();
         document.getElementById('user-menu-name').textContent = myUser.name;
         showMsg("Nama berhasil diperbarui!");
+    } catch(e) { showMsg("Gagal: " + e.message); }
+};
+
+window.changeAvatar = async () => {
+    const newPhoto = prompt("Paste link foto profil baru Anda (URL gambar):\n\n(Biarkan kosong lalu klik OK jika ingin kembali ke inisial nama)", myUser.photoURL || "");
+    if(newPhoto === null) return;
+    try {
+        const urlToSave = newPhoto.trim();
+        await updateProfile(auth.currentUser, { photoURL: urlToSave });
+        myUser.photoURL = urlToSave;
+        set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email, photoURL: myUser.photoURL });
+        window.updateMyAvatarUI();
+        renderBoard(); // Update semua avatar di papan
+        if(document.getElementById('team-ov').classList.contains('show')) window.renderTeamList();
+        showMsg("Foto profil berhasil diperbarui!");
     } catch(e) { showMsg("Gagal: " + e.message); }
 };
 
 // ================= SISTEM PROJECT & COLLABORATION =================
 
 function initApp() {
-    document.getElementById('user-avatar').textContent = myUser.name.charAt(0).toUpperCase();
+    window.updateMyAvatarUI();
     document.getElementById('user-menu-name').textContent = myUser.name;
     document.getElementById('user-menu-email').textContent = myUser.email;
     
@@ -1036,7 +1062,7 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         wsMembers = {};
         if(snap.val()) {
             const memIds = Object.keys(snap.val());
-            for(let id of memIds) { const uSnap = await get(ref(db, `public_users/${id}`)); if(uSnap.exists()) wsMembers[id] = { id: id, name: uSnap.val().name }; }
+            for(let id of memIds) { const uSnap = await get(ref(db, `public_users/${id}`)); if(uSnap.exists()) wsMembers[id] = { id: id, name: uSnap.val().name, photoURL: uSnap.val().photoURL }; }
         }
         updateAssigneeDropdowns(); renderBoard();
         if(document.getElementById('team-ov').classList.contains('show')) window.renderTeamList();
@@ -1061,10 +1087,12 @@ window.renderTeamList = () => {
     let html = '';
     for(let id in wsMembers) {
         const isMe = id === myUser.id; const canRemove = isOwner && !isMe;
+        const mem = wsMembers[id];
+        const avaNode = mem.photoURL ? `<img src="${mem.photoURL}" class="pic-avatar-mini" style="margin:0; border:none; object-fit:cover;" onerror="this.outerHTML='<div class=\\'pic-avatar-mini\\' style=\\'margin:0;\\'>${mem.name.charAt(0).toUpperCase()}</div>'"/>` : `<div class="pic-avatar-mini" style="margin:0;">${mem.name.charAt(0).toUpperCase()}</div>`;
         html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--input-border);">
             <div style="display:flex; align-items:center; gap:10px;">
-                <div class="pic-avatar-mini" style="margin:0;">${wsMembers[id].name.charAt(0).toUpperCase()}</div>
-                <div style="font-weight:600; color:var(--text-main); font-size:13px;">${wsMembers[id].name} ${isMe ? '<span style="color:var(--primary);">(Anda)</span>' : ''}</div>
+                ${avaNode}
+                <div style="font-weight:600; color:var(--text-main); font-size:13px;">${mem.name} ${isMe ? '<span style="color:var(--primary);">(Anda)</span>' : ''}</div>
             </div>
             ${canRemove ? `<button class="btn-c" style="padding:6px 12px; font-size:11px; color:#e24b4a; border-color:rgba(226,75,74,0.3); background:rgba(226,75,74,0.05);" onclick="removeMember('${id}')">Keluarkan</button>` : ''}
         </div>`;
@@ -1308,9 +1336,12 @@ window.cardH = (c) => { const b = brands.find(x=>x.id===c.bId) || {n:'', c:'tran
     // AVATAR 24PX PRESISI
     let picHtml = ''; 
     if (c.assignee && wsMembers[c.assignee]) { 
-        const picName = wsMembers[c.assignee].name; 
-        const init = picName.charAt(0).toUpperCase(); 
-        picHtml = `<div class="pic-avatar-mini" title="PIC: ${picName}">${init}</div>`; 
+        const picUser = wsMembers[c.assignee]; 
+        if (picUser.photoURL) {
+            picHtml = `<img src="${picUser.photoURL}" class="pic-avatar-mini" title="PIC: ${picUser.name}" onerror="this.outerHTML='<div class=\\'pic-avatar-mini\\' title=\\'PIC: ${picUser.name}\\'>${picUser.name.charAt(0).toUpperCase()}</div>'">`;
+        } else {
+            picHtml = `<div class="pic-avatar-mini" title="PIC: ${picUser.name}">${picUser.name.charAt(0).toUpperCase()}</div>`; 
+        }
     } 
     
     return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot"><div style="display:flex; align-items:center; gap:6px;">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n || 'Umum'}</span></div>${picHtml}</div></div>`; 
@@ -1345,7 +1376,13 @@ window.selCard = (id) => {
     
     // UPDATE PIC ROW DI DETAIL
     const member = wsMembers[c.assignee];
-    document.getElementById('dp-pic-avatar').textContent = member ? member.name.charAt(0).toUpperCase() : '?';
+    const dpAva = document.getElementById('dp-pic-avatar');
+    if (member && member.photoURL) {
+        dpAva.innerHTML = `<img src="${member.photoURL}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.outerHTML='${member.name.charAt(0).toUpperCase()}'">`;
+    } else {
+        dpAva.textContent = member ? member.name.charAt(0).toUpperCase() : '?';
+    }
+
     document.getElementById('dp-fassignee').value=c.assignee||''; 
     
     document.getElementById('dp-datetime-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'block'; 
