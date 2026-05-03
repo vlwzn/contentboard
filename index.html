@@ -171,7 +171,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .c-prog-fill{background:var(--primary);height:100%;transition:width 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
 .c-prog-text{font-size:10px;color:var(--text-light);text-align:right; margin-top:-6px; margin-bottom:10px; font-weight: 500;}
 
-.card-foot{display:flex;align-items:center;gap:6px;padding-top:12px;border-top:1px solid var(--input-border)}
+.card-foot{display:flex;align-items:center;gap:6px;padding-top:12px;border-top:1px solid var(--input-border); justify-content:space-between;}
 .cfoot-name{font-size:11px;color:var(--text-muted);flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight: 500;}
 
 /* AVATAR PIC - DIPERBARUI KE 24PX PRESISI */
@@ -188,6 +188,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     border: 1.5px solid #fff; 
     box-shadow: 0 2px 5px rgba(0,0,0,0.15); 
     text-transform: uppercase;
+    flex-shrink: 0;
 }
 img.pic-avatar-mini { object-fit: cover; } /* Khusus untuk gambar asli */
 
@@ -295,6 +296,16 @@ img.pic-avatar-mini { object-fit: cover; } /* Khusus untuk gambar asli */
   .dp { width: 100%; max-width: 100%; border-radius: 24px 24px 0 0; top: 60px; height: calc(100vh - 60px); border-left: none; transform: translateY(100%); }
   .dp.open { transform: translateY(0); }
   .dp-pull-indicator { display: block; }
+  
+  /* Fix Mobile Filter & Music Panel */
+  #music-panel, #filter-panel {
+      position: fixed;
+      top: 120px;
+      left: 16px;
+      right: 16px;
+      width: auto;
+      z-index: 6000;
+  }
 }
 </style>
 </head>
@@ -423,7 +434,7 @@ img.pic-avatar-mini { object-fit: cover; } /* Khusus untuk gambar asli */
               <span style="font-size: 14px;">⚙️</span> Filter
           </button>
           
-          <div id="filter-panel" onclick="event.stopPropagation()" style="width: 260px;">
+          <div id="filter-panel" onclick="event.stopPropagation()">
               <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--input-border); padding-bottom: 10px;">Pengaturan Tampilan</div>
               <div style="display:flex; flex-direction:column; gap:12px; max-height: 60vh; overflow-y: auto; padding-right: 4px;">
                   <div class="filter-row">
@@ -823,7 +834,17 @@ window.resetFilters = () => {
     document.getElementById('filter-panel').classList.remove('show');
 };
 
-// ================= AUTHENTICATION (KEMBALI FULL 100%) =================
+// ================= FILTER LOGIC UNTUK PDF & BOARD =================
+window.getFilteredCards = () => {
+    const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, fAss = document.getElementById('filter-assignee') ? document.getElementById('filter-assignee').value : 'all', sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+    return cards.filter(c => { 
+        let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mAss = (fAss === 'all' || (fAss === 'unassigned' ? (!c.assignee || c.assignee === '') : c.assignee === fAss)), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; 
+        if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); } 
+        return mB && mT && mM && mW && mU && mObj && mAss && mS; 
+    });
+};
+
+// ================= AUTHENTICATION =================
 window.isRegistering = false;
 
 window.updateMyAvatarUI = () => {
@@ -1329,22 +1350,66 @@ window.cols = (t) => columns;
 window.renderAll = () => { renderTabs(); renderBoard(); };
 window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); const mBrand = document.getElementById('m-brand'); if(mBrand) mBrand.innerHTML = opts; const dpBrand = document.getElementById('dp-fbrand'); if(dpBrand) dpBrand.innerHTML = opts; };
 
-window.renderBoard = () => { if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, fAss = document.getElementById('filter-assignee') ? document.getElementById('filter-assignee').value : 'all', sortBy = document.getElementById('sort-by').value, sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim(); const vis = cards.filter(c => { let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mAss = (fAss === 'all' || (fAss === 'unassigned' ? (!c.assignee || c.assignee === '') : c.assignee === fAss)), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); } return mB && mT && mM && mW && mU && mObj && mAss && mS; }); document.getElementById('board').innerHTML = columns.map((col, idx) => { let cc = vis.filter(c => c.status===col.id); if (sortBy !== 'manual') cc.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`; };
-
-window.cardH = (c) => { const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status); let urgBadge = ''; if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`; else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`; else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`; let objBadge = ''; if (c.type !== 'Catatan' && c.type !== 'To-Do') { const obj = c.objective || 'Konten'; if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`; else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`; else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`; } let dateStyle="color:var(--text-light);", alert=""; if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) { const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5; if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; } else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; } } const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : ''; const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; 
+window.renderBoard = () => { 
+    if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; 
+    const sortBy = document.getElementById('sort-by').value; 
+    const vis = window.getFilteredCards(); 
     
-    // AVATAR 24PX PRESISI
+    document.getElementById('board').innerHTML = columns.map((col, idx) => { 
+        let cc = vis.filter(c => c.status===col.id); 
+        if (sortBy !== 'manual') cc.sort((a, b) => { 
+            if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); 
+            if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); 
+            if (sortBy === 'newest') return b.id.localeCompare(a.id); 
+            return a.type.localeCompare(b.type); 
+        }); 
+        
+        if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; 
+        
+        return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; 
+    }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`; 
+};
+
+window.cardH = (c) => { 
+    const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status); 
+    let urgBadge = ''; 
+    if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`; 
+    else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`; 
+    else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`; 
+    
+    let objBadge = ''; 
+    if (c.type !== 'Catatan' && c.type !== 'To-Do') { 
+        const obj = c.objective || 'Konten'; 
+        if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`; 
+        else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`; 
+        else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`; 
+    } 
+    
+    let dateStyle="color:var(--text-light);", alert=""; 
+    if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) { 
+        const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5; 
+        if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; } 
+        else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; } 
+    } 
+    
+    const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : ''; 
+    const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; 
+    const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; 
+    
+    // AVATAR 24PX PRESISI + NAMA
     let picHtml = ''; 
     if (c.assignee && wsMembers[c.assignee]) { 
         const picUser = wsMembers[c.assignee]; 
+        let avaImg = '';
         if (picUser.photoURL) {
-            picHtml = `<img src="${picUser.photoURL}" class="pic-avatar-mini" title="PIC: ${picUser.name}" onerror="this.outerHTML='<div class=\\'pic-avatar-mini\\' title=\\'PIC: ${picUser.name}\\'>${picUser.name.charAt(0).toUpperCase()}</div>'">`;
+            avaImg = `<img src="${picUser.photoURL}" class="pic-avatar-mini" title="PIC: ${picUser.name}" onerror="this.outerHTML='<div class=\\'pic-avatar-mini\\' title=\\'PIC: ${picUser.name}\\'>${picUser.name.charAt(0).toUpperCase()}</div>'">`;
         } else {
-            picHtml = `<div class="pic-avatar-mini" title="PIC: ${picUser.name}">${picUser.name.charAt(0).toUpperCase()}</div>`; 
+            avaImg = `<div class="pic-avatar-mini" title="PIC: ${picUser.name}">${picUser.name.charAt(0).toUpperCase()}</div>`; 
         }
+        picHtml = `<div style="display:flex; align-items:center; gap:6px;">${avaImg} <span style="font-size:11px; font-weight:700; color:var(--text-muted);">${picUser.name}</span></div>`;
     } 
     
-    return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot"><div style="display:flex; align-items:center; gap:6px;">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n || 'Umum'}</span></div>${picHtml}</div></div>`; 
+    return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot" style="justify-content:space-between;"><div style="display:flex; align-items:center; gap:6px; overflow:hidden;">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;flex-shrink:0;"></span>`:''}<span class="cfoot-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.n || 'Umum'}</span></div>${picHtml}</div></div>`; 
 };
 
 let draggedBrandIdx = null; window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); };
@@ -1460,7 +1525,7 @@ window.dropCol = (e, targetId) => {
     renderBoard(); 
 };
 
-window.exportToPDF=()=>{ try { const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20); doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28); const data=cards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]); doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } }); doc.save("Content_Plan.pdf"); } catch(err) { showMsg("Gagal membuat PDF."); } };
+window.exportToPDF=()=>{ try { const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20); doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28); const visCards = window.getFilteredCards(); const data=visCards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]); doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } }); doc.save("Content_Plan.pdf"); } catch(err) { showMsg("Gagal membuat PDF."); } };
 
 window.syncColor = (v, idS, p='bm') => { if(p==='bm') bCol=v; else cCol=v; const el = document.getElementById(p + '-color-' + idS); if(el) el.value = v; };
 
