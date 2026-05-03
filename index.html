@@ -92,6 +92,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .proj-item:hover { background: var(--hover-bg); }
 .proj-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
 .proj-drag-handle { cursor: grab; color: var(--text-light); margin-right: 8px; font-size: 14px; user-select: none; }
+.leave-proj-btn { margin-left:8px; font-size:12px; color: var(--text-light); transition: color 0.2s; padding:2px; border-radius:4px; }
+.leave-proj-btn:hover { color: #e24b4a; background: rgba(226,75,74,0.1); }
 
 .top-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
 .topbtn { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--card-bg); font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); outline: none; color: var(--text-main); }
@@ -617,8 +619,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div style="display:flex; gap:10px;">
               <button class="btn-s" style="flex:1;" onclick="applyBgUrl()">Gunakan Link</button>
               <label class="btn-c" style="flex:1; text-align:center; cursor:pointer; margin:0; padding:12px 0;">
-                  Upload Lokal
-                  <input type="file" accept="image/*" style="display:none;" onchange="applyBgFile(this)">
+                  Upload Lokal (Max 5MB)
+                  <input type="file" accept="image/*" style="display:none;" id="file-bg-input" onchange="handleBgUpload(this)">
               </label>
               <button class="btn-c" style="flex:1;" onclick="removeBg()">Hapus</button>
           </div>
@@ -628,6 +630,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button class="btn-s" onclick="closeThemeModal()">Tutup Pengaturan</button>
     </div>
   </div>
+</div>
+
+<!-- Modal Editor Gambar Lokal -->
+<div class="overlay" id="img-edit-ov" style="z-index: 6000;">
+    <div class="modal">
+        <div class="modal-head" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Sesuaikan Wallpaper</div>
+        <div class="modal-body" style="padding:24px; text-align:center;">
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Gambar akan otomatis disesuaikan (Auto-Crop) dengan layar Anda dan dikompresi agar aplikasi tetap ringan.</p>
+            <div style="width:100%; height:200px; background:var(--input-bg); border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:20px; border:1px solid var(--input-border);">
+                <img id="img-edit-preview" src="" style="max-width:100%; max-height:100%; transition: transform 0.3s;" />
+            </div>
+            <button class="btn-c" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="rotateImg()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Putar Gambar 90°
+            </button>
+        </div>
+        <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
+            <button class="btn-c" onclick="cancelImgEdit()">Batal</button>
+            <button class="btn-s" onclick="applyEditedImg()">Terapkan Wallpaper</button>
+        </div>
+    </div>
 </div>
 
 <div class="overlay" id="move-ws-ov" onclick="if(event.target===this) closeMoveWsModal()">
@@ -701,6 +724,7 @@ let unsubscribeBoard = null;
 
 let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '' };
 let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
+let tempImgObj = new Image(); let imgRotation = 0; // State untuk editor gambar
 
 // HELPER: UTILS & UI
 window.allowDrop = (e) => { e.preventDefault(); };
@@ -871,13 +895,30 @@ function checkAndRenderWs() {
     }
 }
 
+window.leaveShared = (id, e) => {
+    e.stopPropagation();
+    showMsg("Hapus project ini dari daftar Anda?", () => {
+        sharedWorkspaces = sharedWorkspaces.filter(w => w.id !== id);
+        set(ref(db, `users/${myUser.id}/shared`), sharedWorkspaces);
+        remove(ref(db, `board_members/${id}/${myUser.id}`));
+        if (activeWsId === id) {
+            if (workspaces.length > 0) switchWorkspace(workspaces[0].id, true);
+            else if (sharedWorkspaces.length > 0) switchWorkspace(sharedWorkspaces[0].id, false);
+            else { activeWsId = null; checkAndRenderWs(); }
+        }
+    });
+};
+
 function renderWsSelector() {
     const btn = document.getElementById('project-btn'), cont = document.getElementById('proj-list-container'), sharedCont = document.getElementById('shared-proj-list'), sharedHead = document.getElementById('shared-proj-header');
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) { btn.innerHTML = 'Ruang Kosong ▾'; cont.innerHTML = ''; sharedHead.style.display = 'none'; sharedCont.innerHTML = ''; return; }
     let activeData = workspaces.find(w => w.id === activeWsId) || sharedWorkspaces.find(w => w.id === activeWsId);
     if (activeData) btn.innerHTML = `${activeData.name} ▾`;
     cont.innerHTML = workspaces.map((w, i) => `<div class="proj-item ${w.id === activeWsId ? 'active' : ''}" draggable="true" ondragstart="dragWs(event, ${i})" ondragover="allowDrop(event); dragOverWs(event);" ondragleave="dragLeaveWs(event)" ondrop="dropWs(event, ${i})" onclick="switchWorkspace('${w.id}', true)"><div><span class="proj-drag-handle">⠿</span> ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}</div>`).join('');
-    if(sharedWorkspaces.length > 0) { sharedHead.style.display = 'block'; sharedCont.innerHTML = sharedWorkspaces.map(w => `<div class="proj-item ${w.id === activeWsId ? 'active' : ''}" onclick="switchWorkspace('${w.id}', false)"><div>👥 ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}</div>`).join(''); } else { sharedHead.style.display = 'none'; sharedCont.innerHTML = ''; }
+    if(sharedWorkspaces.length > 0) { 
+        sharedHead.style.display = 'block'; 
+        sharedCont.innerHTML = sharedWorkspaces.map(w => `<div class="proj-item ${w.id === activeWsId ? 'active' : ''}" onclick="switchWorkspace('${w.id}', false)"><div>👥 ${w.name}</div><div style="display:flex; gap:8px; align-items:center;">${w.id === activeWsId ? '<span>✓</span>' : ''}<span class="leave-proj-btn" title="Keluar / Hapus dari daftar" onclick="leaveShared('${w.id}', event)">❌</span></div></div>`).join(''); 
+    } else { sharedHead.style.display = 'none'; sharedCont.innerHTML = ''; }
 }
 
 let draggedWsIdx = null;
@@ -895,7 +936,7 @@ window.joinProject = async (joinId) => {
         try {
             await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); 
         } catch (errSet) {
-            console.log("Info: User sudah terdaftar di server.");
+            console.log("Info: User mungkin sudah terdaftar di server.");
         }
         
         // Beri jeda 500ms agar Satpam Firebase (Rules) sempat memperbarui datanya
@@ -913,21 +954,27 @@ window.joinProject = async (joinId) => {
             if (joinId === 'default') projName = "Project Utama";
         }
         
-        // 3. Masukkan ke memori Shared Workspace secara aman tanpa menimpa yang lain
+        // 3. Masukkan ke memori Shared Workspace secara aman tanpa menimpa yang lain, hapus duplikat jika ada
         const userSharedSnap = await get(ref(db, `users/${myUser.id}/shared`));
         let currentShared = userSharedSnap.val() ? Object.values(userSharedSnap.val()) : [];
         
-        const existLocally = currentShared.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId);
+        // Hapus duplikat id yang sama sebelumnya untuk mencegah list menumpuk
+        currentShared = currentShared.filter(w => w.id !== joinId);
         
-        if(!existLocally) {
+        // Cek apakah itu bukan project pribadi
+        const isPersonal = workspaces.find(w => w.id === joinId);
+        
+        if(!isPersonal) {
             currentShared.push({ id: joinId, name: projName }); 
             await set(ref(db, `users/${myUser.id}/shared`), currentShared); 
+            sharedWorkspaces = currentShared; // update state lokal
         }
         
-        // Bersihkan URL dan masuk ke project
+        // Bersihkan URL dan PAKSA MASUK ke project tersebut
         window.history.replaceState({}, document.title, window.location.pathname);
         showMsg("Berhasil bergabung ke project tim!"); 
-        switchWorkspace(joinId, false); 
+        switchWorkspace(joinId, false); // PAKSA PINDAH
+        
     } catch (e) { 
         window.history.replaceState({}, document.title, window.location.pathname);
         showMsg("Gagal bergabung: " + e.message); 
@@ -937,7 +984,7 @@ window.joinProject = async (joinId) => {
 window.openWsModal = (isEdit = false) => { const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn'); if (isEdit) { if(!isOwner) return showMsg("Hanya pemilik yang dapat mengubah nama/menghapus project."); editWsId = activeWsId; titleEl.textContent = "Edit Project"; const w = workspaces.find(w => w.id === activeWsId); inputEl.value = w ? w.name : ''; delBtn.style.display = "block"; } else { editWsId = null; titleEl.textContent = "Project Baru"; inputEl.value = ''; delBtn.style.display = "none"; } document.getElementById('ws-ov').classList.add('show'); };
 window.closeWsModal = () => document.getElementById('ws-ov').classList.remove('show');
 
-window.saveWs = () => { const name = document.getElementById('ws-name').value.trim(); if(!name) return; if (editWsId) { const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name; set(ref(db, `users/${myUser.id}/workspaces`), workspaces); set(ref(db, `content_board_data_${editWsId}/meta/name`), name); closeWsModal(); } else { const customId = 'ws_' + Date.now(); workspaces.push({id: customId, name: name}); set(ref(db, `users/${myUser.id}/workspaces`), workspaces); set(ref(db, `content_board_data_${customId}/meta`), { name: name, owner: myUser.id }); set(ref(db, `board_members/${customId}/${myUser.id}`), { role: 'owner' }); closeWsModal(); localStorage.setItem('cb_active_ws', customId); } };
+window.saveWs = () => { const name = document.getElementById('ws-name').value.trim(); if(!name) return; if (editWsId) { const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name; set(ref(db, `users/${myUser.id}/workspaces`), workspaces); set(ref(db, `content_board_data_${editWsId}/meta/name`), name); closeWsModal(); } else { const customId = 'ws_' + Date.now(); workspaces.push({id: customId, name: name}); set(ref(db, `users/${myUser.id}/workspaces`), workspaces); set(ref(db, `content_board_data_${customId}/meta`), { name: name, owner: myUser.id }); set(ref(db, `board_members/${customId}/${myUser.id}`), { role: 'owner' }); closeWsModal(); localStorage.setItem('cb_active_ws', customId); switchWorkspace(customId, true); } };
 
 window.confirmDelWs = () => { showMsg("Hapus project ini beserta seluruh kontennya secara permanen?", () => { workspaces = workspaces.filter(w => w.id !== activeWsId); set(ref(db, `users/${myUser.id}/workspaces`), workspaces); remove(ref(db, `content_board_data_${activeWsId}`)); remove(ref(db, `board_members/${activeWsId}`)); closeWsModal(); if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true); }); };
 
@@ -962,7 +1009,6 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         brands = data.brands || []; cards = data.cards || [];
         columns = (data.columns && data.columns.length > 0) ? data.columns : [{id:'review',lbl:'Review',c:'#534AB7', collapsed: false}];
         
-        // Memaksa sistem untuk SELALU memuat tema dari memori lokal perangkat, bukan dari server
         if(window.loadLocalTheme) window.loadLocalTheme();
         
         renderAll(); renderWsSelector();
@@ -1018,30 +1064,67 @@ function applyTheme() {
 window.saveLocalTheme = () => { localStorage.setItem('cb_theme_' + activeWsId, JSON.stringify(themeSettings)); };
 window.loadLocalTheme = () => { const saved = localStorage.getItem('cb_theme_' + activeWsId); themeSettings = saved ? JSON.parse(saved) : { color: '#534AB7', bg: '' }; applyTheme(); };
 
-window.openThemeModal = () => { document.getElementById('bg-url-input').value = themeSettings.bg || ''; document.getElementById('theme-ov').classList.add('show'); };
+window.openThemeModal = () => { document.getElementById('bg-url-input').value = themeSettings.bg && themeSettings.bg.startsWith('http') ? themeSettings.bg : ''; document.getElementById('theme-ov').classList.add('show'); };
 window.closeThemeModal = () => document.getElementById('theme-ov').classList.remove('show');
 window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelectorAll('.theme-option').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); applyTheme(); window.saveLocalTheme(); };
 window.applyBgUrl = () => { const u = document.getElementById('bg-url-input').value.trim(); if(u) { themeSettings.bg = u; applyTheme(); window.saveLocalTheme(); }};
-window.removeBg = () => { themeSettings.bg = ''; document.getElementById('bg-url-input').value = ''; applyTheme(); window.saveLocalTheme(); };
+window.removeBg = () => { themeSettings.bg = ''; document.getElementById('bg-url-input').value = ''; applyTheme(); window.saveLocalTheme(); document.getElementById('file-bg-input').value = ''; };
 
-// --- FUNGSI UPLOAD GAMBAR LOKAL ---
-window.applyBgFile = (input) => { 
-    if (input.files && input.files[0]) { 
+// --- EDITOR GAMBAR LOKAL (ROTATE & COMPRESS) ---
+window.handleBgUpload = (input) => {
+    if (input.files && input.files[0]) {
         const file = input.files[0];
-        if(file.size > 2 * 1024 * 1024) { 
-            showMsg("Ukuran gambar terlalu besar! Maksimal 2MB agar loading papan tetap cepat."); 
-            input.value = ''; 
-            return; 
+        if (file.size > 5 * 1024 * 1024) {
+            showMsg("Ukuran melebihi 5MB. Silakan pilih gambar yang lebih kecil.");
+            input.value = ''; return;
         }
-        const reader = new FileReader(); 
-        reader.onload = function(e) { 
-            themeSettings.bg = e.target.result; 
-            applyTheme(); 
-            window.saveLocalTheme(); 
-            input.value = ''; 
-        }; 
-        reader.readAsDataURL(file); 
-    } 
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            tempImgObj.onload = function() {
+                imgRotation = 0;
+                updateImgPreview();
+                document.getElementById('img-edit-ov').classList.add('show');
+                document.getElementById('theme-ov').classList.remove('show');
+            }
+            tempImgObj.src = e.target.result;
+            input.value = '';
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+window.rotateImg = () => { imgRotation = (imgRotation + 90) % 360; updateImgPreview(); };
+window.updateImgPreview = () => { 
+    const el = document.getElementById('img-edit-preview'); 
+    el.src = tempImgObj.src; 
+    el.style.transform = `rotate(${imgRotation}deg)`; 
+};
+window.cancelImgEdit = () => { document.getElementById('img-edit-ov').classList.remove('show'); document.getElementById('theme-ov').classList.add('show'); };
+
+window.applyEditedImg = () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    let w = tempImgObj.width, h = tempImgObj.height;
+    
+    // Auto-compress logic agar tidak over-limit di Local Storage
+    const MAX_W = 1920; 
+    if (w > MAX_W) { h = Math.round((MAX_W / w) * h); w = MAX_W; }
+    
+    if (imgRotation === 90 || imgRotation === 270) {
+        canvas.width = h; canvas.height = w;
+    } else {
+        canvas.width = w; canvas.height = h;
+    }
+    
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(imgRotation * Math.PI / 180);
+    ctx.drawImage(tempImgObj, -w/2, -h/2, w, h);
+    
+    // Encode ke format JPEG dengan kualitas 80% (mengurangi ukuran file drastis tanpa terlihat buram)
+    themeSettings.bg = canvas.toDataURL('image/jpeg', 0.8);
+    applyTheme(); window.saveLocalTheme();
+    document.getElementById('img-edit-ov').classList.remove('show');
+    document.getElementById('theme-ov').classList.add('show');
 };
 
 window.openMoveWsModal = (cardId) => { cardToMoveId = cardId; const availableWs = workspaces.filter(w => w.id !== activeWsId); if(availableWs.length === 0) return showMsg("Buat Project lain dulu untuk memindahkan."); document.getElementById('move-ws-select').innerHTML = availableWs.map(w => `<option value="${w.id}">${w.name}</option>`).join(''); document.getElementById('move-ws-ov').classList.add('show'); };
