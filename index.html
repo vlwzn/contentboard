@@ -4,6 +4,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0"/>
 <title>ContentBoard Pro</title>
+
+<!-- TAG PWA -->
+<link rel="manifest" id="pwa-manifest">
+<link rel="apple-touch-icon" id="pwa-apple-icon">
+<meta name="theme-color" content="#534AB7">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <style>
@@ -600,12 +606,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="theme-option" style="background:#1a1a1a; width:40px; height:40px; border:1px solid #555;" onclick="setThemeColor('#1a1a1a', this)"></div>
           <input type="color" id="custom-theme-color" style="width:40px; height:40px; border:none; border-radius:50%; cursor:pointer; padding:0; background:none;" onchange="setThemeColor(this.value, null)" title="Warna Kustom">
       </div>
-      <div style="font-size:11px; font-weight:800; color:var(--text-light); margin-bottom:12px; letter-spacing:1px;">WALLPAPER PAPAN (Link URL)</div>
+      <div style="font-size:11px; font-weight:800; color:var(--text-light); margin-bottom:12px; letter-spacing:1px;">WALLPAPER PAPAN</div>
       <div id="bg-preview" style="width:100%; height:120px; background:var(--input-bg); border-radius:12px; border:1px solid var(--input-border); margin-bottom:16px; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:var(--text-light); font-size:12px;">Preview</div>
       <div style="display:flex; flex-direction:column; gap:10px;">
-          <input type="text" id="bg-url-input" class="fi" style="margin-bottom:0;" placeholder="Paste link gambar (Unsplash, Pinterest, Drive)..." />
+          <input type="text" id="bg-url-input" class="fi" style="margin-bottom:0;" placeholder="Paste link gambar atau pilih file lokal..." />
           <div style="display:flex; gap:10px;">
-              <button class="btn-s" style="flex:2;" onclick="applyBgUrl()">Terapkan Wallpaper</button>
+              <button class="btn-s" style="flex:1;" onclick="applyBgUrl()">Gunakan Link</button>
+              <label class="btn-c" style="flex:1; text-align:center; cursor:pointer; margin:0; padding:12px 0;">
+                  Upload Lokal
+                  <input type="file" accept="image/*" style="display:none;" onchange="applyBgFile(this)">
+              </label>
               <button class="btn-c" style="flex:1;" onclick="removeBg()">Hapus</button>
           </div>
       </div>
@@ -952,6 +962,26 @@ window.closeThemeModal = () => document.getElementById('theme-ov').classList.rem
 window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelectorAll('.theme-option').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); applyTheme(); syncToFirebase(); };
 window.applyBgUrl = () => { const u = document.getElementById('bg-url-input').value.trim(); if(u) { themeSettings.bg = u; applyTheme(); syncToFirebase(); }};
 window.removeBg = () => { themeSettings.bg = ''; document.getElementById('bg-url-input').value = ''; applyTheme(); syncToFirebase(); };
+
+// --- FUNGSI UPLOAD GAMBAR LOKAL ---
+window.applyBgFile = (input) => { 
+    if (input.files && input.files[0]) { 
+        const file = input.files[0];
+        if(file.size > 2 * 1024 * 1024) { 
+            showMsg("Ukuran gambar terlalu besar! Maksimal 2MB agar loading papan tetap cepat."); 
+            input.value = ''; 
+            return; 
+        }
+        const reader = new FileReader(); 
+        reader.onload = function(e) { 
+            themeSettings.bg = e.target.result; 
+            applyTheme(); 
+            syncToFirebase(); 
+            input.value = ''; 
+        }; 
+        reader.readAsDataURL(file); 
+    } 
+};
 
 window.openMoveWsModal = (cardId) => { cardToMoveId = cardId; const availableWs = workspaces.filter(w => w.id !== activeWsId); if(availableWs.length === 0) return showMsg("Buat Project lain dulu untuk memindahkan."); document.getElementById('move-ws-select').innerHTML = availableWs.map(w => `<option value="${w.id}">${w.name}</option>`).join(''); document.getElementById('move-ws-ov').classList.add('show'); };
 window.closeMoveWsModal = () => { document.getElementById('move-ws-ov').classList.remove('show'); cardToMoveId = null; };
