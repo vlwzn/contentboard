@@ -1195,8 +1195,11 @@ window.stopReposition = () => {
     document.getElementById('theme-ov').classList.add('show');
 };
 
+const repoOverlay = document.getElementById('repo-overlay');
 const appEl = document.getElementById('main-app');
-appEl.addEventListener('mousedown', e => {
+
+// Desktop Drag
+repoOverlay.addEventListener('mousedown', e => {
     if(!isRepoMode) return;
     startY = e.clientY;
     let curPos = themeSettings.bgPos ? themeSettings.bgPos.split(' ')[1] : '50%';
@@ -1210,6 +1213,22 @@ window.addEventListener('mousemove', e => {
     appEl.style.backgroundPosition = themeSettings.bgPos;
 });
 window.addEventListener('mouseup', () => { startY = undefined; });
+
+// Mobile/Touch Drag
+repoOverlay.addEventListener('touchstart', e => {
+    if(!isRepoMode) return;
+    startY = e.touches[0].clientY;
+    let curPos = themeSettings.bgPos ? themeSettings.bgPos.split(' ')[1] : '50%';
+    startPos = parseFloat(curPos) || 50;
+}, {passive: true});
+window.addEventListener('touchmove', e => {
+    if(!isRepoMode || startY === undefined) return;
+    let diff = (e.touches[0].clientY - startY) / 5;
+    let newPos = Math.max(0, Math.min(100, startPos - diff));
+    themeSettings.bgPos = `50% ${newPos}%`;
+    appEl.style.backgroundPosition = themeSettings.bgPos;
+}, {passive: true});
+window.addEventListener('touchend', () => { startY = undefined; });
 
 // --- EDITOR GAMBAR LOKAL (GIF SUPPORT & AUTO-CROP) ---
 window.handleBgUpload = (input) => {
