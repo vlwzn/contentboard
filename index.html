@@ -59,7 +59,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 }
 
 /* LAYOUT */
-.app{display:flex;flex-direction:column;height:100vh;overflow:hidden; background-size: cover; background-position: center; background-attachment: fixed; transition: background 0.4s ease;}
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden; background-size: cover; background-position: center; background-attachment: fixed; transition: background 0.4s ease; position: relative;}
+
+/* REPOSITION OVERLAY (NOTION STYLE) */
+#repo-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; cursor: ns-resize; user-select: none; backdrop-filter: blur(2px); }
+#repo-overlay p { background: rgba(0,0,0,0.8); padding: 12px 24px; border-radius: 30px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 14px;}
 
 /* TOPBAR MINIMALIS */
 .topbar {
@@ -109,6 +113,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* FILTER PANEL MELAYANG */
 #filter-panel { position: absolute; top: 60px; right: 16px; width: 260px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
 #filter-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+
+/* MUSIC PANEL MELAYANG */
+#music-panel { position: absolute; top: 60px; right: 0; width: 300px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
+#music-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+
 .filter-row { display: flex; flex-direction: column; gap: 4px; }
 .filter-lbl { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -165,8 +174,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card-foot{display:flex;align-items:center;gap:6px;padding-top:12px;border-top:1px solid var(--input-border)}
 .cfoot-name{font-size:11px;color:var(--text-muted);flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight: 500;}
 
-/* AVATAR PIC KECIL DI CARD */
-.pic-avatar-mini { width: 24px; height: 24px; border-radius: 50%; background: var(--primary-light); color: var(--primary); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-left: auto; text-transform: uppercase;}
+/* AVATAR PIC - DIPERBARUI KE 24PX PRESISI */
+.pic-avatar-mini { 
+    width: 24px; height: 24px; 
+    border-radius: 50%; 
+    background: var(--primary); 
+    color: #fff; 
+    font-size: 10px; 
+    font-weight: 700; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border: 1.5px solid #fff; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15); 
+    text-transform: uppercase;
+}
 
 /* ATTACHMENT & STEPS */
 .att-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -228,9 +250,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .dp-fv input, .dp-fv select{width:100%;border:none;outline:none;font-size:14px; color:var(--text-main); background:transparent; font-weight: 500;}
 .dp-fv select { cursor: pointer; }
 
-/* USER ASSIGNEE (PIC) DI DETAIL PANEL */
-.pic-selector { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border: 1px solid var(--input-border); padding: 4px 8px; border-radius: 20px; cursor: pointer; transition: border 0.2s; }
-.pic-selector:hover { border-color: var(--primary); }
+/* PIC ROW IN DETAIL */
+.dp-pic-row { 
+    display: flex; align-items: center; gap: 12px; 
+    background: var(--primary-light); 
+    padding: 12px 16px; 
+    border-radius: 12px; 
+    margin-bottom: 20px;
+    border: 1px solid var(--glass-border);
+}
+.dp-pic-info { display: flex; flex-direction: column; flex: 1; }
+.dp-pic-label { font-size: 10px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
 
 .fi{padding:14px;border:1px solid var(--input-border);border-radius:10px;width:100%;outline:none;margin-bottom:14px; font-size:14px; transition: all 0.2s; background: var(--input-bg); color: var(--text-main);}
 .fi:focus{border-color:var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: var(--modal-bg);}
@@ -269,6 +299,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
+<div id="repo-overlay">
+    <p>🖱️ Geser ke atas/bawah untuk atur posisi wallpaper</p>
+    <button class="btn-s" style="margin-top: 20px;" onclick="stopReposition()">Simpan Posisi</button>
+</div>
+
+<!-- FORM LOGIN FULL VERSION -->
 <div class="overlay show" id="login-ov" style="z-index: 9999; background: var(--bg-app); opacity: 1; visibility: visible;">
   <div class="modal" style="padding: 30px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
     
@@ -324,7 +360,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<div class="app">
+<div class="app" id="main-app">
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand">
@@ -367,6 +403,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="top-actions">
       <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="renderBoard()">
       
+      <!-- FITUR BARU: MINI MUSIC PLAYER -->
+      <div style="position: relative;">
+          <button class="topbtn" onclick="document.getElementById('music-panel').classList.toggle('show'); event.stopPropagation();" title="Pemutar Musik">
+              <span style="font-size: 14px;">🎵</span> Musik
+          </button>
+          <div id="music-panel" onclick="event.stopPropagation()">
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; border-bottom: 1px solid var(--input-border); padding-bottom: 10px;">Mini Player (Spotify / Apple)</div>
+              <input type="text" id="music-link-input" class="fi" style="margin-bottom:0; padding:10px; font-size:12px;" placeholder="Paste link lagu/playlist di sini..." onkeypress="if(event.key==='Enter') setMusicPlayer()">
+              <button class="btn-s" style="padding:10px; font-size:13px;" onclick="setMusicPlayer()">Putar Musik</button>
+              <div id="music-player-container" style="margin-top:4px; display:none; width:100%; border-radius:12px; overflow:hidden;"></div>
+          </div>
+      </div>
+
       <div style="position: relative;">
           <button class="topbtn" onclick="toggleMenu('filter-panel', event)" id="filter-btn">
               <span style="font-size: 14px;">⚙️</span> Filter
@@ -374,7 +423,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           
           <div id="filter-panel" onclick="event.stopPropagation()" style="width: 260px;">
               <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--input-border); padding-bottom: 10px;">Pengaturan Tampilan</div>
-              
               <div style="display:flex; flex-direction:column; gap:12px; max-height: 60vh; overflow-y: auto; padding-right: 4px;">
                   <div class="filter-row">
                       <span class="filter-lbl">Waktu Tayang (Bulan)</span>
@@ -405,19 +453,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                       <select id="sort-by" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="manual">↕️ Manual (Geser)</option><option value="newest">✨ Paling Baru</option><option value="date-asc">📅 Tanggal Terdekat</option><option value="date-desc">📆 Tanggal Terjauh</option></select>
                   </div>
               </div>
-
               <div style="border-top: 1px solid var(--input-border); margin-top: 12px; padding-top: 12px;">
                   <button class="btn-c" style="width: 100%; padding: 10px; font-size: 13px;" onclick="resetFilters()">🔄 Reset Semua Filter</button>
               </div>
           </div>
       </div>
-
       <button class="export-btn" onclick="exportToPDF()">📑 PDF</button>
     </div>
   </div>
   
   <div class="brand-tabs" id="brand-tabs"></div>
-  
   <div class="board-wrap" id="board-wrap"><div class="board" id="board"></div></div>
 
   <div id="empty-state" style="display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
@@ -435,7 +480,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </button>
 
 <div id="dp-ov" onclick="if(event.target===this) closeDP()"></div>
-
 <div class="dp" id="dp">
   <div class="dp-pull-indicator"></div>
   <div class="dp-head" style="padding:20px 24px; border-bottom:1px solid var(--input-border); display:flex; align-items:center;">
@@ -447,11 +491,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div class="dp-body">
     
-    <div style="background: var(--primary-light); padding: 12px 16px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-        <span style="font-size: 12px; font-weight: 700; color: var(--primary);">👤 DITUGASKAN KE (PIC):</span>
-        <select id="dp-fassignee" style="background: transparent; border: none; font-weight: 700; color: var(--text-main); font-size: 14px; cursor: pointer; outline: none; text-align: right; max-width: 150px;" onchange="dps('assignee', this.value)">
-            <option value="">Belum Ada PIC</option>
-        </select>
+    <div class="dp-pic-row">
+        <div class="pic-avatar-mini" id="dp-pic-avatar" style="width:40px; height:40px; font-size:16px; margin:0;">?</div>
+        <div class="dp-pic-info" style="flex:1;">
+            <div class="dp-pic-label">DITUGASKAN KE (PIC)</div>
+            <select id="dp-fassignee" style="background: transparent; border: none; font-weight: 700; color: var(--text-main); font-size: 14px; cursor: pointer; outline: none; width: 100%; margin-top:4px;" onchange="dps('assignee', this.value)">
+                <option value="">Belum Ada PIC</option>
+            </select>
+        </div>
     </div>
 
     <div class="dp-field"><span class="dp-fl">Judul</span><div class="dp-fv"><input type="text" id="dp-ftitle" onblur="dps('title',this.value)"/></div></div>
@@ -503,6 +550,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- MODAL TAMBAH KONTEN (SUDAH KEMBALI) -->
 <div class="overlay" id="add-ov" onclick="if(event.target===this) closeAdd()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; font-size:18px; border-bottom:1px solid var(--input-border); color:var(--text-main);">Buat Konten Baru</div>
@@ -606,24 +654,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="modal-body" style="padding:24px;">
       <div style="font-size:11px; font-weight:800; color:var(--text-light); margin-bottom:12px; letter-spacing:1px;">WARNA AKSEN</div>
       <div style="display:flex; gap:12px; margin-bottom:28px;">
-          <div class="theme-option active" style="background:#534AB7; width:40px; height:40px;" onclick="setThemeColor('#534AB7', this)"></div>
-          <div class="theme-option" style="background:#1D9E75; width:40px; height:40px;" onclick="setThemeColor('#1D9E75', this)"></div>
-          <div class="theme-option" style="background:#D85A30; width:40px; height:40px;" onclick="setThemeColor('#D85A30', this)"></div>
-          <div class="theme-option" style="background:#1a1a1a; width:40px; height:40px; border:1px solid #555;" onclick="setThemeColor('#1a1a1a', this)"></div>
-          <input type="color" id="custom-theme-color" style="width:40px; height:40px; border:none; border-radius:50%; cursor:pointer; padding:0; background:none;" onchange="setThemeColor(this.value, null)" title="Warna Kustom">
+          <div class="theme-option active" style="background:#534AB7;" onclick="setThemeColor('#534AB7', this)"></div>
+          <div class="theme-option" style="background:#1D9E75;" onclick="setThemeColor('#1D9E75', this)"></div>
+          <div class="theme-option" style="background:#D85A30;" onclick="setThemeColor('#D85A30', this)"></div>
+          <div class="theme-option" style="background:#1a1a1a; border:1px solid #555;" onclick="setThemeColor('#1a1a1a', this)"></div>
+          <input type="color" id="custom-theme-color" style="width:36px; height:36px; border:none; border-radius:50%; cursor:pointer; padding:0; background:none;" onchange="setThemeColor(this.value, null)" title="Warna Kustom">
       </div>
       <div style="font-size:11px; font-weight:800; color:var(--text-light); margin-bottom:12px; letter-spacing:1px;">WALLPAPER PAPAN</div>
-      <div id="bg-preview" style="width:100%; height:120px; background:var(--input-bg); border-radius:12px; border:1px solid var(--input-border); margin-bottom:16px; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:var(--text-light); font-size:12px;">Preview</div>
+      <div id="bg-preview" style="width:100%; height:120px; background:var(--input-bg); border-radius:12px; border:1px solid var(--input-border); margin-bottom:16px; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:var(--text-light); font-size:12px;"></div>
       <div style="display:flex; flex-direction:column; gap:10px;">
-          <input type="text" id="bg-url-input" class="fi" style="margin-bottom:0;" placeholder="Paste link gambar atau pilih file lokal..." />
-          <div style="display:flex; gap:10px;">
-              <button class="btn-s" style="flex:1;" onclick="applyBgUrl()">Gunakan Link</button>
-              <label class="btn-c" style="flex:1; text-align:center; cursor:pointer; margin:0; padding:12px 0;">
-                  Upload Lokal (Max 5MB)
-                  <input type="file" accept="image/*" style="display:none;" id="file-bg-input" onchange="handleBgUpload(this)">
-              </label>
-              <button class="btn-c" style="flex:1;" onclick="removeBg()">Hapus</button>
-          </div>
+          <label class="btn-s" style="text-align:center; cursor:pointer; margin:0;">
+              Upload Lokal (Max 5MB / GIF Support)
+              <input type="file" accept="image/*" style="display:none;" id="file-bg-input" onchange="handleBgUpload(this)">
+          </label>
+          <button class="btn-c" id="btn-repo" style="display:none;" onclick="startReposition()">📏 Atur Posisi (Drag)</button>
+          <button class="btn-c" onclick="removeBg()">Hapus Wallpaper</button>
       </div>
     </div>
     <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
@@ -722,9 +767,10 @@ let unsubscribeWs = null;
 let unsubscribeSharedWs = null;
 let unsubscribeBoard = null;
 
-let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '' };
+let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '', bgPos: '50% 50%' };
 let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
-let tempImgObj = new Image(); let imgRotation = 0; // State untuk editor gambar
+let tempImgObj = new Image(); let imgRotation = 0; 
+let isRepoMode = false, startY, startPos;
 
 // HELPER: UTILS & UI
 window.allowDrop = (e) => { e.preventDefault(); };
@@ -775,7 +821,7 @@ window.resetFilters = () => {
     document.getElementById('filter-panel').classList.remove('show');
 };
 
-// ================= AUTHENTICATION =================
+// ================= AUTHENTICATION (KEMBALI FULL 100%) =================
 window.isRegistering = false;
 
 onAuthStateChanged(auth, (user) => {
@@ -932,49 +978,29 @@ window.generateShareLink = () => { if(!activeWsId) return; if(!isOwner) return s
 window.joinProject = async (joinId) => { 
     if (!myUser) return; 
     try { 
-        // 1. Trik: Daftarkan diri ke Firebase (board_members) agar diizinkan
-        try {
-            await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); 
-        } catch (errSet) {
-            console.log("Info: User mungkin sudah terdaftar di server.");
-        }
-        
-        // Beri jeda 500ms agar Satpam Firebase (Rules) sempat memperbarui datanya
+        try { await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); } catch (errSet) {}
         await new Promise(r => setTimeout(r, 500)); 
-
-        // 2. Baca nama project dengan aman
         const dbPath = joinId === 'default' ? 'content_board_data' : `content_board_data_${joinId}`;
         let projName = "Project Kolaborasi";
         try {
             const snap = await get(ref(db, `${dbPath}/meta`)); 
             if(snap.exists() && snap.val() && snap.val().name) projName = snap.val().name;
             else if (joinId === 'default') projName = "Project Utama";
-        } catch(e) {
-            console.log("Gagal membaca nama asli, gunakan default");
-            if (joinId === 'default') projName = "Project Utama";
-        }
+        } catch(e) { if (joinId === 'default') projName = "Project Utama"; }
         
-        // 3. Masukkan ke memori Shared Workspace secara aman tanpa menimpa yang lain, hapus duplikat jika ada
         const userSharedSnap = await get(ref(db, `users/${myUser.id}/shared`));
         let currentShared = userSharedSnap.val() ? Object.values(userSharedSnap.val()) : [];
-        
-        // Hapus duplikat id yang sama sebelumnya untuk mencegah list menumpuk
         currentShared = currentShared.filter(w => w.id !== joinId);
-        
-        // Cek apakah itu bukan project pribadi
         const isPersonal = workspaces.find(w => w.id === joinId);
         
         if(!isPersonal) {
             currentShared.push({ id: joinId, name: projName }); 
             await set(ref(db, `users/${myUser.id}/shared`), currentShared); 
-            sharedWorkspaces = currentShared; // update state lokal
+            sharedWorkspaces = currentShared; 
         }
-        
-        // Bersihkan URL dan PAKSA MASUK ke project tersebut
         window.history.replaceState({}, document.title, window.location.pathname);
         showMsg("Berhasil bergabung ke project tim!"); 
-        switchWorkspace(joinId, false); // PAKSA PINDAH
-        
+        switchWorkspace(joinId, false); 
     } catch (e) { 
         window.history.replaceState({}, document.title, window.location.pathname);
         showMsg("Gagal bergabung: " + e.message); 
@@ -994,6 +1020,18 @@ window.switchWorkspace = (wsId, ownerFlag) => {
     localStorage.setItem('cb_active_ws', wsId); 
     aB = 'all';
     document.getElementById('btn-edit-ws').style.display = isOwner ? 'flex' : 'none';
+    
+    const handleKick = (err) => {
+        if(err.message && err.message.toLowerCase().includes('permission_denied')) {
+            showMsg("Akses ditutup. Anda telah dikeluarkan dari project ini.", () => {
+                sharedWorkspaces = sharedWorkspaces.filter(w => w.id !== wsId);
+                set(ref(db, `users/${myUser.id}/shared`), sharedWorkspaces);
+                if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true);
+                else { activeWsId = null; checkAndRenderWs(); }
+            });
+        }
+    };
+
     onValue(ref(db, `board_members/${wsId}`), async (snap) => {
         wsMembers = {};
         if(snap.val()) {
@@ -1002,7 +1040,8 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         }
         updateAssigneeDropdowns(); renderBoard();
         if(document.getElementById('team-ov').classList.contains('show')) window.renderTeamList();
-    });
+    }, handleKick);
+    
     const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
     unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
         const data = snapshot.val() || {};
@@ -1012,7 +1051,7 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         if(window.loadLocalTheme) window.loadLocalTheme();
         
         renderAll(); renderWsSelector();
-    });
+    }, handleKick);
 };
 
 window.openTeamModal = () => { window.renderTeamList(); document.getElementById('team-ov').classList.add('show'); };
@@ -1053,7 +1092,8 @@ function updateAssigneeDropdowns() {
         opts += `<option value="${id}">${wsMembers[id].name}</option>`;
         fOpts += `<option value="${id}">${wsMembers[id].name}</option>`;
     }
-    document.getElementById('m-assignee').innerHTML = opts;
+    const mAss = document.getElementById('m-assignee');
+    if(mAss) mAss.innerHTML = opts;
     const dpAss = document.getElementById('dp-fassignee');
     if(dpAss) { dpAss.innerHTML = opts; if(selId){ const c = cards.find(x=>x.id===selId); if(c) dpAss.value = c.assignee || '';} }
     const fAss = document.getElementById('filter-assignee');
@@ -1066,22 +1106,63 @@ function applyTheme() {
     const root = document.documentElement; root.style.setProperty('--primary', themeSettings.color || '#534AB7');
     let lightColor = themeSettings.color || '#534AB7'; if(lightColor.length === 7) lightColor += '20'; 
     root.style.setProperty('--primary-light', lightColor);
-    const appEl = document.querySelector('.app'), bgP = document.getElementById('bg-preview');
-    if(themeSettings.bg) { appEl.style.backgroundImage = `url('${themeSettings.bg}')`; if(bgP) bgP.style.backgroundImage = `url('${themeSettings.bg}')`; } else { appEl.style.backgroundImage = 'none'; if(bgP) bgP.style.backgroundImage = 'none'; }
+    
+    const appEl = document.getElementById('main-app'), bgP = document.getElementById('bg-preview');
+    if(themeSettings.bg) { 
+        appEl.style.backgroundImage = `url('${themeSettings.bg}')`; 
+        appEl.style.backgroundPosition = themeSettings.bgPos || '50% 50%';
+        if(bgP) {
+            bgP.style.backgroundImage = `url('${themeSettings.bg}')`; 
+            bgP.style.backgroundPosition = themeSettings.bgPos || '50% 50%';
+        }
+        if(document.getElementById('btn-repo')) document.getElementById('btn-repo').style.display = 'block';
+    } else { 
+        appEl.style.backgroundImage = 'none'; 
+        if(bgP) bgP.style.backgroundImage = 'none'; 
+        if(document.getElementById('btn-repo')) document.getElementById('btn-repo').style.display = 'none';
+    }
 }
 
-// ================= FUNGSI PAPAN & KARTU =================
-
+// ================= FUNGSI THEME, REPO, DAN GAMBAR =================
 window.saveLocalTheme = () => { localStorage.setItem('cb_theme_' + activeWsId, JSON.stringify(themeSettings)); };
-window.loadLocalTheme = () => { const saved = localStorage.getItem('cb_theme_' + activeWsId); themeSettings = saved ? JSON.parse(saved) : { color: '#534AB7', bg: '' }; applyTheme(); };
+window.loadLocalTheme = () => { const saved = localStorage.getItem('cb_theme_' + activeWsId); themeSettings = saved ? JSON.parse(saved) : { color: '#534AB7', bg: '', bgPos: '50% 50%' }; applyTheme(); };
 
-window.openThemeModal = () => { document.getElementById('bg-url-input').value = themeSettings.bg && themeSettings.bg.startsWith('http') ? themeSettings.bg : ''; document.getElementById('theme-ov').classList.add('show'); };
+window.openThemeModal = () => { document.getElementById('theme-ov').classList.add('show'); };
 window.closeThemeModal = () => document.getElementById('theme-ov').classList.remove('show');
 window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelectorAll('.theme-option').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); applyTheme(); window.saveLocalTheme(); };
-window.applyBgUrl = () => { const u = document.getElementById('bg-url-input').value.trim(); if(u) { themeSettings.bg = u; applyTheme(); window.saveLocalTheme(); }};
-window.removeBg = () => { themeSettings.bg = ''; document.getElementById('bg-url-input').value = ''; applyTheme(); window.saveLocalTheme(); document.getElementById('file-bg-input').value = ''; };
+window.removeBg = () => { themeSettings.bg = ''; applyTheme(); window.saveLocalTheme(); document.getElementById('file-bg-input').value = ''; };
 
-// --- EDITOR GAMBAR LOKAL (ROTATE & AUTO-CROP 16:9) ---
+// --- REPOSITION WALLPAPER ---
+window.startReposition = () => {
+    if(!themeSettings.bg) return;
+    isRepoMode = true;
+    document.getElementById('repo-overlay').style.display = 'flex';
+    document.getElementById('theme-ov').classList.remove('show');
+};
+window.stopReposition = () => {
+    isRepoMode = false;
+    document.getElementById('repo-overlay').style.display = 'none';
+    window.saveLocalTheme();
+    document.getElementById('theme-ov').classList.add('show');
+};
+
+const appEl = document.getElementById('main-app');
+appEl.addEventListener('mousedown', e => {
+    if(!isRepoMode) return;
+    startY = e.clientY;
+    let curPos = themeSettings.bgPos ? themeSettings.bgPos.split(' ')[1] : '50%';
+    startPos = parseFloat(curPos) || 50;
+});
+window.addEventListener('mousemove', e => {
+    if(!isRepoMode || startY === undefined) return;
+    let diff = (e.clientY - startY) / 5;
+    let newPos = Math.max(0, Math.min(100, startPos - diff));
+    themeSettings.bgPos = `50% ${newPos}%`;
+    appEl.style.backgroundPosition = themeSettings.bgPos;
+});
+window.addEventListener('mouseup', () => { startY = undefined; });
+
+// --- EDITOR GAMBAR LOKAL (GIF SUPPORT & AUTO-CROP) ---
 window.handleBgUpload = (input) => {
     if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -1091,14 +1172,24 @@ window.handleBgUpload = (input) => {
         }
         const reader = new FileReader();
         reader.onload = function(e) {
-            tempImgObj.onload = function() {
-                imgRotation = 0;
-                updateImgPreview();
-                document.getElementById('img-edit-ov').classList.add('show');
-                document.getElementById('theme-ov').classList.remove('show');
+            // JIKA FILE ADALAH GIF, LANGSUNG PASANG
+            if (file.type === 'image/gif') {
+                themeSettings.bg = e.target.result;
+                themeSettings.bgPos = '50% 50%';
+                applyTheme(); window.saveLocalTheme();
+                showMsg("GIF Berhasil Terpasang! 🎞️ Gunakan tombol 'Atur Posisi' untuk menggeser.");
+                input.value = '';
+            } else {
+                // BUKAN GIF, MASUK KE EDITOR CROP
+                tempImgObj.onload = function() {
+                    imgRotation = 0;
+                    updateImgPreview();
+                    document.getElementById('img-edit-ov').classList.add('show');
+                    document.getElementById('theme-ov').classList.remove('show');
+                }
+                tempImgObj.src = e.target.result;
+                input.value = '';
             }
-            tempImgObj.src = e.target.result;
-            input.value = '';
         };
         reader.readAsDataURL(file);
     }
@@ -1179,24 +1270,51 @@ window.applyEditedImg = () => {
     ctx.drawImage(rotCanvas, cropX, cropY, cropW, cropH, 0, 0, finalW, finalH);
     
     themeSettings.bg = finalCanvas.toDataURL('image/jpeg', 0.8);
+    themeSettings.bgPos = '50% 50%';
     applyTheme(); window.saveLocalTheme();
     document.getElementById('img-edit-ov').classList.remove('show');
     document.getElementById('theme-ov').classList.add('show');
 };
 
+// ================= FUNGSI PAPAN & KARTU =================
 window.openMoveWsModal = (cardId) => { cardToMoveId = cardId; const availableWs = workspaces.filter(w => w.id !== activeWsId); if(availableWs.length === 0) return showMsg("Buat Project lain dulu untuk memindahkan."); document.getElementById('move-ws-select').innerHTML = availableWs.map(w => `<option value="${w.id}">${w.name}</option>`).join(''); document.getElementById('move-ws-ov').classList.add('show'); };
 window.closeMoveWsModal = () => { document.getElementById('move-ws-ov').classList.remove('show'); cardToMoveId = null; };
 window.moveCardToWs = async () => { const targetWsId = document.getElementById('move-ws-select').value; const cIdx = cards.findIndex(x => x.id === cardToMoveId); if(cIdx === -1) return; const cardToMove = JSON.parse(JSON.stringify(cards[cIdx])); const btn = document.getElementById('move-ws-btn'); try { btn.textContent = 'Memindahkan...'; btn.disabled = true; cards.splice(cIdx, 1); syncToFirebase(); const destPath = targetWsId === 'default' ? 'content_board_data' : `content_board_data_${targetWsId}`; const destSnap = await get(ref(db, destPath)); let destData = destSnap.val() || { cards: [], columns: [], brands: [] }; if(!destData.cards) destData.cards = []; cardToMove.bId = ""; cardToMove.status = (destData.columns && destData.columns.length > 0) ? destData.columns[0].id : 'review'; destData.cards.unshift(cardToMove); await set(ref(db, destPath), destData); closeMoveWsModal(); showMsg("Berhasil dipindahkan!"); renderBoard(); } catch(e) { cards.splice(cIdx, 0, cardToMove); syncToFirebase(); renderBoard(); showMsg("Gagal: " + e.message); } finally { btn.textContent = 'Pindahkan'; btn.disabled = false; } };
 
-window.showCtxMenu = (e, type, id) => { e.preventDefault(); e.stopPropagation(); const ctx = document.getElementById('ctx-menu'); ctx.style.display = 'flex'; if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`; else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`; else if (type === 'card') ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="selId='${id}';dupCard();selId=null;hideCtxMenu()">📄 Duplikat Konten</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="selId='${id}';delCurCard();hideCtxMenu()">🗑️ Hapus Konten</button>`; let x = e.clientX, y = e.clientY; if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10; if (y + ctx.offsetHeight > window.innerHeight) y = window.innerHeight - ctx.offsetHeight - 10; ctx.style.left = x + 'px'; ctx.style.top = y + 'px'; };
+window.showCtxMenu = (e, type, id) => { 
+    e.preventDefault(); e.stopPropagation(); 
+    const ctx = document.getElementById('ctx-menu'); 
+    ctx.style.display = 'flex'; 
+    if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`; 
+    else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`; 
+    else if (type === 'card') {
+        selId = id; // FIX PENTING: Menyimpan ID Kartu saat di klik kanan
+        ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="dupCard();hideCtxMenu()">📄 Duplikat Konten</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="delCurCard();hideCtxMenu()">🗑️ Hapus Konten</button>`; 
+    }
+    let x = e.clientX, y = e.clientY; 
+    if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10; 
+    if (y + ctx.offsetHeight > window.innerHeight) y = window.innerHeight - ctx.offsetHeight - 10; 
+    ctx.style.left = x + 'px'; ctx.style.top = y + 'px'; 
+};
 
 window.cols = (t) => columns; 
 window.renderAll = () => { renderTabs(); renderBoard(); };
-window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); document.getElementById('m-brand').innerHTML = opts; document.getElementById('dp-fbrand').innerHTML = opts; };
+window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); const mBrand = document.getElementById('m-brand'); if(mBrand) mBrand.innerHTML = opts; const dpBrand = document.getElementById('dp-fbrand'); if(dpBrand) dpBrand.innerHTML = opts; };
 
 window.renderBoard = () => { if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, fAss = document.getElementById('filter-assignee') ? document.getElementById('filter-assignee').value : 'all', sortBy = document.getElementById('sort-by').value, sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim(); const vis = cards.filter(c => { let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mAss = (fAss === 'all' || (fAss === 'unassigned' ? (!c.assignee || c.assignee === '') : c.assignee === fAss)), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); } return mB && mT && mM && mW && mU && mObj && mAss && mS; }); document.getElementById('board').innerHTML = columns.map((col, idx) => { let cc = vis.filter(c => c.status===col.id); if (sortBy !== 'manual') cc.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`; };
 
-window.cardH = (c) => { const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status); let urgBadge = ''; if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`; else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`; else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`; let objBadge = ''; if (c.type !== 'Catatan' && c.type !== 'To-Do') { const obj = c.objective || 'Konten'; if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`; else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`; else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`; } let dateStyle="color:var(--text-light);", alert=""; if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) { const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5; if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; } else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; } } const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : ''; const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; let picHtml = ''; if (c.assignee && wsMembers[c.assignee]) { const picName = wsMembers[c.assignee].name; const init = picName.charAt(0); picHtml = `<div style="display:flex;align-items:center;gap:6px;margin-left:auto;background:var(--input-bg);padding:2px 8px 2px 2px;border-radius:20px;border:1px solid var(--input-border);" title="Ditugaskan ke: ${picName}"><div class="pic-avatar-mini" style="margin:0;width:20px;height:20px;font-size:10px;">${init}</div><span style="font-size:11px;font-weight:600;color:var(--text-main);">${picName}</span></div>`; } return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n || 'Umum'}</span>${picHtml}</div></div>`; };
+window.cardH = (c) => { const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status); let urgBadge = ''; if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`; else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`; else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`; let objBadge = ''; if (c.type !== 'Catatan' && c.type !== 'To-Do') { const obj = c.objective || 'Konten'; if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`; else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`; else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`; } let dateStyle="color:var(--text-light);", alert=""; if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) { const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5; if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; } else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; } } const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : ''; const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; 
+    
+    // AVATAR 24PX PRESISI
+    let picHtml = ''; 
+    if (c.assignee && wsMembers[c.assignee]) { 
+        const picName = wsMembers[c.assignee].name; 
+        const init = picName.charAt(0).toUpperCase(); 
+        picHtml = `<div class="pic-avatar-mini" title="PIC: ${picName}">${init}</div>`; 
+    } 
+    
+    return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot"><div style="display:flex; align-items:center; gap:6px;">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n || 'Umum'}</span></div>${picHtml}</div></div>`; 
+};
 
 let draggedBrandIdx = null; window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); };
 window.dropB = (e, targetIdx) => { e.preventDefault(); e.stopPropagation(); if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return; brands.splice(targetIdx, 0, brands.splice(draggedBrandIdx, 1)[0]); syncToFirebase(); renderAll(); draggedBrandIdx = null; };
@@ -1207,16 +1325,45 @@ window.toggleCol = (id) => { const col = columns.find(c=>c.id===id); if(col){ co
 window.openAdd = (s) => { document.getElementById('add-ov').classList.add('show'); selType('Video'); renderMStatus('Video', s || columns[0].id); document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; document.getElementById('m-title').value = ''; document.getElementById('m-objective').value = 'Konten'; };
 window.closeAdd = () => document.getElementById('add-ov').classList.remove('show');
 window.selType = (t) => { mType=t; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); document.getElementById('btn-' + (t==='To-Do' ? 't' : t[0].toLowerCase())).style.background='var(--primary-light)'; document.getElementById('m-datetime-container').style.display=(t==='Catatan'||t==='To-Do')?'none':'block'; document.getElementById('m-objective').parentElement.style.display=(t==='Catatan'||t==='To-Do')?'none':'flex'; renderMStatus(t,''); };
-window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; };
+window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); if(s) { s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; } };
 
 window.saveCard = () => { const t=document.getElementById('m-title').value.trim(); if(!t)return; cards.unshift({ id:'c'+Date.now(), title:t, bId:document.getElementById('m-brand').value, type:mType, date:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-date').value, time:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-time').value, week:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-week').value, urgency:document.getElementById('m-urgency').value, objective:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-objective').value, status:document.getElementById('m-status').value, assignee: document.getElementById('m-assignee').value, notes:'',images:[],steps:[] }); closeAdd(); syncToFirebase(); };
 
-window.selCard = (id) => { selId=id; const c=cards.find(x=>x.id===id); if(!c)return; document.getElementById('dp-title').textContent=c.title; document.getElementById('dp-ftitle').value=c.title; document.getElementById('dp-fdate').value=c.date||''; document.getElementById('dp-ftime').value=c.time||''; document.getElementById('dp-fweek').value=c.week||'1'; document.getElementById('dp-ftype').value=c.type; document.getElementById('dp-fbrand').value=c.bId; document.getElementById('dp-furgency').value=c.urgency||'normal'; document.getElementById('dp-fobjective').value=c.objective||'Konten'; document.getElementById('dp-fassignee').value=c.assignee||''; document.getElementById('dp-datetime-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'block'; document.getElementById('dp-obj-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'flex'; const s=document.getElementById('dp-fstatus'); s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); s.value=c.status; document.getElementById('dp-notes').value=c.notes||''; document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; renderSteps(c); renderAtt(c.images); document.getElementById('dp').classList.add('open'); document.getElementById('dp-ov').classList.add('show'); };
+window.selCard = (id) => { 
+    selId=id; 
+    const c=cards.find(x=>x.id===id); 
+    if(!c)return; 
+    document.getElementById('dp-title').textContent=c.title; 
+    document.getElementById('dp-ftitle').value=c.title; 
+    document.getElementById('dp-fdate').value=c.date||''; 
+    document.getElementById('dp-ftime').value=c.time||''; 
+    document.getElementById('dp-fweek').value=c.week||'1'; 
+    document.getElementById('dp-ftype').value=c.type; 
+    document.getElementById('dp-fbrand').value=c.bId; 
+    document.getElementById('dp-furgency').value=c.urgency||'normal'; 
+    document.getElementById('dp-fobjective').value=c.objective||'Konten'; 
+    
+    // UPDATE PIC ROW DI DETAIL
+    const member = wsMembers[c.assignee];
+    document.getElementById('dp-pic-avatar').textContent = member ? member.name.charAt(0).toUpperCase() : '?';
+    document.getElementById('dp-fassignee').value=c.assignee||''; 
+    
+    document.getElementById('dp-datetime-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'block'; 
+    document.getElementById('dp-obj-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'flex'; 
+    const s=document.getElementById('dp-fstatus'); 
+    if(s) { s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); s.value=c.status; }
+    document.getElementById('dp-notes').value=c.notes||''; 
+    document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; 
+    renderSteps(c); renderAtt(c.images); 
+    document.getElementById('dp').classList.add('open'); 
+    document.getElementById('dp-ov').classList.add('show'); 
+};
+
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
-window.dps = (f,v) => { const c=cards.find(x=>x.id===selId); if(c){c[f]=v; renderBoard(); syncToFirebase();} };
+window.dps = (f,v) => { const c=cards.find(x=>x.id===selId); if(c){c[f]=v; renderBoard(); syncToFirebase(); if(f==='assignee') selCard(selId); } };
 window.dpChType = (v) => { const c=cards.find(x=>x.id===selId); if(c){c.type=v; if(v==='Catatan' || v==='To-Do'){c.date='';c.time='';c.week=''; c.objective='';} syncToFirebase(); selCard(selId);} };
 window.dupCard = () => { const c = cards.find(x=>x.id===selId); if(!c) return; const newC = JSON.parse(JSON.stringify(c)); newC.id = 'c'+Date.now(); newC.title += " (Copy)"; cards.unshift(newC); closeDP(); syncToFirebase(); };
-window.delCurCard = () => { showMsg("Hapus konten ini secara permanen?",()=>{cards=cards.filter(x=>x.id!==selId); closeDP(); syncToFirebase();}); };
+window.delCurCard = () => { if(!selId) return; showMsg("Hapus konten ini secara permanen?",()=>{cards=cards.filter(x=>x.id!==selId); closeDP(); syncToFirebase();}); };
 window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" target="_blank" style="color:var(--primary);font-weight:600;">${u}</a>`);
 window.editNotes = () => { document.getElementById('dp-notes-display').style.display='none'; const ta=document.getElementById('dp-notes'); ta.style.display='block'; ta.focus(); };
 window.saveNotes = (v) => { dps('notes',v); document.getElementById('dp-notes-display').innerHTML=v?linkify(v):'Klik tambah catatan...'; document.getElementById('dp-notes-display').style.display='block'; document.getElementById('dp-notes').style.display='none'; };
@@ -1330,6 +1477,48 @@ const setupPWA = () => {
 setupPWA();
 
 window.addToGCal = () => { const c = cards.find(x => x.id === selId); if(!c) return; const b = brands.find(x=>x.id===c.bId); const bName = b ? b.n : 'Umum'; const title = encodeURIComponent(`[${bName}] ${c.title}`), details = encodeURIComponent(`Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}\n\nCatatan:\n${c.notes||''}`); let dates = ""; if (c.date) { const d = new Date(`${c.date}T${c.time||'09:00'}:00`), d2 = new Date(d.getTime() + 36e5), f = x => x.toISOString().replace(/-|:|\.\d\d\d/g, ''); dates = `&dates=${f(d)}/${f(d2)}`; } window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`, '_blank'); };
+
+// --- LOGIKA MINI MUSIC PLAYER ---
+window.setMusicPlayer = () => {
+    const val = document.getElementById('music-link-input').value.trim();
+    const container = document.getElementById('music-player-container');
+    if(!val) {
+        container.style.display = 'none';
+        container.innerHTML = '';
+        localStorage.removeItem('cb_music_link');
+        return;
+    }
+    let embedUrl = val;
+    
+    // Auto-Konversi Link Spotify ke format Embed
+    if (val.includes('spotify.com')) {
+        try { const urlObj = new URL(val); embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`; } catch(e){}
+    } 
+    // Auto-Konversi Link Apple Music ke format Embed
+    else if (val.includes('music.apple.com')) {
+        embedUrl = val.replace('music.apple.com', 'embed.music.apple.com');
+    }
+    
+    container.innerHTML = `<iframe src="${embedUrl}" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style="border-radius:12px; background:transparent;"></iframe>`;
+    container.style.display = 'block';
+    localStorage.setItem('cb_music_link', val); // Simpan link agar tak hilang saat direfresh
+};
+
+// Auto-load lagu saat website baru dibuka
+setTimeout(() => {
+    const savedMusic = localStorage.getItem('cb_music_link');
+    if(savedMusic) {
+        document.getElementById('music-link-input').value = savedMusic;
+        window.setMusicPlayer();
+    }
+}, 1000);
+
+// Auto-tutup panel musik jika Anda nge-klik tempat lain di layar
+document.addEventListener('click', () => {
+    const musicPanel = document.getElementById('music-panel');
+    if (musicPanel) musicPanel.classList.remove('show');
+});
+
 </script>
 </body>
 </html>
