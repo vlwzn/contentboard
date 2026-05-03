@@ -883,7 +883,36 @@ window.dropWs = (e, targetIdx) => { e.preventDefault(); e.stopPropagation(); e.c
 
 window.generateShareLink = () => { if(!activeWsId) return; if(!isOwner) return showMsg("Hanya pembuat project yang bisa mengundang orang lain."); update(ref(db, `board_members/${activeWsId}/${myUser.id}`), { role: 'owner' }); const link = `${window.location.origin}${window.location.pathname}?join=${activeWsId}`; navigator.clipboard.writeText(link).then(() => { showMsg(`<b>Link Undangan Disalin!</b><br><br>Kirim link ini ke tim Anda:<br><code style="background:var(--input-bg); padding:4px; border-radius:4px; display:block; margin-top:8px; word-break:break-all; font-size:11px;">${link}</code><br>Mereka wajib login/daftar terlebih dahulu sebelum bisa bergabung.`); }); };
 
-window.joinProject = async (joinId) => { if (!myUser) return; try { const snap = await get(ref(db, `content_board_data_${joinId}/meta`)); let projName = "Shared Project"; if(snap.exists() && snap.val().name) projName = snap.val().name; const exist = sharedWorkspaces.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId); if(exist) return showMsg("Anda sudah tergabung dalam project ini."); const newShared = [...sharedWorkspaces, { id: joinId, name: projName }]; await set(ref(db, `users/${myUser.id}/shared`), newShared); await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); showMsg("Berhasil bergabung ke project tim!"); switchWorkspace(joinId, false); } catch (e) { showMsg("Link tidak valid atau project sudah dihapus."); } };
+window.joinProject = async (joinId) => { 
+    if (!myUser) return; 
+    try { 
+        // 1. Cek apakah sudah ada di project ini
+        const exist = sharedWorkspaces.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId); 
+        if(exist) return showMsg("Anda sudah tergabung dalam project ini."); 
+        
+        // 2. Trik: Daftarkan diri dulu ke Firebase (board_members) agar diizinkan membaca nama project
+        await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); 
+        
+        // 3. Sekarang baru baca data meta project
+        const snap = await get(ref(db, `content_board_data_${joinId}/meta`)); 
+        if(!snap.exists()) { 
+            // Jika projectnya ternyata tidak ada/sudah dihapus, kita hapus kembali status member sementaranya
+            await remove(ref(db, `board_members/${joinId}/${myUser.id}`)); 
+            throw new Error("Project Not Found"); 
+        } 
+        
+        let projName = snap.val().name || "Shared Project"; 
+        
+        // 4. Masukkan project ke daftar Shared Workspace
+        const newShared = [...sharedWorkspaces, { id: joinId, name: projName }]; 
+        await set(ref(db, `users/${myUser.id}/shared`), newShared); 
+        
+        showMsg("Berhasil bergabung ke project tim!"); 
+        switchWorkspace(joinId, false); 
+    } catch (e) { 
+        showMsg("Gagal bergabung. Link tidak valid atau project sudah dihapus."); 
+    } 
+};
 
 window.openWsModal = (isEdit = false) => { const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn'); if (isEdit) { if(!isOwner) return showMsg("Hanya pemilik yang dapat mengubah nama/menghapus project."); editWsId = activeWsId; titleEl.textContent = "Edit Project"; const w = workspaces.find(w => w.id === activeWsId); inputEl.value = w ? w.name : ''; delBtn.style.display = "block"; } else { editWsId = null; titleEl.textContent = "Project Baru"; inputEl.value = ''; delBtn.style.display = "none"; } document.getElementById('ws-ov').classList.add('show'); };
 window.closeWsModal = () => document.getElementById('ws-ov').classList.remove('show');
