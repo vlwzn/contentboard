@@ -949,9 +949,6 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         }
         updateAssigneeDropdowns(); renderBoard();
         if(document.getElementById('team-ov').classList.contains('show')) window.renderTeamList();
-        
-        // Memuat tema personal spesifik untuk perangkat Anda di workspace ini
-        if(window.loadLocalTheme) window.loadLocalTheme();
     });
     const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
     unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
@@ -959,7 +956,9 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         brands = data.brands || []; cards = data.cards || [];
         columns = (data.columns && data.columns.length > 0) ? data.columns : [{id:'review',lbl:'Review',c:'#534AB7', collapsed: false}];
         
-        // Tema tidak lagi diambil dari database publik agar tidak menimpa pengaturan personal
+        // Memaksa sistem untuk SELALU memuat tema dari memori lokal perangkat, bukan dari server
+        if(window.loadLocalTheme) window.loadLocalTheme();
+        
         renderAll(); renderWsSelector();
     });
 };
