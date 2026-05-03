@@ -897,7 +897,7 @@ window.joinProject = async (joinId) => {
         try {
             await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); 
         } catch (errSet) {
-            // Jika Satpam menolak karena user SUDAH TERDAFTAR sebelumnya, kita abaikan error ini
+            // Jika Satpam menolak karena user SUDAH TERDAFTAR sebelumnya, abaikan
             console.log("Info: User mungkin sudah terdaftar di server.");
         }
         
@@ -905,11 +905,14 @@ window.joinProject = async (joinId) => {
         const dbPath = joinId === 'default' ? 'content_board_data' : `content_board_data_${joinId}`;
         const snap = await get(ref(db, `${dbPath}/meta`)); 
         
-        if(!snap.exists()) { 
+        let projName = "Project Kolaborasi";
+        if(snap.exists() && snap.val().name) {
+            projName = snap.val().name;
+        } else if (joinId === 'default') {
+            projName = "Project Utama"; // KUNCI PERBAIKAN: Beri nama otomatis untuk project default
+        } else {
             throw new Error("Data project tidak ditemukan atau sudah dihapus oleh pemilik."); 
-        } 
-        
-        let projName = snap.val().name || "Shared Project"; 
+        }
         
         // 4. Masukkan project ke daftar Shared Workspace
         const newShared = [...sharedWorkspaces, { id: joinId, name: projName }]; 
