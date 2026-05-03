@@ -1020,8 +1020,6 @@ window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" targ
 window.editNotes = () => { document.getElementById('dp-notes-display').style.display='none'; const ta=document.getElementById('dp-notes'); ta.style.display='block'; ta.focus(); };
 window.saveNotes = (v) => { dps('notes',v); document.getElementById('dp-notes-display').innerHTML=v?linkify(v):'Klik tambah catatan...'; document.getElementById('dp-notes-display').style.display='block'; document.getElementById('dp-notes').style.display='none'; };
 
-window.addToGCal = () => { const c = cards.find(x => x.id === selId); if(!c) return; const title = encodeURIComponent(`Konten: ${c.title}`), details = encodeURIComponent(`Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}\n\nCatatan:\n${c.notes||''}`); let dates = ""; if (c.date) { const d = new Date(`${c.date}T${c.time||'09:00'}:00`), d2 = new Date(d.getTime() + 36e5), f = x => x.toISOString().replace(/-|:|\.\d\d\d/g, ''); dates = `&dates=${f(d)}/${f(d2)}`; } window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`, '_blank'); };
-
 window.renderSteps = (c) => { document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`<div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})"><span class="drag-handle">⠿</span><input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})"><input class="step-input" type="text" value="${s.text.replace(/"/g, '&quot;')}" onchange="updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:var(--text-light);':''}"><button class="step-del" onclick="delStep(${i})">×</button></div>`).join(''); };
 window.updateStepText = (i, v) => { const c = cards.find(x => x.id === selId); if(c && v.trim()){ c.steps[i].text = v.trim(); syncToFirebase(); } else if(c) renderSteps(c); };
 window.toggleStep = (i) => { const c=cards.find(x=>x.id===selId); c.steps[i].done=!c.steps[i].done; syncToFirebase(); renderSteps(c); renderBoard(); };
@@ -1129,6 +1127,8 @@ const setupPWA = () => {
     manifestLink.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(manifestStr);
 };
 setupPWA();
+
+window.addToGCal = () => { const c = cards.find(x => x.id === selId); if(!c) return; const b = brands.find(x=>x.id===c.bId); const bName = b ? b.n : 'Umum'; const title = encodeURIComponent(`[${bName}] ${c.title}`), details = encodeURIComponent(`Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}\n\nCatatan:\n${c.notes||''}`); let dates = ""; if (c.date) { const d = new Date(`${c.date}T${c.time||'09:00'}:00`), d2 = new Date(d.getTime() + 36e5), f = x => x.toISOString().replace(/-|:|\.\d\d\d/g, ''); dates = `&dates=${f(d)}/${f(d2)}`; } window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`, '_blank'); };
 </script>
 </body>
 </html>
