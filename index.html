@@ -395,6 +395,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
                       <select id="filter-urgency" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua</option><option value="high">🔥 Mendesak</option><option value="med">⚡ Penting</option><option value="normal">⚪ Normal</option><option value="low">🐢 Santai</option></select>
                   </div>
                   <div class="filter-row">
+                      <span class="filter-lbl">PIC / Penanggung Jawab</span>
+                      <select id="filter-assignee" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua PIC</option><option value="unassigned">Belum Ada PIC</option></select>
+                  </div>
+                  <div class="filter-row">
                       <span class="filter-lbl">Urutkan Kartu</span>
                       <select id="sort-by" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="manual">↕️ Manual (Geser)</option><option value="newest">✨ Paling Baru</option><option value="date-asc">📅 Tanggal Terdekat</option><option value="date-desc">📆 Tanggal Terjauh</option></select>
                   </div>
@@ -740,6 +744,7 @@ window.resetFilters = () => {
     document.getElementById('filter-type').value = 'semua';
     document.getElementById('filter-objective').value = 'all';
     document.getElementById('filter-urgency').value = 'all';
+    if(document.getElementById('filter-assignee')) document.getElementById('filter-assignee').value = 'all';
     document.getElementById('sort-by').value = 'manual';
     document.getElementById('search-input').value = '';
     renderBoard();
@@ -846,7 +851,7 @@ function initApp() {
     
     const urlParams = new URLSearchParams(window.location.search);
     const joinId = urlParams.get('join');
-    if (joinId) { joinProject(joinId); window.history.replaceState({}, document.title, window.location.pathname); }
+    if (joinId) { joinProject(joinId); }
 
     unsubscribeWs = onValue(ref(db, `users/${myUser.id}/workspaces`), (snap) => { workspaces = snap.val() ? Object.values(snap.val()) : []; checkAndRenderWs(); });
     unsubscribeSharedWs = onValue(ref(db, `users/${myUser.id}/shared`), (snap) => { sharedWorkspaces = snap.val() ? Object.values(snap.val()) : []; checkAndRenderWs(); });
@@ -886,39 +891,40 @@ window.generateShareLink = () => { if(!activeWsId) return; if(!isOwner) return s
 window.joinProject = async (joinId) => { 
     if (!myUser) return; 
     try { 
-        // 1. Cek apakah sudah ada di project ini secara lokal
-        const exist = sharedWorkspaces.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId); 
-        if(exist) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-            return showMsg("Anda sudah tergabung dalam project ini."); 
-        }
-        
-        // 2. Trik: Daftarkan diri ke Firebase (board_members)
+        // 1. Trik: Daftarkan diri ke Firebase (board_members) agar diizinkan
         try {
             await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); 
         } catch (errSet) {
-            // Jika Satpam menolak karena user SUDAH TERDAFTAR sebelumnya, abaikan
-            console.log("Info: User mungkin sudah terdaftar di server.");
+            console.log("Info: User sudah terdaftar di server.");
         }
         
-        // 3. Baca data meta project
+        // Beri jeda 500ms agar Satpam Firebase (Rules) sempat memperbarui datanya
+        await new Promise(r => setTimeout(r, 500)); 
+
+        // 2. Baca nama project dengan aman
         const dbPath = joinId === 'default' ? 'content_board_data' : `content_board_data_${joinId}`;
-        const snap = await get(ref(db, `${dbPath}/meta`)); 
-        
         let projName = "Project Kolaborasi";
-        if(snap.exists() && snap.val().name) {
-            projName = snap.val().name;
-        } else if (joinId === 'default') {
-            projName = "Project Utama"; // KUNCI PERBAIKAN: Beri nama otomatis untuk project default
-        } else {
-            throw new Error("Data project tidak ditemukan atau sudah dihapus oleh pemilik."); 
+        try {
+            const snap = await get(ref(db, `${dbPath}/meta`)); 
+            if(snap.exists() && snap.val() && snap.val().name) projName = snap.val().name;
+            else if (joinId === 'default') projName = "Project Utama";
+        } catch(e) {
+            console.log("Gagal membaca nama asli, gunakan default");
+            if (joinId === 'default') projName = "Project Utama";
         }
         
-        // 4. Masukkan project ke daftar Shared Workspace
-        const newShared = [...sharedWorkspaces, { id: joinId, name: projName }]; 
-        await set(ref(db, `users/${myUser.id}/shared`), newShared); 
+        // 3. Masukkan ke memori Shared Workspace secara aman tanpa menimpa yang lain
+        const userSharedSnap = await get(ref(db, `users/${myUser.id}/shared`));
+        let currentShared = userSharedSnap.val() ? Object.values(userSharedSnap.val()) : [];
         
-        // Hapus "?join=" dari link agar aman jika di-refresh
+        const existLocally = currentShared.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId);
+        
+        if(!existLocally) {
+            currentShared.push({ id: joinId, name: projName }); 
+            await set(ref(db, `users/${myUser.id}/shared`), currentShared); 
+        }
+        
+        // Bersihkan URL dan masuk ke project
         window.history.replaceState({}, document.title, window.location.pathname);
         showMsg("Berhasil bergabung ke project tim!"); 
         switchWorkspace(joinId, false); 
@@ -985,10 +991,16 @@ window.removeMember = (id) => { showMsg("Keluarkan anggota ini dari project? (Na
 
 function updateAssigneeDropdowns() {
     let opts = `<option value="">Belum Ada PIC</option>`;
-    for(let id in wsMembers) opts += `<option value="${id}">${wsMembers[id].name}</option>`;
+    let fOpts = `<option value="all">Semua PIC</option><option value="unassigned">Belum Ada PIC</option>`;
+    for(let id in wsMembers) {
+        opts += `<option value="${id}">${wsMembers[id].name}</option>`;
+        fOpts += `<option value="${id}">${wsMembers[id].name}</option>`;
+    }
     document.getElementById('m-assignee').innerHTML = opts;
     const dpAss = document.getElementById('dp-fassignee');
     if(dpAss) { dpAss.innerHTML = opts; if(selId){ const c = cards.find(x=>x.id===selId); if(c) dpAss.value = c.assignee || '';} }
+    const fAss = document.getElementById('filter-assignee');
+    if(fAss) { const cur = fAss.value; fAss.innerHTML = fOpts; if(fOpts.includes(cur)) fAss.value = cur; }
 }
 
 function syncToFirebase() { if(!activeWsId) return; const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`; update(ref(db, dbPath), { brands, cards, columns }); }
@@ -1042,9 +1054,9 @@ window.cols = (t) => columns;
 window.renderAll = () => { renderTabs(); renderBoard(); };
 window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); document.getElementById('m-brand').innerHTML = opts; document.getElementById('dp-fbrand').innerHTML = opts; };
 
-window.renderBoard = () => { if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, sortBy = document.getElementById('sort-by').value, sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim(); const vis = cards.filter(c => { let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); } return mB && mT && mM && mW && mU && mObj && mS; }); document.getElementById('board').innerHTML = columns.map((col, idx) => { let cc = vis.filter(c => c.status===col.id); if (sortBy !== 'manual') cc.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`; };
+window.renderBoard = () => { if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, fAss = document.getElementById('filter-assignee') ? document.getElementById('filter-assignee').value : 'all', sortBy = document.getElementById('sort-by').value, sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim(); const vis = cards.filter(c => { let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mAss = (fAss === 'all' || (fAss === 'unassigned' ? (!c.assignee || c.assignee === '') : c.assignee === fAss)), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); } return mB && mT && mM && mW && mU && mObj && mAss && mS; }); document.getElementById('board').innerHTML = columns.map((col, idx) => { let cc = vis.filter(c => c.status===col.id); if (sortBy !== 'manual') cc.sort((a, b) => { if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); if (sortBy === 'newest') return b.id.localeCompare(a.id); return a.type.localeCompare(b.type); }); if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`; };
 
-window.cardH = (c) => { const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status); let urgBadge = ''; if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`; else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`; else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`; let objBadge = ''; if (c.type !== 'Catatan' && c.type !== 'To-Do') { const obj = c.objective || 'Konten'; if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`; else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`; else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`; } let dateStyle="color:var(--text-light);", alert=""; if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) { const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5; if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; } else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; } } const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : ''; const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; let picHtml = ''; if (c.assignee && wsMembers[c.assignee]) { const init = wsMembers[c.assignee].name.charAt(0); picHtml = `<div class="pic-avatar-mini" title="Ditugaskan ke: ${wsMembers[c.assignee].name}">${init}</div>`; } return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n || 'Umum'}</span>${picHtml}</div></div>`; };
+window.cardH = (c) => { const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status); let urgBadge = ''; if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`; else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`; else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`; let objBadge = ''; if (c.type !== 'Catatan' && c.type !== 'To-Do') { const obj = c.objective || 'Konten'; if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`; else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`; else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`; } let dateStyle="color:var(--text-light);", alert=""; if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) { const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5; if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; } else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; } } const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : ''; const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; let picHtml = ''; if (c.assignee && wsMembers[c.assignee]) { const picName = wsMembers[c.assignee].name; const init = picName.charAt(0); picHtml = `<div style="display:flex;align-items:center;gap:6px;margin-left:auto;background:var(--input-bg);padding:2px 8px 2px 2px;border-radius:20px;border:1px solid var(--input-border);" title="Ditugaskan ke: ${picName}"><div class="pic-avatar-mini" style="margin:0;width:20px;height:20px;font-size:10px;">${init}</div><span style="font-size:11px;font-weight:600;color:var(--text-main);">${picName}</span></div>`; } return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;"></span>`:''}<span class="cfoot-name">${b.n || 'Umum'}</span>${picHtml}</div></div>`; };
 
 let draggedBrandIdx = null; window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); };
 window.dropB = (e, targetIdx) => { e.preventDefault(); e.stopPropagation(); if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return; brands.splice(targetIdx, 0, brands.splice(draggedBrandIdx, 1)[0]); syncToFirebase(); renderAll(); draggedBrandIdx = null; };
