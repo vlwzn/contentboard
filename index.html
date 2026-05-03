@@ -886,19 +886,27 @@ window.generateShareLink = () => { if(!activeWsId) return; if(!isOwner) return s
 window.joinProject = async (joinId) => { 
     if (!myUser) return; 
     try { 
-        // 1. Cek apakah sudah ada di project ini
+        // 1. Cek apakah sudah ada di project ini secara lokal
         const exist = sharedWorkspaces.find(w => w.id === joinId) || workspaces.find(w => w.id === joinId); 
-        if(exist) return showMsg("Anda sudah tergabung dalam project ini."); 
+        if(exist) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return showMsg("Anda sudah tergabung dalam project ini."); 
+        }
         
-        // 2. Trik: Daftarkan diri dulu ke Firebase (board_members) agar diizinkan membaca nama project
-        await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); 
+        // 2. Trik: Daftarkan diri ke Firebase (board_members)
+        try {
+            await set(ref(db, `board_members/${joinId}/${myUser.id}`), { role: 'editor' }); 
+        } catch (errSet) {
+            // Jika Satpam menolak karena user SUDAH TERDAFTAR sebelumnya, kita abaikan error ini
+            console.log("Info: User mungkin sudah terdaftar di server.");
+        }
         
-        // 3. Sekarang baru baca data meta project
-        const snap = await get(ref(db, `content_board_data_${joinId}/meta`)); 
+        // 3. Baca data meta project
+        const dbPath = joinId === 'default' ? 'content_board_data' : `content_board_data_${joinId}`;
+        const snap = await get(ref(db, `${dbPath}/meta`)); 
+        
         if(!snap.exists()) { 
-            // Jika projectnya ternyata tidak ada/sudah dihapus, kita hapus kembali status member sementaranya
-            await remove(ref(db, `board_members/${joinId}/${myUser.id}`)); 
-            throw new Error("Project Not Found"); 
+            throw new Error("Data project tidak ditemukan atau sudah dihapus oleh pemilik."); 
         } 
         
         let projName = snap.val().name || "Shared Project"; 
@@ -907,10 +915,13 @@ window.joinProject = async (joinId) => {
         const newShared = [...sharedWorkspaces, { id: joinId, name: projName }]; 
         await set(ref(db, `users/${myUser.id}/shared`), newShared); 
         
+        // Hapus "?join=" dari link agar aman jika di-refresh
+        window.history.replaceState({}, document.title, window.location.pathname);
         showMsg("Berhasil bergabung ke project tim!"); 
         switchWorkspace(joinId, false); 
     } catch (e) { 
-        showMsg("Gagal bergabung. Link tidak valid atau project sudah dihapus."); 
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showMsg("Gagal bergabung: " + e.message); 
     } 
 };
 
