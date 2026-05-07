@@ -1537,7 +1537,13 @@ window._renderBoardCore = () => {
         if (sortBy !== 'manual') cc.sort((a, b) => { 
             if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); 
             if (sortBy === 'date-desc') return new Date(b.date||'0000') - new Date(a.date||'0000'); 
-            if (sortBy === 'newest') return b.id.localeCompare(a.id); 
+            if (sortBy === 'newest') {
+                // BUG FIX: Paling Baru sekarang berpatokan pada Tanggal, konten lama ke bawah
+                const dateA = new Date(a.date || '0000').getTime();
+                const dateB = new Date(b.date || '0000').getTime();
+                if (dateA !== dateB) return dateB - dateA; 
+                return b.id.localeCompare(a.id); // Fallback jika tanggalnya sama persis
+            }
             return a.type.localeCompare(b.type); 
         }); 
         
