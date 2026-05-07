@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0"/>
 <title>ContentBoard Pro</title>
 
+<!-- TAG PWA -->
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="pwa-apple-icon">
 <meta name="theme-color" content="#534AB7">
@@ -109,14 +110,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .search-input { width: 200px; padding-left: 32px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'); background-repeat: no-repeat; background-position: 10px center; cursor: text; }
 .search-input:focus { width: 260px; background-color: var(--modal-bg); border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
 
-/* FILTER PANEL MELAYANG */
-#filter-panel { position: absolute; top: 60px; right: 16px; width: 260px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
-#filter-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-
-/* MUSIC PANEL MELAYANG */
-#music-panel { position: absolute; top: 60px; right: 0; width: 300px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
-#music-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-
+/* FILTER & MUSIC PANEL MELAYANG */
+#filter-panel, #music-panel { position: absolute; top: 60px; right: 16px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
+#filter-panel { width: 260px; }
+#music-panel { width: 300px; right: 0; }
+#filter-panel.show, #music-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
 .filter-row { display: flex; flex-direction: column; gap: 4px; }
 .filter-lbl { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -251,7 +249,7 @@ img.pic-avatar-mini { object-fit: cover; }
 .dp-fv input, .dp-fv select{width:100%;border:none;outline:none;font-size:14px; color:var(--text-main); background:transparent; font-weight: 500;}
 .dp-fv select { cursor: pointer; }
 
-/* PIC ROW IN DETAIL (DIUPDATE UNTUK 2 KOLOM: PJ IDE & PIC EKSEKUSI) */
+/* PIC ROW IN DETAIL */
 .dp-pic-row { display: flex; align-items: center; gap: 10px; background: var(--primary-light); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--glass-border); flex: 1; }
 .dp-pic-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 .dp-pic-label { font-size: 9px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -290,7 +288,7 @@ img.pic-avatar-mini { object-fit: cover; }
   .dp-pull-indicator { display: block; }
   
   #music-panel, #filter-panel { position: fixed; top: 120px; left: 16px; right: 16px; width: auto; z-index: 6000; }
-  .dp-pic-row-container { flex-direction: column; } /* Agar baris PJ dan PIC tidak sempit di HP */
+  .dp-pic-row-container { flex-direction: column; } 
 }
 </style>
 </head>
@@ -301,6 +299,7 @@ img.pic-avatar-mini { object-fit: cover; }
     <button class="btn-s" style="margin-top: 20px;" onclick="stopReposition()">Simpan Posisi</button>
 </div>
 
+<!-- FORM LOGIN FULL VERSION -->
 <div class="overlay show" id="login-ov" style="z-index: 9999; background: var(--bg-app); opacity: 1; visibility: visible;">
   <div class="modal" style="padding: 30px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
     
@@ -380,6 +379,9 @@ img.pic-avatar-mini { object-fit: cover; }
             <button id="project-btn" class="proj-selector-btn" onclick="toggleMenu('proj-menu', event)">Project Utama ▾</button>
             <button class="share-btn" onclick="generateShareLink()" title="Undang anggota tim ke project ini">🤝 Bagikan</button>
             <button class="share-btn" style="border-color:var(--input-border); background:var(--card-bg); color:var(--text-main);" onclick="openTeamModal()" title="Kelola Anggota Tim">👥 Tim</button>
+            
+            <!-- TOMBOL BARU: KELOLA PJ IDE EKSKLUSIF -->
+            <button class="share-btn" style="border-color:var(--input-border); background:var(--card-bg); color:var(--text-main);" onclick="openCreatorList()" title="Kelola Nama PJ Ide (Pencetus)">💡 PJ Ide</button>
 
             <div id="proj-menu" class="custom-dropdown" style="top: 40px; left: 0; min-width: 260px; max-height: 400px; overflow-y: auto;">
                 <div style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: var(--text-light); letter-spacing: 0.5px;">PROJECT SAYA</div>
@@ -562,6 +564,7 @@ img.pic-avatar-mini { object-fit: cover; }
   </div>
 </div>
 
+<!-- MODAL TAMBAH KONTEN -->
 <div class="overlay" id="add-ov" onclick="if(event.target===this) closeAdd()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; font-size:18px; border-bottom:1px solid var(--input-border); color:var(--text-main);">Buat Konten Baru</div>
@@ -646,6 +649,24 @@ img.pic-avatar-mini { object-fit: cover; }
     <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
       <button class="btn-c" onclick="closeCol()">Batal</button>
       <button class="btn-s" onclick="saveCol()">Simpan Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL KELOLA PJ IDE (CREATOR) BARU -->
+<div class="overlay" id="creator-list-ov" onclick="if(event.target===this) closeCreatorList()">
+  <div class="modal">
+    <div class="modal-head" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border); color:var(--text-main);">Kelola PJ Ide (Pencetus)</div>
+    <div class="modal-body" style="padding:24px;">
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Tambahkan nama orang di luar tim yang sering mencetuskan ide konten.</p>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+            <input type="text" id="new-creator-name" class="fi" style="margin-bottom:0;" placeholder="Ketik nama PJ Ide baru..." onkeypress="if(event.key==='Enter') addCreator()">
+            <button class="btn-s" style="padding:10px 16px;" onclick="addCreator()">Tambah</button>
+        </div>
+        <div id="creator-list-container" style="max-height:300px; overflow-y:auto; border:1px solid var(--input-border); border-radius:8px; padding:8px;"></div>
+    </div>
+    <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; background:var(--input-bg); border-top:1px solid var(--input-border);">
+        <button class="btn-s" onclick="closeCreatorList()">Selesai</button>
     </div>
   </div>
 </div>
@@ -783,7 +804,8 @@ let unsubscribeWs = null;
 let unsubscribeSharedWs = null;
 let unsubscribeBoard = null;
 
-let brands=[], cards=[], columns=[], themeSettings = { color: '#534AB7', bg: '', bgPos: '50% 50%' };
+// TAMBAHAN STATE: CREATORS (PJ IDE EKSKLUSIF)
+let brands=[], cards=[], columns=[], creators=[], themeSettings = { color: '#534AB7', bg: '', bgPos: '50% 50%' };
 let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
 let tempImgObj = new Image(); let imgRotation = 0; 
 let isRepoMode = false, startY, startPos;
@@ -1126,12 +1148,90 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         const data = snapshot.val() || {};
         brands = data.brands || []; cards = data.cards || [];
         columns = (data.columns && data.columns.length > 0) ? data.columns : [{id:'review',lbl:'Review',c:'#534AB7', collapsed: false}];
+        creators = data.creators || []; // MUAT DATA CREATORS TERSENDIRI
         
         if(window.loadLocalTheme) window.loadLocalTheme();
         
-        renderAll(); renderWsSelector();
+        renderAll(); renderWsSelector(); updateCreatorDropdowns();
     }, handleKick);
 };
+
+// ================= MANAJEMEN PJ IDE (CREATOR EKSTERNAL) =================
+window.openCreatorList = () => { window.renderCreatorList(); document.getElementById('creator-list-ov').classList.add('show'); };
+window.closeCreatorList = () => document.getElementById('creator-list-ov').classList.remove('show');
+
+window.renderCreatorList = () => {
+    const cont = document.getElementById('creator-list-container');
+    if(creators.length === 0) { cont.innerHTML = '<div class="empty" style="padding:16px;">Belum ada nama PJ Ide yang ditambahkan.</div>'; return; }
+    cont.innerHTML = creators.map(c => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 4px; border-bottom:1px solid var(--input-border);">
+            <div style="font-weight:600; color:var(--text-main); font-size:13px;">
+                <span class="pic-avatar-mini" style="display:inline-flex; width:20px; height:20px; font-size:9px; margin-right:6px; vertical-align:middle;">${c.name.charAt(0).toUpperCase()}</span> 
+                ${c.name}
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button class="btn-c" style="padding:4px 8px; font-size:11px;" onclick="editCreator('${c.id}')">Edit</button>
+                <button class="btn-c" style="padding:4px 8px; font-size:11px; color:#e24b4a; border-color:rgba(226,75,74,0.3); background:rgba(226,75,74,0.05);" onclick="delCreator('${c.id}')">Hapus</button>
+            </div>
+        </div>
+    `).join('');
+};
+
+window.addCreator = () => {
+    const input = document.getElementById('new-creator-name');
+    const name = input.value.trim();
+    if(!name) return;
+    creators.push({id: 'cr'+Date.now(), name: name});
+    input.value = '';
+    syncToFirebase();
+    window.renderCreatorList();
+    updateCreatorDropdowns();
+    renderBoard();
+};
+
+window.editCreator = (id) => {
+    const c = creators.find(x => x.id === id);
+    const newName = prompt("Edit Nama PJ Ide:", c.name);
+    if(newName && newName.trim()) {
+        c.name = newName.trim();
+        syncToFirebase();
+        window.renderCreatorList();
+        updateCreatorDropdowns();
+        renderBoard();
+        if(selId) selCard(selId);
+    }
+};
+
+window.delCreator = (id) => {
+    showMsg("Hapus PJ Ide ini? (Namanya akan dikosongkan dari konten yang sedang ditanganinya)", () => {
+        creators = creators.filter(x => x.id !== id);
+        cards.forEach(c => { if(c.creator === id) c.creator = ''; });
+        syncToFirebase();
+        window.renderCreatorList();
+        updateCreatorDropdowns();
+        renderBoard();
+        if(selId) selCard(selId);
+    });
+};
+
+function updateCreatorDropdowns() {
+    let opts = `<option value="">Belum Ada PJ Ide</option>`;
+    let fOpts = `<option value="all">Semua PJ Ide</option><option value="unassigned">Belum Ada PJ</option>`;
+    creators.forEach(c => {
+        opts += `<option value="${c.id}">${c.name}</option>`;
+        fOpts += `<option value="${c.id}">${c.name}</option>`;
+    });
+
+    const mCre = document.getElementById('m-creator'); if(mCre) mCre.innerHTML = opts;
+    const dpCre = document.getElementById('dp-fcreator'); if(dpCre) dpCre.innerHTML = opts;
+    const fCre = document.getElementById('filter-creator'); if(fCre) { const cur = fCre.value; fCre.innerHTML = fOpts; if(fOpts.includes(cur)) fCre.value = cur; }
+
+    if(selId){ 
+        const c = cards.find(x=>x.id===selId); 
+        if(c && dpCre) dpCre.value = c.creator || '';
+    }
+}
+// ====================================================================
 
 window.openTeamModal = () => { window.renderTeamList(); document.getElementById('team-ov').classList.add('show'); };
 window.closeTeamModal = () => document.getElementById('team-ov').classList.remove('show');
@@ -1160,7 +1260,7 @@ window.removeMember = (id) => {
                 await update(ref(db, `board_members/${activeWsId}/${myUser.id}`), { role: 'owner' });
             }
             await remove(ref(db, `board_members/${activeWsId}/${id}`)); 
-            cards.forEach(c => { if(c.assignee === id) c.assignee = ''; if(c.creator === id) c.creator = ''; }); 
+            cards.forEach(c => { if(c.assignee === id) c.assignee = ''; }); 
             syncToFirebase(); 
             showMsg("Anggota berhasil dikeluarkan."); 
         } catch(e) {
@@ -1170,39 +1270,30 @@ window.removeMember = (id) => {
 };
 
 function updateAssigneeDropdowns() {
-    let opts = `<option value="">Belum Ada</option>`;
-    let fOpts = `<option value="all">Semua PIC/PJ</option><option value="unassigned">Belum Ada</option>`;
+    let opts = `<option value="">Belum Ada PIC</option>`;
+    let fOpts = `<option value="all">Semua PIC Eksekusi</option><option value="unassigned">Belum Ada PIC</option>`;
     for(let id in wsMembers) {
         opts += `<option value="${id}">${wsMembers[id].name}</option>`;
         fOpts += `<option value="${id}">${wsMembers[id].name}</option>`;
     }
-    // Update Dropdown PIC
     const mAss = document.getElementById('m-assignee'); if(mAss) mAss.innerHTML = opts;
     const dpAss = document.getElementById('dp-fassignee'); if(dpAss) { dpAss.innerHTML = opts; }
     const fAss = document.getElementById('filter-assignee'); if(fAss) { const cur = fAss.value; fAss.innerHTML = fOpts; if(fOpts.includes(cur)) fAss.value = cur; }
     
-    // Update Dropdown PJ IDE (Kreator)
-    const mCre = document.getElementById('m-creator'); if(mCre) mCre.innerHTML = opts;
-    const dpCre = document.getElementById('dp-fcreator'); if(dpCre) { dpCre.innerHTML = opts; }
-    const fCre = document.getElementById('filter-creator'); if(fCre) { const cur = fCre.value; fCre.innerHTML = fOpts; if(fOpts.includes(cur)) fCre.value = cur; }
-
     if(selId){ 
         const c = cards.find(x=>x.id===selId); 
-        if(c) {
-            if(dpAss) dpAss.value = c.assignee || '';
-            if(dpCre) dpCre.value = c.creator || '';
-        }
+        if(c && dpAss) dpAss.value = c.assignee || '';
     }
 }
 
-// FIX 1: Debounce syncToFirebase untuk meringankan penulisan ke database
+// FIX 1: Debounce syncToFirebase
 let syncDebounce;
 window.syncToFirebase = function() { 
     clearTimeout(syncDebounce);
     syncDebounce = setTimeout(() => {
         if(!activeWsId) return; 
         const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`; 
-        update(ref(db, dbPath), { brands, cards, columns }); 
+        update(ref(db, dbPath), { brands, cards, columns, creators }); // CREATORS IKUT DISIMPAN
     }, 500);
 }
 
@@ -1236,7 +1327,7 @@ window.closeThemeModal = () => document.getElementById('theme-ov').classList.rem
 window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelectorAll('.theme-option').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); applyTheme(); window.saveLocalTheme(); };
 window.removeBg = () => { themeSettings.bg = ''; applyTheme(); window.saveLocalTheme(); document.getElementById('file-bg-input').value = ''; };
 
-// --- FIX 5: REPOSITION WALLPAPER (Super Responsif) ---
+// --- FIX 5: REPOSITION WALLPAPER (Sangat Responsif & Cepat) ---
 window.startReposition = () => {
     if(!themeSettings.bg) return;
     isRepoMode = true;
@@ -1261,7 +1352,7 @@ repoOverlay.addEventListener('mousedown', e => {
 });
 window.addEventListener('mousemove', e => {
     if(!isRepoMode || startY === undefined) return;
-    let diff = (e.clientY - startY) * 1.5; // OPTIMASI: Dikali 1.5 agar gesernya super cepat
+    let diff = (e.clientY - startY) * 1.5; 
     let newPos = Math.max(0, Math.min(100, startPos - diff));
     themeSettings.bgPos = `50% ${newPos}%`;
     appEl.style.backgroundPosition = themeSettings.bgPos;
@@ -1450,7 +1541,7 @@ window._renderBoardCore = () => {
             return a.type.localeCompare(b.type); 
         }); 
         
-        // FIX 3: Event onClick ToggleCol digeser ke button agar rapi dan tidak bentrok
+        // FIX 3: Event onClick ToggleCol
         if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle" onclick="toggleCol(event, '${col.id}')">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; 
         
         return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol(event, '${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; 
@@ -1483,7 +1574,7 @@ window.cardH = (c) => {
     const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; 
     const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; 
     
-    // AVATAR 24PX PRESISI + NAMA
+    // Tampilan PIC di Kartu Luar
     let picHtml = ''; 
     if (c.assignee && wsMembers[c.assignee]) { 
         const picUser = wsMembers[c.assignee]; 
@@ -1536,7 +1627,7 @@ window.selCard = (id) => {
     document.getElementById('dp-furgency').value=c.urgency||'normal'; 
     document.getElementById('dp-fobjective').value=c.objective||'Konten'; 
     
-    // UPDATE PIC & PJ ROW DI DETAIL
+    // UPDATE PIC ROW DI DETAIL
     const member = wsMembers[c.assignee];
     const dpAva = document.getElementById('dp-pic-avatar');
     if (member && member.photoURL) {
@@ -1546,12 +1637,13 @@ window.selCard = (id) => {
     }
     document.getElementById('dp-fassignee').value=c.assignee||''; 
 
-    const creatorUser = wsMembers[c.creator];
+    // UPDATE PJ IDE ROW DI DETAIL (Dari database terpisah)
+    const creatorUser = creators.find(x => x.id === c.creator);
     const dpPjAva = document.getElementById('dp-pj-avatar');
-    if (creatorUser && creatorUser.photoURL) {
-        dpPjAva.innerHTML = `<img src="${creatorUser.photoURL}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.outerHTML='${creatorUser.name.charAt(0).toUpperCase()}'">`;
+    if (creatorUser) {
+        dpPjAva.textContent = creatorUser.name.charAt(0).toUpperCase();
     } else {
-        dpPjAva.textContent = creatorUser ? creatorUser.name.charAt(0).toUpperCase() : '?';
+        dpPjAva.textContent = '?';
     }
     document.getElementById('dp-fcreator').value=c.creator||''; 
     
@@ -1568,7 +1660,7 @@ window.selCard = (id) => {
 
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
 
-// FIX 1: dps (Database Property Setter) sekarang punya Update DOM Spesifik untuk meringankan Lag
+// FIX 1: dps (Database Property Setter) update DOM spesifik
 window.dps = (f,v) => { 
     const c=cards.find(x=>x.id===selId); 
     if(c){
@@ -1580,7 +1672,6 @@ window.dps = (f,v) => {
         } else if (f === 'status' || f === 'urgency' || f === 'objective' || f === 'bId') {
             renderBoard();
         } else {
-            // Jika hanya mengganti judul (teks), update langsung HTML kartunya tanpa merender ulang seluruh board
             if (f === 'title') {
                 const cardEl = document.querySelector(`.card[data-id="${selId}"]`);
                 if (cardEl) {
@@ -1868,11 +1959,9 @@ window.setMusicPlayer = () => {
     }
     let embedUrl = val;
     
-    // Auto-Konversi Link Spotify ke format Embed
     if (val.includes('spotify.com')) {
         try { const urlObj = new URL(val); embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`; } catch(e){}
     } 
-    // Auto-Konversi Link Apple Music ke format Embed
     else if (val.includes('music.apple.com')) {
         embedUrl = val.replace('music.apple.com', 'embed.music.apple.com');
     }
@@ -1886,7 +1975,6 @@ window.setMusicPlayer = () => {
     localStorage.setItem('cb_music_link', val); 
 };
 
-// Auto-load lagu saat website baru dibuka
 setTimeout(() => {
     const savedMusic = localStorage.getItem('cb_music_link');
     if(savedMusic) {
