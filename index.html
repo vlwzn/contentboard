@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0"/>
 <title>ContentBoard Pro</title>
 
-<!-- TAG PWA -->
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="pwa-apple-icon">
 <meta name="theme-color" content="#534AB7">
@@ -58,7 +57,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* LAYOUT: background-attachment diubah ke scroll demi kemulusan FPS CPU/GPU */
+/* LAYOUT */
 .app{display:flex;flex-direction:column;height:100vh;overflow:hidden; background-size: cover; background-position: center; background-attachment: scroll; transition: background 0.4s ease; position: relative;}
 
 /* REPOSITION OVERLAY */
@@ -110,11 +109,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .search-input { width: 200px; padding-left: 32px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'); background-repeat: no-repeat; background-position: 10px center; cursor: text; }
 .search-input:focus { width: 260px; background-color: var(--modal-bg); border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
 
-/* FILTER & MUSIC PANEL MELAYANG */
-#filter-panel, #music-panel { position: absolute; top: 60px; right: 16px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
-#filter-panel { width: 260px; }
-#music-panel { width: 300px; right: 0; }
-#filter-panel.show, #music-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+/* FILTER PANEL MELAYANG */
+#filter-panel { position: absolute; top: 60px; right: 16px; width: 260px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
+#filter-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+
+/* MUSIC PANEL MELAYANG */
+#music-panel { position: absolute; top: 60px; right: 0; width: 300px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
+#music-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+
 .filter-row { display: flex; flex-direction: column; gap: 4px; }
 .filter-lbl { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -130,16 +132,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .add-btab:hover{color:var(--primary);}
 
 /* BOARD */
-.board-wrap{flex:1;overflow-x:auto;overflow-y:hidden;display:flex; scroll-behavior: smooth;}
+.board-wrap{flex:1;overflow-x:auto;overflow-y:hidden;display:flex; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;}
 .board{display:flex;gap:16px;padding:16px 20px 24px 20px;align-items:stretch;height:100%}
 
-/* OPTIMASI: contain: layout style; ditambahkan agar render lebih mulus */
 .col{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;height:100%; contain: layout style; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
 .col-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); box-shadow:0 2px 8px rgba(0,0,0,0.04); transition: background 0.3s;}
 .col-lbl{font-size:13px;font-weight:700;flex:1;color:var(--text-main);}
 .col-cnt{font-size:11px;color:var(--text-muted);background:var(--input-bg); padding:2px 8px;border-radius:10px; font-weight: 600; border: 1px solid var(--input-border);}
-
-/* OPTIMASI: Blur dikurangi jadi 4px, GPU jauh lebih ringan */
 .col-body{overflow-y:auto;display:flex;flex-direction:column;gap:10px;flex:1; padding:10px 10px 80px 10px; background:var(--col-body-bg); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); border:1px solid var(--glass-border); border-radius:16px; box-shadow:inset 0 4px 15px rgba(0,0,0,0.02); contain: content; transition: background 0.3s;} 
 .col-body::-webkit-scrollbar{width:4px;}
 .col-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:4px;}
@@ -175,7 +174,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cfoot-name{font-size:11px;color:var(--text-muted);flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight: 500;}
 
 /* AVATAR PIC */
-.pic-avatar-mini { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1.5px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); text-transform: uppercase; flex-shrink: 0; }
+.pic-avatar-mini { 
+    width: 24px; height: 24px; 
+    border-radius: 50%; 
+    background: var(--primary); 
+    color: #fff; 
+    font-size: 10px; 
+    font-weight: 700; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border: 1.5px solid #fff; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15); 
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
 img.pic-avatar-mini { object-fit: cover; }
 
 /* ATTACHMENT & STEPS */
@@ -238,10 +251,10 @@ img.pic-avatar-mini { object-fit: cover; }
 .dp-fv input, .dp-fv select{width:100%;border:none;outline:none;font-size:14px; color:var(--text-main); background:transparent; font-weight: 500;}
 .dp-fv select { cursor: pointer; }
 
-/* PIC ROW IN DETAIL */
-.dp-pic-row { display: flex; align-items: center; gap: 12px; background: var(--primary-light); padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
-.dp-pic-info { display: flex; flex-direction: column; flex: 1; }
-.dp-pic-label { font-size: 10px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+/* PIC ROW IN DETAIL (DIUPDATE UNTUK 2 KOLOM: PJ IDE & PIC EKSEKUSI) */
+.dp-pic-row { display: flex; align-items: center; gap: 10px; background: var(--primary-light); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--glass-border); flex: 1; }
+.dp-pic-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.dp-pic-label { font-size: 9px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
 
 .fi{padding:14px;border:1px solid var(--input-border);border-radius:10px;width:100%;outline:none;margin-bottom:14px; font-size:14px; transition: all 0.2s; background: var(--input-bg); color: var(--text-main);}
 .fi:focus{border-color:var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: var(--modal-bg);}
@@ -277,6 +290,7 @@ img.pic-avatar-mini { object-fit: cover; }
   .dp-pull-indicator { display: block; }
   
   #music-panel, #filter-panel { position: fixed; top: 120px; left: 16px; right: 16px; width: auto; z-index: 6000; }
+  .dp-pic-row-container { flex-direction: column; } /* Agar baris PJ dan PIC tidak sempit di HP */
 }
 </style>
 </head>
@@ -287,7 +301,6 @@ img.pic-avatar-mini { object-fit: cover; }
     <button class="btn-s" style="margin-top: 20px;" onclick="stopReposition()">Simpan Posisi</button>
 </div>
 
-<!-- FORM LOGIN FULL VERSION -->
 <div class="overlay show" id="login-ov" style="z-index: 9999; background: var(--bg-app); opacity: 1; visibility: visible;">
   <div class="modal" style="padding: 30px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
     
@@ -385,7 +398,6 @@ img.pic-avatar-mini { object-fit: cover; }
     </div>
 
     <div class="top-actions">
-      <!-- FIX: Search Debounce diterapkan di sini untuk kurangi lag -->
       <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="handleSearch()">
       
       <div style="position: relative;">
@@ -430,7 +442,11 @@ img.pic-avatar-mini { object-fit: cover; }
                       <select id="filter-urgency" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua</option><option value="high">🔥 Mendesak</option><option value="med">⚡ Penting</option><option value="normal">⚪ Normal</option><option value="low">🐢 Santai</option></select>
                   </div>
                   <div class="filter-row">
-                      <span class="filter-lbl">PIC / Penanggung Jawab</span>
+                      <span class="filter-lbl">PJ IDE / PENCETUS</span>
+                      <select id="filter-creator" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua PJ Ide</option><option value="unassigned">Belum Ada PJ</option></select>
+                  </div>
+                  <div class="filter-row">
+                      <span class="filter-lbl">PIC EKSEKUSI</span>
                       <select id="filter-assignee" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua PIC</option><option value="unassigned">Belum Ada PIC</option></select>
                   </div>
                   <div class="filter-row">
@@ -476,17 +492,28 @@ img.pic-avatar-mini { object-fit: cover; }
   </div>
   <div class="dp-body">
     
-    <div class="dp-pic-row">
-        <div class="pic-avatar-mini" id="dp-pic-avatar" style="width:40px; height:40px; font-size:16px; margin:0;">?</div>
-        <div class="dp-pic-info" style="flex:1;">
-            <div class="dp-pic-label">DITUGASKAN KE (PIC)</div>
-            <select id="dp-fassignee" style="background: transparent; border: none; font-weight: 700; color: var(--text-main); font-size: 14px; cursor: pointer; outline: none; width: 100%; margin-top:4px;" onchange="dps('assignee', this.value)">
-                <option value="">Belum Ada PIC</option>
-            </select>
+    <div class="dp-pic-row-container" style="display:flex; gap:12px; margin-bottom:20px;">
+        <div class="dp-pic-row" style="flex:1; margin-bottom:0; padding:10px 12px; background:var(--input-bg);">
+            <div class="pic-avatar-mini" id="dp-pj-avatar" style="width:32px; height:32px; font-size:14px; margin:0;">?</div>
+            <div class="dp-pic-info" style="flex:1; overflow:hidden;">
+                <div class="dp-pic-label" style="font-size:9px; color:var(--text-light);">PJ IDE (CREATOR)</div>
+                <select id="dp-fcreator" style="background:transparent; border:none; font-weight:700; color:var(--text-main); font-size:13px; cursor:pointer; outline:none; width:100%; margin-top:2px; padding:0;" onchange="dps('creator', this.value)">
+                    <option value="">Pilih PJ</option>
+                </select>
+            </div>
+        </div>
+        <div class="dp-pic-row" style="flex:1; margin-bottom:0; padding:10px 12px;">
+            <div class="pic-avatar-mini" id="dp-pic-avatar" style="width:32px; height:32px; font-size:14px; margin:0;">?</div>
+            <div class="dp-pic-info" style="flex:1; overflow:hidden;">
+                <div class="dp-pic-label" style="font-size:9px;">PIC EKSEKUSI</div>
+                <select id="dp-fassignee" style="background:transparent; border:none; font-weight:700; color:var(--text-main); font-size:13px; cursor:pointer; outline:none; width:100%; margin-top:2px; padding:0;" onchange="dps('assignee', this.value)">
+                    <option value="">Pilih PIC</option>
+                </select>
+            </div>
         </div>
     </div>
 
-    <div class="dp-field"><span class="dp-fl">Judul</span><div class="dp-fv"><input type="text" id="dp-ftitle" onblur="dps('title',this.value)"/></div></div>
+    <div class="dp-field"><span class="dp-fl">Judul</span><div class="dp-fv"><input type="text" id="dp-ftitle" onfocus="window.disableRender=true" onblur="window.disableRender=false; dps('title',this.value)"/></div></div>
     
     <div class="dp-field"><span class="dp-fl">Prioritas</span>
       <div class="dp-fv">
@@ -517,14 +544,14 @@ img.pic-avatar-mini { object-fit: cover; }
     
     <div id="dp-steps-list" style="margin-top:12px;"></div>
     <div style="display:flex; gap:8px; margin-top:12px;">
-        <input type="text" id="new-step-input" class="fi" style="margin-bottom:0; padding:10px 14px;" placeholder="Ketik tugas baru..." onkeypress="if(event.key==='Enter') addStep()">
+        <input type="text" id="new-step-input" class="fi" style="margin-bottom:0; padding:10px 14px;" placeholder="Ketik tugas baru..." onfocus="window.disableRender=true" onblur="window.disableRender=false" onkeypress="if(event.key==='Enter') addStep()">
         <button class="btn-s" style="padding:10px 18px; font-size:18px; line-height:1; border-radius:10px;" onclick="addStep()">+</button>
     </div>
 
     <div style="margin-top:28px; font-size:11px; color:var(--text-light); font-weight:800; letter-spacing:1px; border-bottom: 1px solid var(--input-border); padding-bottom:6px;">CATATAN & SCRIPT</div>
     
     <div id="dp-notes-display" style="width:100%; min-height:100px; margin-top:12px; border:1px solid transparent; border-radius:12px; padding:14px; font-size:14px; background:var(--input-bg); white-space:pre-wrap; word-break:break-word; cursor:text; transition:all 0.2s; line-height:1.6;" onclick="editNotes()" title="Klik untuk mengedit naskah/catatan"></div>
-    <textarea id="dp-notes" style="display:none; width:100%; height:150px; margin-top:12px; border:1px solid var(--primary); border-radius:12px; padding:14px; outline:none; font-family:inherit; font-size:14px; resize:vertical; background:var(--modal-bg); color:var(--text-main); line-height:1.6; box-shadow: 0 0 0 3px var(--primary-light);" onblur="saveNotes(this.value)" placeholder="Ketik narasi, catatan kreatif, atau paste link di sini..."></textarea>
+    <textarea id="dp-notes" style="display:none; width:100%; height:150px; margin-top:12px; border:1px solid var(--primary); border-radius:12px; padding:14px; outline:none; font-family:inherit; font-size:14px; resize:vertical; background:var(--modal-bg); color:var(--text-main); line-height:1.6; box-shadow: 0 0 0 3px var(--primary-light);" onfocus="window.disableRender=true" onblur="window.disableRender=false; saveNotes(this.value)" placeholder="Ketik narasi, catatan kreatif, atau paste link di sini..."></textarea>
     
     <div style="margin-top:28px; font-size:11px; color:var(--text-light); font-weight:800; letter-spacing:1px; border-bottom: 1px solid var(--input-border); padding-bottom:6px;">LAMPIRAN VISUAL</div>
     <div id="dp-attachments" class="att-list"></div>
@@ -535,17 +562,22 @@ img.pic-avatar-mini { object-fit: cover; }
   </div>
 </div>
 
-<!-- MODAL TAMBAH KONTEN -->
 <div class="overlay" id="add-ov" onclick="if(event.target===this) closeAdd()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; font-size:18px; border-bottom:1px solid var(--input-border); color:var(--text-main);">Buat Konten Baru</div>
     <div class="modal-body" style="padding:24px;">
       <input class="fi" type="text" id="m-title" placeholder="Tulis Judul Konten..." style="font-size:16px; font-weight:600; padding:16px;"/>
       
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <select class="fi" id="m-brand" style="margin-bottom:0; flex:1;"></select>
+      </div>
+      
       <div style="display:flex; gap:8px; margin-bottom:16px;">
-        <select class="fi" id="m-brand" style="margin-bottom:0; flex:2;"></select>
-        <select class="fi" id="m-assignee" style="margin-bottom:0; flex:1;" title="Tugaskan ke">
-             <option value="">PIC</option>
+        <select class="fi" id="m-creator" style="margin-bottom:0; flex:1; background:var(--input-bg);" title="PJ Ide (Pencetus)">
+             <option value="">Pilih PJ Ide</option>
+        </select>
+        <select class="fi" id="m-assignee" style="margin-bottom:0; flex:1;" title="PIC Eksekusi">
+             <option value="">Pilih PIC</option>
         </select>
       </div>
 
@@ -662,7 +694,6 @@ img.pic-avatar-mini { object-fit: cover; }
   </div>
 </div>
 
-<!-- Modal Editor Gambar Lokal -->
 <div class="overlay" id="img-edit-ov" style="z-index: 6000;">
     <div class="modal">
         <div class="modal-head" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Sesuaikan Wallpaper</div>
@@ -757,17 +788,22 @@ let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBra
 let tempImgObj = new Image(); let imgRotation = 0; 
 let isRepoMode = false, startY, startPos;
 
-// FIX PERFORMA: RequestAnimationFrame Debounce
+// FIX 1: PENGUNCI LAG KETIKA MENGETIK
+window.disableRender = false;
+
 let renderBoardRAF = null;
-window.renderBoard = () => {
+window.executeRenderBoard = () => {
     if(renderBoardRAF) return; 
     renderBoardRAF = requestAnimationFrame(() => {
-        executeRenderBoard();
+        _renderBoardCore();
         renderBoardRAF = null;
     });
 };
 
-// FIX BUG SEARCH LAG: Debounce
+window.renderBoard = () => {
+    window.executeRenderBoard();
+};
+
 let searchDebounce;
 window.handleSearch = () => {
     clearTimeout(searchDebounce);
@@ -816,6 +852,7 @@ window.resetFilters = () => {
     document.getElementById('filter-type').value = 'semua';
     document.getElementById('filter-objective').value = 'all';
     document.getElementById('filter-urgency').value = 'all';
+    if(document.getElementById('filter-creator')) document.getElementById('filter-creator').value = 'all';
     if(document.getElementById('filter-assignee')) document.getElementById('filter-assignee').value = 'all';
     document.getElementById('sort-by').value = 'manual';
     document.getElementById('search-input').value = '';
@@ -825,11 +862,11 @@ window.resetFilters = () => {
 
 // ================= FILTER LOGIC UNTUK PDF & BOARD =================
 window.getFilteredCards = () => {
-    const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, fAss = document.getElementById('filter-assignee') ? document.getElementById('filter-assignee').value : 'all', sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+    const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, fAss = document.getElementById('filter-assignee') ? document.getElementById('filter-assignee').value : 'all', fCre = document.getElementById('filter-creator') ? document.getElementById('filter-creator').value : 'all', sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
     return cards.filter(c => { 
-        let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mAss = (fAss === 'all' || (fAss === 'unassigned' ? (!c.assignee || c.assignee === '') : c.assignee === fAss)), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; 
+        let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mAss = (fAss === 'all' || (fAss === 'unassigned' ? (!c.assignee || c.assignee === '') : c.assignee === fAss)), mCre = (fCre === 'all' || (fCre === 'unassigned' ? (!c.creator || c.creator === '') : c.creator === fCre)), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; 
         if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); } 
-        return mB && mT && mM && mW && mU && mObj && mAss && mS; 
+        return mB && mT && mM && mW && mU && mObj && mAss && mCre && mS; 
     });
 };
 
@@ -942,7 +979,7 @@ window.changeAvatar = async () => {
         myUser.photoURL = urlToSave;
         set(ref(db, `public_users/${myUser.id}`), { name: myUser.name, email: myUser.email, photoURL: myUser.photoURL });
         window.updateMyAvatarUI();
-        renderBoard(); // Update semua avatar di papan
+        renderBoard(); 
         if(document.getElementById('team-ov').classList.contains('show')) window.renderTeamList();
         showMsg("Foto profil berhasil diperbarui!");
     } catch(e) { showMsg("Gagal: " + e.message); }
@@ -1085,6 +1122,7 @@ window.switchWorkspace = (wsId, ownerFlag) => {
     
     const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
     unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
+        if(window.disableRender) return; // PENGUNCI LAG: Jangan timpa DOM kalau user sedang mengetik
         const data = snapshot.val() || {};
         brands = data.brands || []; cards = data.cards || [];
         columns = (data.columns && data.columns.length > 0) ? data.columns : [{id:'review',lbl:'Review',c:'#534AB7', collapsed: false}];
@@ -1122,7 +1160,7 @@ window.removeMember = (id) => {
                 await update(ref(db, `board_members/${activeWsId}/${myUser.id}`), { role: 'owner' });
             }
             await remove(ref(db, `board_members/${activeWsId}/${id}`)); 
-            cards.forEach(c => { if(c.assignee === id) c.assignee = ''; }); 
+            cards.forEach(c => { if(c.assignee === id) c.assignee = ''; if(c.creator === id) c.creator = ''; }); 
             syncToFirebase(); 
             showMsg("Anggota berhasil dikeluarkan."); 
         } catch(e) {
@@ -1132,21 +1170,41 @@ window.removeMember = (id) => {
 };
 
 function updateAssigneeDropdowns() {
-    let opts = `<option value="">Belum Ada PIC</option>`;
-    let fOpts = `<option value="all">Semua PIC</option><option value="unassigned">Belum Ada PIC</option>`;
+    let opts = `<option value="">Belum Ada</option>`;
+    let fOpts = `<option value="all">Semua PIC/PJ</option><option value="unassigned">Belum Ada</option>`;
     for(let id in wsMembers) {
         opts += `<option value="${id}">${wsMembers[id].name}</option>`;
         fOpts += `<option value="${id}">${wsMembers[id].name}</option>`;
     }
-    const mAss = document.getElementById('m-assignee');
-    if(mAss) mAss.innerHTML = opts;
-    const dpAss = document.getElementById('dp-fassignee');
-    if(dpAss) { dpAss.innerHTML = opts; if(selId){ const c = cards.find(x=>x.id===selId); if(c) dpAss.value = c.assignee || '';} }
-    const fAss = document.getElementById('filter-assignee');
-    if(fAss) { const cur = fAss.value; fAss.innerHTML = fOpts; if(fOpts.includes(cur)) fAss.value = cur; }
+    // Update Dropdown PIC
+    const mAss = document.getElementById('m-assignee'); if(mAss) mAss.innerHTML = opts;
+    const dpAss = document.getElementById('dp-fassignee'); if(dpAss) { dpAss.innerHTML = opts; }
+    const fAss = document.getElementById('filter-assignee'); if(fAss) { const cur = fAss.value; fAss.innerHTML = fOpts; if(fOpts.includes(cur)) fAss.value = cur; }
+    
+    // Update Dropdown PJ IDE (Kreator)
+    const mCre = document.getElementById('m-creator'); if(mCre) mCre.innerHTML = opts;
+    const dpCre = document.getElementById('dp-fcreator'); if(dpCre) { dpCre.innerHTML = opts; }
+    const fCre = document.getElementById('filter-creator'); if(fCre) { const cur = fCre.value; fCre.innerHTML = fOpts; if(fOpts.includes(cur)) fCre.value = cur; }
+
+    if(selId){ 
+        const c = cards.find(x=>x.id===selId); 
+        if(c) {
+            if(dpAss) dpAss.value = c.assignee || '';
+            if(dpCre) dpCre.value = c.creator || '';
+        }
+    }
 }
 
-function syncToFirebase() { if(!activeWsId) return; const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`; update(ref(db, dbPath), { brands, cards, columns }); }
+// FIX 1: Debounce syncToFirebase untuk meringankan penulisan ke database
+let syncDebounce;
+window.syncToFirebase = function() { 
+    clearTimeout(syncDebounce);
+    syncDebounce = setTimeout(() => {
+        if(!activeWsId) return; 
+        const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`; 
+        update(ref(db, dbPath), { brands, cards, columns }); 
+    }, 500);
+}
 
 function applyTheme() {
     const root = document.documentElement; root.style.setProperty('--primary', themeSettings.color || '#534AB7');
@@ -1178,7 +1236,7 @@ window.closeThemeModal = () => document.getElementById('theme-ov').classList.rem
 window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelectorAll('.theme-option').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); applyTheme(); window.saveLocalTheme(); };
 window.removeBg = () => { themeSettings.bg = ''; applyTheme(); window.saveLocalTheme(); document.getElementById('file-bg-input').value = ''; };
 
-// --- FIX 5: REPOSITION WALLPAPER (Sangat Responsif & Cepat) ---
+// --- FIX 5: REPOSITION WALLPAPER (Super Responsif) ---
 window.startReposition = () => {
     if(!themeSettings.bg) return;
     isRepoMode = true;
@@ -1218,7 +1276,7 @@ repoOverlay.addEventListener('touchstart', e => {
 }, {passive: true});
 window.addEventListener('touchmove', e => {
     if(!isRepoMode || startY === undefined) return;
-    let diff = (e.touches[0].clientY - startY) * 1.5; // OPTIMASI: Sama cepatnya di HP
+    let diff = (e.touches[0].clientY - startY) * 1.5; 
     let newPos = Math.max(0, Math.min(100, startPos - diff));
     themeSettings.bgPos = `50% ${newPos}%`;
     appEl.style.backgroundPosition = themeSettings.bgPos;
@@ -1360,10 +1418,25 @@ window.showCtxMenu = (e, type, id) => {
 
 window.cols = (t) => columns; 
 window.renderAll = () => { renderTabs(); renderBoard(); };
+
+// FIX 4: BRAND DRAG & DROP
+let draggedBrandIdx = null; 
+window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); };
+window.dropB = (e, targetIdx) => { 
+    e.preventDefault(); e.stopPropagation(); 
+    if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return; 
+    const draggedBrand = brands.splice(draggedBrandIdx, 1)[0];
+    brands.splice(targetIdx, 0, draggedBrand); 
+    syncToFirebase(); 
+    renderTabs(); 
+    renderBoard();
+    draggedBrandIdx = null; 
+};
+
 window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); const mBrand = document.getElementById('m-brand'); if(mBrand) mBrand.innerHTML = opts; const dpBrand = document.getElementById('dp-fbrand'); if(dpBrand) dpBrand.innerHTML = opts; };
 
-// FIX 1: FUNGSI RENDER BOARD (Request Animation Frame untuk hilangkan Lag/Patah-patah)
-window.executeRenderBoard = () => {
+// FIX 1: FUNGSI RENDER BOARD (Dengan DOM Update untuk Anti-Lag)
+window._renderBoardCore = () => {
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; 
     const sortBy = document.getElementById('sort-by').value; 
     const vis = window.getFilteredCards(); 
@@ -1423,21 +1496,7 @@ window.cardH = (c) => {
         picHtml = `<div style="display:flex; align-items:center; gap:6px;">${avaImg} <span style="font-size:11px; font-weight:700; color:var(--text-muted);">${picUser.name}</span></div>`;
     } 
     
-    return `<div class="card" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot" style="justify-content:space-between;"><div style="display:flex; align-items:center; gap:6px; overflow:hidden;">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;flex-shrink:0;"></span>`:''}<span class="cfoot-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.n || 'Umum'}</span></div>${picHtml}</div></div>`; 
-};
-
-// FIX 4: BRAND DRAG & DROP
-let draggedBrandIdx = null; 
-window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); };
-window.dropB = (e, targetIdx) => { 
-    e.preventDefault(); e.stopPropagation(); 
-    if(draggedBrandIdx === null || draggedBrandIdx === targetIdx) return; 
-    const draggedBrand = brands.splice(draggedBrandIdx, 1)[0];
-    brands.splice(targetIdx, 0, draggedBrand); 
-    syncToFirebase(); 
-    renderTabs(); 
-    renderBoard();
-    draggedBrandIdx = null; 
+    return `<div class="card" data-id="${c.id}" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot" style="justify-content:space-between;"><div style="display:flex; align-items:center; gap:6px; overflow:hidden;">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;flex-shrink:0;"></span>`:''}<span class="cfoot-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.n || 'Umum'}</span></div>${picHtml}</div></div>`; 
 };
 
 window.setB = (id) => { aB=id; renderAll(); };
@@ -1454,7 +1513,14 @@ window.closeAdd = () => document.getElementById('add-ov').classList.remove('show
 window.selType = (t) => { mType=t; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); document.getElementById('btn-' + (t==='To-Do' ? 't' : t[0].toLowerCase())).style.background='var(--primary-light)'; document.getElementById('m-datetime-container').style.display=(t==='Catatan'||t==='To-Do')?'none':'block'; document.getElementById('m-objective').parentElement.style.display=(t==='Catatan'||t==='To-Do')?'none':'flex'; renderMStatus(t,''); };
 window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); if(s) { s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; } };
 
-window.saveCard = () => { const t=document.getElementById('m-title').value.trim(); if(!t)return; cards.unshift({ id:'c'+Date.now(), title:t, bId:document.getElementById('m-brand').value, type:mType, date:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-date').value, time:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-time').value, week:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-week').value, urgency:document.getElementById('m-urgency').value, objective:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-objective').value, status:document.getElementById('m-status').value, assignee: document.getElementById('m-assignee').value, notes:'',images:[],steps:[] }); closeAdd(); syncToFirebase(); renderBoard(); };
+window.saveCard = () => { 
+    const t=document.getElementById('m-title').value.trim(); 
+    if(!t)return; 
+    cards.unshift({ id:'c'+Date.now(), title:t, bId:document.getElementById('m-brand').value, type:mType, date:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-date').value, time:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-time').value, week:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-week').value, urgency:document.getElementById('m-urgency').value, objective:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-objective').value, status:document.getElementById('m-status').value, creator: document.getElementById('m-creator').value, assignee: document.getElementById('m-assignee').value, notes:'',images:[],steps:[] }); 
+    closeAdd(); 
+    syncToFirebase(); 
+    renderBoard(); 
+};
 
 window.selCard = (id) => { 
     selId=id; 
@@ -1470,6 +1536,7 @@ window.selCard = (id) => {
     document.getElementById('dp-furgency').value=c.urgency||'normal'; 
     document.getElementById('dp-fobjective').value=c.objective||'Konten'; 
     
+    // UPDATE PIC & PJ ROW DI DETAIL
     const member = wsMembers[c.assignee];
     const dpAva = document.getElementById('dp-pic-avatar');
     if (member && member.photoURL) {
@@ -1477,8 +1544,16 @@ window.selCard = (id) => {
     } else {
         dpAva.textContent = member ? member.name.charAt(0).toUpperCase() : '?';
     }
-
     document.getElementById('dp-fassignee').value=c.assignee||''; 
+
+    const creatorUser = wsMembers[c.creator];
+    const dpPjAva = document.getElementById('dp-pj-avatar');
+    if (creatorUser && creatorUser.photoURL) {
+        dpPjAva.innerHTML = `<img src="${creatorUser.photoURL}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.outerHTML='${creatorUser.name.charAt(0).toUpperCase()}'">`;
+    } else {
+        dpPjAva.textContent = creatorUser ? creatorUser.name.charAt(0).toUpperCase() : '?';
+    }
+    document.getElementById('dp-fcreator').value=c.creator||''; 
     
     document.getElementById('dp-datetime-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'block'; 
     document.getElementById('dp-obj-container').style.display=(c.type==='Catatan'||c.type==='To-Do')?'none':'flex'; 
@@ -1492,7 +1567,31 @@ window.selCard = (id) => {
 };
 
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
-window.dps = (f,v) => { const c=cards.find(x=>x.id===selId); if(c){c[f]=v; renderBoard(); syncToFirebase(); if(f==='assignee') selCard(selId); } };
+
+// FIX 1: dps (Database Property Setter) sekarang punya Update DOM Spesifik untuk meringankan Lag
+window.dps = (f,v) => { 
+    const c=cards.find(x=>x.id===selId); 
+    if(c){
+        c[f]=v; 
+        syncToFirebase(); 
+        if(f==='assignee' || f==='creator') {
+            selCard(selId);
+            renderBoard();
+        } else if (f === 'status' || f === 'urgency' || f === 'objective' || f === 'bId') {
+            renderBoard();
+        } else {
+            // Jika hanya mengganti judul (teks), update langsung HTML kartunya tanpa merender ulang seluruh board
+            if (f === 'title') {
+                const cardEl = document.querySelector(`.card[data-id="${selId}"]`);
+                if (cardEl) {
+                    const titleEl = cardEl.querySelector('.card-title');
+                    if (titleEl) titleEl.textContent = v;
+                }
+            }
+        }
+    } 
+};
+
 window.dpChType = (v) => { const c=cards.find(x=>x.id===selId); if(c){c.type=v; if(v==='Catatan' || v==='To-Do'){c.date='';c.time='';c.week=''; c.objective='';} syncToFirebase(); selCard(selId);} };
 window.dupCard = () => { const c = cards.find(x=>x.id===selId); if(!c) return; const newC = JSON.parse(JSON.stringify(c)); newC.id = 'c'+Date.now(); newC.title += " (Copy)"; cards.unshift(newC); closeDP(); syncToFirebase(); renderBoard(); };
 window.delCurCard = () => { if(!selId) return; showMsg("Hapus konten ini secara permanen?",()=>{cards=cards.filter(x=>x.id!==selId); closeDP(); syncToFirebase(); renderBoard(); }); };
@@ -1500,7 +1599,7 @@ window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" targ
 window.editNotes = () => { document.getElementById('dp-notes-display').style.display='none'; const ta=document.getElementById('dp-notes'); ta.style.display='block'; ta.focus(); };
 window.saveNotes = (v) => { dps('notes',v); document.getElementById('dp-notes-display').innerHTML=v?linkify(v):'Klik tambah catatan...'; document.getElementById('dp-notes-display').style.display='block'; document.getElementById('dp-notes').style.display='none'; };
 
-window.renderSteps = (c) => { document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`<div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})"><span class="drag-handle">⠿</span><input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})"><input class="step-input" type="text" value="${s.text.replace(/"/g, '&quot;')}" onchange="updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:var(--text-light);':''}"><button class="step-del" onclick="delStep(${i})">×</button></div>`).join(''); };
+window.renderSteps = (c) => { document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`<div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})"><span class="drag-handle">⠿</span><input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})"><input class="step-input" type="text" value="${s.text.replace(/"/g, '"')}" onfocus="window.disableRender=true" onblur="window.disableRender=false; updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:var(--text-light);':''}"><button class="step-del" onclick="delStep(${i})">×</button></div>`).join(''); };
 window.updateStepText = (i, v) => { const c = cards.find(x => x.id === selId); if(c && v.trim()){ c.steps[i].text = v.trim(); syncToFirebase(); } else if(c) renderSteps(c); };
 window.toggleStep = (i) => { const c=cards.find(x=>x.id===selId); c.steps[i].done=!c.steps[i].done; syncToFirebase(); renderSteps(c); renderBoard(); };
 window.addStep = () => { const i=document.getElementById('new-step-input'); if(!i.value.trim())return; const c=cards.find(x=>x.id===selId); if(!c.steps)c.steps=[]; c.steps.push({text:i.value.trim(),done:false}); i.value=''; syncToFirebase(); renderSteps(c); renderBoard(); };
@@ -1528,13 +1627,45 @@ window.closeCol = () => document.getElementById('col-ov').classList.remove('show
 window.saveCol = () => { const n=document.getElementById('cm-name').value.trim(); if(!n)return; if(editColId){ const c=columns.find(x=>x.id===editColId); c.lbl=n; c.c=cCol; } else { columns.push({id:'col'+Date.now(),lbl:n,c:cCol,collapsed:false}); } document.getElementById('col-ov').classList.remove('show'); renderAll(); syncToFirebase(); };
 window.confirmDelCol = (id) => { if(columns.length<=1)return showMsg("Harus ada minimal 1 status."); showMsg("Hapus kolom status ini?",()=>{const f=columns.find(x=>x.id!==id).id; cards.forEach(c=>{if(c.status===id)c.status=f;}); columns=columns.filter(x=>x.id!==id); renderAll(); syncToFirebase();}); };
 
+// DESKTOP DRAG & DROP HTML5
 let draggedCardId = null;
 window.dragCard = (e, id) => { e.stopPropagation(); draggedCardId = id; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(id)); setTimeout(() => { e.target.style.opacity = '0.5'; }, 0); };
 window.dragEndCard = (e) => { e.target.style.opacity = '1'; draggedCardId = null; document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); };
 window.dragOverCard = (e, id) => { e.preventDefault(); e.stopPropagation(); if(!draggedCardId || draggedCardId === id) return; const t = e.currentTarget; if (e.clientY - (t.getBoundingClientRect().y + t.getBoundingClientRect().height/2) > 0) t.style.boxShadow = '0 4px 0 var(--primary)'; else t.style.boxShadow = '0 -4px 0 var(--primary)'; };
 window.dragLeaveCard = (e) => { if(e.currentTarget) e.currentTarget.style.boxShadow = ''; };
-window.dropOnCard = (e, targetId) => { e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); if (!draggedCardId || draggedCardId === targetId) return; const cIdx = cards.findIndex(x => x.id === draggedCardId), tIdx = cards.findIndex(x => x.id === targetId); if (cIdx === -1 || tIdx === -1) return; const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + e.currentTarget.getBoundingClientRect().height/2) > 0; const card = cards.splice(cIdx, 1)[0]; card.status = cards[tIdx].status; let newIdx = cards.findIndex(x => x.id === targetId); if (dropBelow) newIdx++; cards.splice(newIdx, 0, card); document.getElementById('sort-by').value = 'manual'; draggedCardId = null; syncToFirebase(); renderBoard(); };
-window.dropCard = (e, colId) => { e.preventDefault(); e.stopPropagation(); const id = e.dataTransfer.getData("text/plain") || draggedCardId; if(!id) return; const cIdx = cards.findIndex(x => x.id === id); if(cIdx > -1) { const card = cards.splice(cIdx, 1)[0]; card.status = colId; cards.push(card); document.getElementById('sort-by').value = 'manual'; syncToFirebase(); renderBoard(); } draggedCardId = null; };
+window.dropOnCard = (e, targetId) => { 
+    e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.card').forEach(c => c.style.boxShadow = ''); 
+    if (!draggedCardId || draggedCardId === targetId) return; 
+    const cIdx = cards.findIndex(x => x.id === draggedCardId), tIdx = cards.findIndex(x => x.id === targetId); 
+    if (cIdx === -1 || tIdx === -1) return; 
+    const dropBelow = e.clientY - (e.currentTarget.getBoundingClientRect().y + e.currentTarget.getBoundingClientRect().height/2) > 0; 
+    const card = cards.splice(cIdx, 1)[0]; 
+    card.status = cards[tIdx].status; 
+    let newIdx = cards.findIndex(x => x.id === targetId); 
+    if (dropBelow) newIdx++; 
+    cards.splice(newIdx, 0, card); 
+    document.getElementById('sort-by').value = 'manual'; 
+    draggedCardId = null; 
+    
+    // TARGETED DOM MOVE (Meringankan lag akibat full render)
+    renderBoard();
+    syncToFirebase(); 
+};
+window.dropCard = (e, colId) => { 
+    e.preventDefault(); e.stopPropagation(); 
+    const id = e.dataTransfer.getData("text/plain") || draggedCardId; 
+    if(!id) return; 
+    const cIdx = cards.findIndex(x => x.id === id); 
+    if(cIdx > -1) { 
+        const card = cards.splice(cIdx, 1)[0]; 
+        card.status = colId; 
+        cards.push(card); 
+        document.getElementById('sort-by').value = 'manual'; 
+        renderBoard();
+        syncToFirebase(); 
+    } 
+    draggedCardId = null; 
+};
 
 let draggedColId = null;
 window.dragCol = (e, id) => { e.stopPropagation(); draggedColId = id; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", id); setTimeout(() => { const col = e.target.closest('.col'); if(col) col.style.opacity = '0.5'; }, 0); };
@@ -1554,6 +1685,119 @@ window.dropCol = (e, targetId) => {
     syncToFirebase(); 
     renderBoard(); 
 };
+
+// FIX 3: MOBILE DRAG AND DROP (Dengan Sistem Tahan/Hold 0.4 Detik)
+let touchDragCard = null, touchDragClone = null, touchStartX = 0, touchStartY = 0;
+let touchDragTimer = null;
+let isLongPressed = false;
+
+document.addEventListener('touchstart', (e) => {
+    const card = e.target.closest('.card');
+    if(!card) return;
+    if(['INPUT','BUTTON','TEXTAREA','SELECT','A'].includes(e.target.tagName)) return;
+    
+    touchDragCard = card;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    isLongPressed = false;
+
+    // Timer 0.4 detik (400ms) untuk mendeteksi user menahan kartu
+    touchDragTimer = setTimeout(() => {
+        isLongPressed = true;
+        if(touchDragCard) {
+            touchDragCard.style.transform = 'scale(1.03)';
+            touchDragCard.style.transition = 'transform 0.2s';
+            if(navigator.vibrate) navigator.vibrate(50); // Getaran halus di HP
+        }
+    }, 400); 
+}, {passive: true});
+
+document.addEventListener('touchmove', (e) => {
+    if(!touchDragCard) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+    
+    // Jika user menggeser layar sebelum 0.4 detik, batalkan drag (berarti dia cuma mau scroll)
+    if(!isLongPressed) {
+        if(Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            clearTimeout(touchDragTimer);
+            touchDragCard = null;
+        }
+        return;
+    }
+
+    e.preventDefault(); // Kunci scroll layar saat menyeret kartu
+
+    if(!touchDragClone) {
+        const dragAttr = touchDragCard.getAttribute('ondragstart');
+        if(dragAttr) draggedCardId = dragAttr.match(/'([^']+)'/)[1];
+        
+        touchDragCard.style.transform = '';
+        touchDragCard.style.transition = '';
+        
+        touchDragClone = touchDragCard.cloneNode(true);
+        touchDragClone.style.position = 'fixed';
+        touchDragClone.style.zIndex = '9999';
+        touchDragClone.style.opacity = '0.9';
+        touchDragClone.style.pointerEvents = 'none'; // Penting agar drop bekerja
+        touchDragClone.style.width = touchDragCard.offsetWidth + 'px';
+        touchDragClone.style.boxShadow = '0 15px 30px rgba(0,0,0,0.2)';
+        document.body.appendChild(touchDragClone);
+        touchDragCard.style.opacity = '0.3';
+    }
+
+    if(touchDragClone) {
+        touchDragClone.style.left = (touch.clientX - touchDragClone.offsetWidth/2) + 'px';
+        touchDragClone.style.top = (touch.clientY - touchDragClone.offsetHeight/2) + 'px';
+        
+        document.querySelectorAll('.col').forEach(c => c.style.borderLeft = '');
+        const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+        const col = dropTarget ? dropTarget.closest('.col') : null;
+        if(col && !col.classList.contains('collapsed')) {
+            col.style.borderLeft = '4px solid var(--primary)';
+        }
+    }
+}, {passive: false});
+
+document.addEventListener('touchend', (e) => {
+    clearTimeout(touchDragTimer);
+    
+    if(touchDragCard && !touchDragClone && isLongPressed) {
+        touchDragCard.style.transform = '';
+        touchDragCard.style.transition = '';
+    }
+
+    if(touchDragClone) {
+        const touch = e.changedTouches[0];
+        touchDragClone.remove();
+        touchDragClone = null;
+        if(touchDragCard) touchDragCard.style.opacity = '1';
+        
+        const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+        const col = dropTarget ? dropTarget.closest('.col') : null;
+        
+        if(col && draggedCardId) {
+            const dropAttr = col.getAttribute('ondrop');
+            if(dropAttr) {
+                const colId = dropAttr.match(/'([^']+)'/)[1];
+                const cIdx = cards.findIndex(x => x.id === draggedCardId);
+                if(cIdx > -1) { 
+                    const card = cards.splice(cIdx, 1)[0]; 
+                    card.status = colId; 
+                    cards.push(card); 
+                    document.getElementById('sort-by').value = 'manual'; 
+                    renderBoard(); 
+                    syncToFirebase(); 
+                }
+            }
+        }
+        document.querySelectorAll('.col').forEach(c => c.style.borderLeft = '');
+        draggedCardId = null;
+    }
+    touchDragCard = null;
+    isLongPressed = false;
+});
 
 window.exportToPDF=()=>{ try { const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20); doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28); const visCards = window.getFilteredCards(); const data=visCards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]); doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } }); doc.save("Content_Plan.pdf"); } catch(err) { showMsg("Gagal membuat PDF."); } };
 
@@ -1624,9 +1868,11 @@ window.setMusicPlayer = () => {
     }
     let embedUrl = val;
     
+    // Auto-Konversi Link Spotify ke format Embed
     if (val.includes('spotify.com')) {
         try { const urlObj = new URL(val); embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`; } catch(e){}
     } 
+    // Auto-Konversi Link Apple Music ke format Embed
     else if (val.includes('music.apple.com')) {
         embedUrl = val.replace('music.apple.com', 'embed.music.apple.com');
     }
@@ -1640,6 +1886,7 @@ window.setMusicPlayer = () => {
     localStorage.setItem('cb_music_link', val); 
 };
 
+// Auto-load lagu saat website baru dibuka
 setTimeout(() => {
     const savedMusic = localStorage.getItem('cb_music_link');
     if(savedMusic) {
@@ -1656,4 +1903,3 @@ document.addEventListener('click', () => {
 </script>
 </body>
 </html>
-```eof
