@@ -62,10 +62,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .app{display:flex;flex-direction:column;height:100vh;overflow:hidden; background-size: cover; background-position: center; background-attachment: scroll; transition: background 0.4s ease; position: relative;}
 
 /* REPOSITION OVERLAY */
-#repo-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; cursor: ns-resize; user-select: none; backdrop-filter: blur(2px); }
+#repo-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; cursor: ns-resize; user-select: none; }
 #repo-overlay p { background: rgba(0,0,0,0.8); padding: 12px 24px; border-radius: 30px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 14px;}
 
-/* TOPBAR MINIMALIS */
+/* TOPBAR MINIMALIS (Blur dipertahankan hanya di sini sesuai audit) */
 .topbar {
     display: flex;
     align-items: center;
@@ -86,8 +86,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; flex-shrink: 0; cursor: pointer; user-select: none; overflow:hidden; }
 .brand-icon:hover { transform: scale(1.05); opacity: 0.9; }
 
-/* CUSTOM DROPDOWNS */
-.custom-dropdown { position: absolute; background: var(--modal-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 12px; padding: 6px; z-index: 5000; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+/* CUSTOM DROPDOWNS (Dihapus blur) */
+.custom-dropdown { position: absolute; background: var(--modal-bg); border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 12px; padding: 6px; z-index: 5000; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
 .custom-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
 
 .proj-selector-btn { font-weight: 700; font-size: 16px; color: var(--text-main); background: transparent; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; outline: none; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
@@ -121,8 +121,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .filter-row { display: flex; flex-direction: column; gap: 4px; }
 .filter-lbl { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* BRAND TABS */
-.brand-tabs{display:flex; background:var(--glass-bg); backdrop-filter:blur(12px); border-bottom:1px solid var(--glass-border); overflow-x:auto;flex-shrink:0;padding:0 16px; z-index: 99; transition: all 0.3s;}
+/* BRAND TABS (Dihapus blur) */
+.brand-tabs{display:flex; background:var(--glass-bg); border-bottom:1px solid var(--glass-border); overflow-x:auto;flex-shrink:0;padding:0 16px; z-index: 99; transition: all 0.3s;}
 .brand-tabs::-webkit-scrollbar{height:4px;}
 .brand-tabs::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px;}
 .btab{display:flex;align-items:center;gap:6px;padding:14px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-light);font-size:13px;white-space:nowrap;user-select:none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);}
@@ -137,21 +137,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .board{display:flex;gap:16px;padding:16px 20px 24px 20px;align-items:stretch;height:100%}
 
 .col{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;height:100%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
-.col-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); box-shadow:0 2px 8px rgba(0,0,0,0.04); transition: background 0.3s;}
+/* col-head (Dihapus blur) */
+.col-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px; background:var(--glass-bg); border:1px solid var(--glass-border); box-shadow:0 2px 8px rgba(0,0,0,0.04); transition: background 0.3s;}
 .col-lbl{font-size:13px;font-weight:700;flex:1;color:var(--text-main);}
 .col-cnt{font-size:11px;color:var(--text-muted);background:var(--input-bg); padding:2px 8px;border-radius:10px; font-weight: 600; border: 1px solid var(--input-border);}
 
-/* SOLUSI ANTI LAG MURNI CSS: Blur hanya diset 2px agar CPU/GPU laptop tidak ngos-ngosan */
-.col-body{overflow-y:auto;display:flex;flex-direction:column;gap:10px;flex:1; padding:10px 10px 80px 10px; background:var(--col-body-bg); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); border:1px solid var(--glass-border); border-radius:16px; box-shadow:inset 0 4px 15px rgba(0,0,0,0.02); transition: background 0.3s;} 
+/* col-body (Dihapus blur) */
+.col-body{overflow-y:auto;display:flex;flex-direction:column;gap:10px;flex:1; padding:10px 10px 80px 10px; background:var(--col-body-bg); border:1px solid var(--glass-border); border-radius:16px; box-shadow:inset 0 4px 15px rgba(0,0,0,0.02); transition: background 0.3s;} 
 .col-body::-webkit-scrollbar{width:4px;}
 .col-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:4px;}
 
-.add-col-btn{padding:12px;border-radius:12px;color:var(--text-muted);font-size:13px;border:2px dashed var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(12px);cursor:pointer;text-align:center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600; width: 100%;}
+/* add-col-btn (Dihapus blur) */
+.add-col-btn{padding:12px;border-radius:12px;color:var(--text-muted);font-size:13px;border:2px dashed var(--glass-border);background:var(--glass-bg);cursor:pointer;text-align:center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 600; width: 100%;}
 .add-col-btn:hover{background:var(--card-bg); color:var(--text-main); border-color:var(--primary); transform: translateY(-2px);}
 
-/* COLLAPSED COLUMN */
+/* COLLAPSED COLUMN (Dihapus blur) */
 .col.collapsed { width: 50px; align-items: center; background: transparent; height: max-content; align-self: flex-start; }
-.collapsed-head { display:flex; flex-direction: column; height: auto; min-height: 140px; width: 100%; cursor: pointer; justify-content: flex-start; align-items:center; padding: 14px 0; background: var(--glass-bg); backdrop-filter:blur(12px); border: 1px solid var(--glass-border) !important; border-left: 5px solid var(--col-color) !important; border-radius: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
+.collapsed-head { display:flex; flex-direction: column; height: auto; min-height: 140px; width: 100%; cursor: pointer; justify-content: flex-start; align-items:center; padding: 14px 0; background: var(--glass-bg); border: 1px solid var(--glass-border) !important; border-left: 5px solid var(--col-color) !important; border-radius: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
 .collapsed-head:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.1);}
 .col-toggle { background: none; border: none; cursor: pointer; color: var(--text-light); font-size: 11px; padding: 4px; display:flex; align-items:center; justify-content:center; transition: color 0.2s; outline:none;}
 .col-toggle:hover { color: var(--primary); }
@@ -233,17 +235,18 @@ img.pic-avatar-mini { object-fit: cover; }
 }
 .fab:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
 
-/* MODAL & PANEL */
-.overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;align-items:center;justify-content:center;padding:20px; backdrop-filter:blur(5px); opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+/* MODAL & PANEL (Dihapus blur) */
+.overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;align-items:center;justify-content:center;padding:20px; opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
 .overlay.show{opacity: 1; visibility: visible;}
 .modal{background:var(--modal-bg);border-radius:20px;width:100%;max-width:400px;overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.3); transform: scale(0.95) translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
 .overlay.show .modal { transform: scale(1) translateY(0); }
 
-/* OVERLAY KHUSUS UNTUK DETAIL PANEL */
-#dp-ov { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1999; backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+/* OVERLAY KHUSUS UNTUK DETAIL PANEL (Dihapus blur) */
+#dp-ov { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1999; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 #dp-ov.show { opacity: 1; visibility: visible; }
 
-.dp{position:fixed;right:0;top:0;bottom:0;width:90%;max-width:420px; background:var(--card-bg); backdrop-filter:blur(20px); border-left:1px solid var(--glass-border);transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);z-index:2000; box-shadow:-10px 0 40px rgba(0,0,0,0.15);}
+/* Panel DP (Dihapus blur) */
+.dp{position:fixed;right:0;top:0;bottom:0;width:90%;max-width:420px; background:var(--card-bg); border-left:1px solid var(--glass-border);transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);z-index:2000; box-shadow:-10px 0 40px rgba(0,0,0,0.15);}
 .dp.open{transform:translateX(0)}
 .dp-pull-indicator { display: none; width: 40px; height: 5px; background: rgba(136,136,136,0.3); border-radius: 3px; margin: 12px auto -4px; }
 
@@ -405,7 +408,6 @@ img.pic-avatar-mini { object-fit: cover; }
     </div>
 
     <div class="top-actions">
-      <!-- DEBOUNCE SEARCH AGAR TIDAK LAG SAAT MENGETIK -->
       <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="handleSearch()">
       
       <div style="position: relative;">
@@ -867,7 +869,6 @@ window.resetFilters = () => {
 };
 
 // ================= FILTER LOGIC UNTUK PDF & BOARD =================
-// DEBOUNCE SEARCH AGAR AMAN SAAT MENGETIK
 let searchDebounce;
 window.handleSearch = () => {
     clearTimeout(searchDebounce);
@@ -1275,7 +1276,6 @@ function updateAssigneeDropdowns() {
     }
 }
 
-// DEBOUNCE SINKRONISASI KE FIREBASE (AMAN, TIDAK MERUSAK FITUR)
 let syncDebounce;
 window.syncToFirebase = function() { 
     clearTimeout(syncDebounce);
@@ -1512,7 +1512,7 @@ window.dropB = (e, targetIdx) => {
 
 window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); const mBrand = document.getElementById('m-brand'); if(mBrand) mBrand.innerHTML = opts; const dpBrand = document.getElementById('dp-fbrand'); if(dpBrand) dpBrand.innerHTML = opts; };
 
-// ================= RENDER BOARD & KARTU (KEMBALI KE ORIGINAL + BUG FIX TANGGAL) =================
+// ================= RENDER BOARD & KARTU (BUG TANGGAL DIPERBAIKI) =================
 window.renderBoard = () => { 
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; 
     const sortBy = document.getElementById('sort-by').value; 
@@ -1532,7 +1532,6 @@ window.renderBoard = () => {
             return a.type.localeCompare(b.type); 
         }); 
         
-        // BUG FIX COLLAPSE: Kembalikan fungsi klik persis seperti semula tanpa tambahan event/parameter yang salah
         if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; 
         
         return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="event.stopPropagation(); toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; 
@@ -1582,7 +1581,6 @@ window.cardH = (c) => {
 
 window.setB = (id) => { aB=id; renderAll(); };
 
-// KEMBALI KE FUNGSI TOGGLE ORIGINAL
 window.toggleCol = (id) => { 
     const col = columns.find(c=>c.id===id); 
     if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } 
@@ -1649,13 +1647,12 @@ window.selCard = (id) => {
 
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
 
-// KEMBALI KE FUNGSI ORIGINAL DPS
 window.dps = (f,v) => { 
     const c=cards.find(x=>x.id===selId); 
     if(c){
         c[f]=v; 
         syncToFirebase(); 
-        renderBoard(); // Murni render ulang board agar tidak ada bug ketik
+        renderBoard();
         if(f==='assignee' || f==='creator') {
             selCard(selId);
         }
@@ -1754,7 +1751,7 @@ window.dropCol = (e, targetId) => {
     renderBoard(); 
 };
 
-// KEMBALI KE DRAG DROP MOBILE ORIGINAL
+// DRAG DROP MOBILE ORIGINAL
 let touchDragCard = null, touchDragClone = null, touchStartX = 0, touchStartY = 0;
 
 document.addEventListener('touchstart', (e) => {
