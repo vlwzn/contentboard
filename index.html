@@ -1751,8 +1751,10 @@ window.dropCol = (e, targetId) => {
     renderBoard(); 
 };
 
-// DRAG DROP MOBILE ORIGINAL
+// DRAG DROP MOBILE (Hold 0.4 Detik)
 let touchDragCard = null, touchDragClone = null, touchStartX = 0, touchStartY = 0;
+let touchDragTimer = null;
+let isLongPressed = false;
 
 document.addEventListener('touchstart', (e) => {
     const card = e.target.closest('.card');
@@ -1762,7 +1764,17 @@ document.addEventListener('touchstart', (e) => {
     touchDragCard = card;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
-}, {passive: false});
+    isLongPressed = false;
+
+    touchDragTimer = setTimeout(() => {
+        isLongPressed = true;
+        if(touchDragCard) {
+            touchDragCard.style.transform = 'scale(1.03)';
+            touchDragCard.style.transition = 'transform 0.2s';
+            if(navigator.vibrate) navigator.vibrate(50);
+        }
+    }, 400); 
+}, {passive: true});
 
 document.addEventListener('touchmove', (e) => {
     if(!touchDragCard) return;
@@ -1770,9 +1782,22 @@ document.addEventListener('touchmove', (e) => {
     const dx = touch.clientX - touchStartX;
     const dy = touch.clientY - touchStartY;
     
-    if(!touchDragClone && (Math.abs(dx) > 15 || Math.abs(dy) > 15)) {
+    if(!isLongPressed) {
+        if(Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            clearTimeout(touchDragTimer);
+            touchDragCard = null;
+        }
+        return;
+    }
+
+    e.preventDefault(); 
+
+    if(!touchDragClone) {
         const dragAttr = touchDragCard.getAttribute('ondragstart');
         if(dragAttr) draggedCardId = dragAttr.match(/'([^']+)'/)[1];
+        
+        touchDragCard.style.transform = '';
+        touchDragCard.style.transition = '';
         
         touchDragClone = touchDragCard.cloneNode(true);
         touchDragClone.style.position = 'fixed';
@@ -1780,12 +1805,12 @@ document.addEventListener('touchmove', (e) => {
         touchDragClone.style.opacity = '0.9';
         touchDragClone.style.pointerEvents = 'none'; 
         touchDragClone.style.width = touchDragCard.offsetWidth + 'px';
+        touchDragClone.style.boxShadow = '0 15px 30px rgba(0,0,0,0.2)';
         document.body.appendChild(touchDragClone);
         touchDragCard.style.opacity = '0.3';
     }
 
     if(touchDragClone) {
-        e.preventDefault(); 
         touchDragClone.style.left = (touch.clientX - touchDragClone.offsetWidth/2) + 'px';
         touchDragClone.style.top = (touch.clientY - touchDragClone.offsetHeight/2) + 'px';
         
@@ -1799,6 +1824,13 @@ document.addEventListener('touchmove', (e) => {
 }, {passive: false});
 
 document.addEventListener('touchend', (e) => {
+    clearTimeout(touchDragTimer);
+    
+    if(touchDragCard && !touchDragClone && isLongPressed) {
+        touchDragCard.style.transform = '';
+        touchDragCard.style.transition = '';
+    }
+
     if(touchDragClone) {
         const touch = e.changedTouches[0];
         touchDragClone.remove();
@@ -1827,6 +1859,7 @@ document.addEventListener('touchend', (e) => {
         draggedCardId = null;
     }
     touchDragCard = null;
+    isLongPressed = false;
 });
 
 window.exportToPDF=()=>{ try { const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20); doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28); const visCards = window.getFilteredCards(); const data=visCards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]); doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } }); doc.save("Content_Plan.pdf"); } catch(err) { showMsg("Gagal membuat PDF."); } };
