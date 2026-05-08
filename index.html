@@ -86,8 +86,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .brand-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; flex-shrink: 0; cursor: pointer; user-select: none; overflow:hidden; }
 .brand-icon:hover { transform: scale(1.05); opacity: 0.9; }
 
-/* CUSTOM DROPDOWNS (Optimasi Anti-Lag GPU) */
-.custom-dropdown { position: absolute; background: var(--modal-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 12px; padding: 6px; z-index: 5000; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.2s; will-change: transform, opacity; }
+/* CUSTOM DROPDOWNS */
+.custom-dropdown { position: absolute; background: var(--modal-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 12px; padding: 6px; z-index: 5000; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
 .custom-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
 
 .proj-selector-btn { font-weight: 700; font-size: 16px; color: var(--text-main); background: transparent; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; outline: none; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
@@ -110,11 +110,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .search-input { width: 200px; padding-left: 32px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'); background-repeat: no-repeat; background-position: 10px center; cursor: text; }
 .search-input:focus { width: 260px; background-color: var(--modal-bg); border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
 
-/* FILTER & MUSIC PANEL MELAYANG (Optimasi Anti-Lag GPU) */
-#filter-panel, #music-panel { position: absolute; top: 60px; right: 16px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s; will-change: transform, opacity; display: flex; flex-direction: column; gap: 12px; }
-#filter-panel { width: 260px; }
-#music-panel { width: 300px; right: 0; }
-#filter-panel.show, #music-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+/* FILTER PANEL MELAYANG */
+#filter-panel { position: absolute; top: 60px; right: 16px; width: 260px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
+#filter-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+
+/* MUSIC PANEL MELAYANG */
+#music-panel { position: absolute; top: 60px; right: 0; width: 300px; background: var(--modal-bg); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); padding: 16px; z-index: 4000; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.98); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; }
+#music-panel.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+
 .filter-row { display: flex; flex-direction: column; gap: 4px; }
 .filter-lbl { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -130,14 +133,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .add-btab:hover{color:var(--primary);}
 
 /* BOARD */
-.board-wrap{flex:1;overflow-x:auto;overflow-y:hidden;display:flex; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;}
+.board-wrap{flex:1;overflow-x:auto;overflow-y:hidden;display:flex; scroll-behavior: smooth;}
 .board{display:flex;gap:16px;padding:16px 20px 24px 20px;align-items:stretch;height:100%}
 
-.col{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;height:100%; contain: layout style; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+.col{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;height:100%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
 .col-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); box-shadow:0 2px 8px rgba(0,0,0,0.04); transition: background 0.3s;}
 .col-lbl{font-size:13px;font-weight:700;flex:1;color:var(--text-main);}
 .col-cnt{font-size:11px;color:var(--text-muted);background:var(--input-bg); padding:2px 8px;border-radius:10px; font-weight: 600; border: 1px solid var(--input-border);}
-.col-body{overflow-y:auto;display:flex;flex-direction:column;gap:10px;flex:1; padding:10px 10px 80px 10px; background:var(--col-body-bg); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); border:1px solid var(--glass-border); border-radius:16px; box-shadow:inset 0 4px 15px rgba(0,0,0,0.02); contain: content; transition: background 0.3s;} 
+
+/* SOLUSI ANTI LAG MURNI CSS: Blur hanya diset 2px agar CPU/GPU laptop tidak ngos-ngosan */
+.col-body{overflow-y:auto;display:flex;flex-direction:column;gap:10px;flex:1; padding:10px 10px 80px 10px; background:var(--col-body-bg); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); border:1px solid var(--glass-border); border-radius:16px; box-shadow:inset 0 4px 15px rgba(0,0,0,0.02); transition: background 0.3s;} 
 .col-body::-webkit-scrollbar{width:4px;}
 .col-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:4px;}
 
@@ -168,7 +173,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .c-prog-fill{background:var(--primary);height:100%;transition:width 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
 .c-prog-text{font-size:10px;color:var(--text-light);text-align:right; margin-top:-6px; margin-bottom:10px; font-weight: 500;}
 
-.card-foot{display:flex;align-items:center;gap:6px;padding:12px 0 0 0;border-top:1px solid var(--input-border); justify-content:space-between;}
+.card-foot{display:flex;align-items:center;gap:6px;padding-top:12px;border-top:1px solid var(--input-border); justify-content:space-between;}
 .cfoot-name{font-size:11px;color:var(--text-muted);flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight: 500;}
 
 /* AVATAR PIC */
@@ -228,18 +233,17 @@ img.pic-avatar-mini { object-fit: cover; }
 }
 .fab:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
 
-/* MODAL & OVERLAY (Optimasi Anti-Lag GPU) */
-.overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;align-items:center;justify-content:center;padding:20px; backdrop-filter:blur(5px); opacity: 0; visibility: hidden; transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s; will-change: opacity;}
+/* MODAL & PANEL */
+.overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;align-items:center;justify-content:center;padding:20px; backdrop-filter:blur(5px); opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
 .overlay.show{opacity: 1; visibility: visible;}
-.modal{background:var(--modal-bg);border-radius:20px;width:100%;max-width:400px;overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.3); transform: scale(0.95) translateY(20px); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform;}
+.modal{background:var(--modal-bg);border-radius:20px;width:100%;max-width:400px;overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.3); transform: scale(0.95) translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
 .overlay.show .modal { transform: scale(1) translateY(0); }
 
-/* OVERLAY KHUSUS UNTUK DETAIL PANEL (Optimasi Anti-Lag GPU) */
-#dp-ov { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1999; backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s; will-change: opacity; }
+/* OVERLAY KHUSUS UNTUK DETAIL PANEL */
+#dp-ov { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1999; backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 #dp-ov.show { opacity: 1; visibility: visible; }
 
-/* OPTIMASI: backdrop-filter blur dikurangi jadi 4px, ditambah will-change: transform untuk animasi sliding super mulus */
-.dp{position:fixed;right:0;top:0;bottom:0;width:90%;max-width:420px; background:var(--card-bg); backdrop-filter:blur(4px); border-left:1px solid var(--glass-border);transform:translateX(100%); transition:transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; z-index:2000; box-shadow:-10px 0 40px rgba(0,0,0,0.15);}
+.dp{position:fixed;right:0;top:0;bottom:0;width:90%;max-width:420px; background:var(--card-bg); backdrop-filter:blur(20px); border-left:1px solid var(--glass-border);transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);z-index:2000; box-shadow:-10px 0 40px rgba(0,0,0,0.15);}
 .dp.open{transform:translateX(0)}
 .dp-pull-indicator { display: none; width: 40px; height: 5px; background: rgba(136,136,136,0.3); border-radius: 3px; margin: 12px auto -4px; }
 
@@ -401,6 +405,7 @@ img.pic-avatar-mini { object-fit: cover; }
     </div>
 
     <div class="top-actions">
+      <!-- DEBOUNCE SEARCH AGAR TIDAK LAG SAAT MENGETIK -->
       <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="handleSearch()">
       
       <div style="position: relative;">
@@ -516,7 +521,7 @@ img.pic-avatar-mini { object-fit: cover; }
         </div>
     </div>
 
-    <div class="dp-field"><span class="dp-fl">Judul</span><div class="dp-fv"><input type="text" id="dp-ftitle" onfocus="window.disableRender=true" onblur="window.disableRender=false; dps('title',this.value)"/></div></div>
+    <div class="dp-field"><span class="dp-fl">Judul</span><div class="dp-fv"><input type="text" id="dp-ftitle" onblur="dps('title',this.value)"/></div></div>
     
     <div class="dp-field"><span class="dp-fl">Prioritas</span>
       <div class="dp-fv">
@@ -547,14 +552,14 @@ img.pic-avatar-mini { object-fit: cover; }
     
     <div id="dp-steps-list" style="margin-top:12px;"></div>
     <div style="display:flex; gap:8px; margin-top:12px;">
-        <input type="text" id="new-step-input" class="fi" style="margin-bottom:0; padding:10px 14px;" placeholder="Ketik tugas baru..." onfocus="window.disableRender=true" onblur="window.disableRender=false" onkeypress="if(event.key==='Enter') addStep()">
+        <input type="text" id="new-step-input" class="fi" style="margin-bottom:0; padding:10px 14px;" placeholder="Ketik tugas baru..." onkeypress="if(event.key==='Enter') addStep()">
         <button class="btn-s" style="padding:10px 18px; font-size:18px; line-height:1; border-radius:10px;" onclick="addStep()">+</button>
     </div>
 
     <div style="margin-top:28px; font-size:11px; color:var(--text-light); font-weight:800; letter-spacing:1px; border-bottom: 1px solid var(--input-border); padding-bottom:6px;">CATATAN & SCRIPT</div>
     
     <div id="dp-notes-display" style="width:100%; min-height:100px; margin-top:12px; border:1px solid transparent; border-radius:12px; padding:14px; font-size:14px; background:var(--input-bg); white-space:pre-wrap; word-break:break-word; cursor:text; transition:all 0.2s; line-height:1.6;" onclick="editNotes()" title="Klik untuk mengedit naskah/catatan"></div>
-    <textarea id="dp-notes" style="display:none; width:100%; height:150px; margin-top:12px; border:1px solid var(--primary); border-radius:12px; padding:14px; outline:none; font-family:inherit; font-size:14px; resize:vertical; background:var(--modal-bg); color:var(--text-main); line-height:1.6; box-shadow: 0 0 0 3px var(--primary-light);" onfocus="window.disableRender=true" onblur="window.disableRender=false; saveNotes(this.value)" placeholder="Ketik narasi, catatan kreatif, atau paste link di sini..."></textarea>
+    <textarea id="dp-notes" style="display:none; width:100%; height:150px; margin-top:12px; border:1px solid var(--primary); border-radius:12px; padding:14px; outline:none; font-family:inherit; font-size:14px; resize:vertical; background:var(--modal-bg); color:var(--text-main); line-height:1.6; box-shadow: 0 0 0 3px var(--primary-light);" onblur="saveNotes(this.value)" placeholder="Ketik narasi, catatan kreatif, atau paste link di sini..."></textarea>
     
     <div style="margin-top:28px; font-size:11px; color:var(--text-light); font-weight:800; letter-spacing:1px; border-bottom: 1px solid var(--input-border); padding-bottom:6px;">LAMPIRAN VISUAL</div>
     <div id="dp-attachments" class="att-list"></div>
@@ -654,7 +659,7 @@ img.pic-avatar-mini { object-fit: cover; }
   </div>
 </div>
 
-<!-- MODAL KELOLA PJ IDE (CREATOR) BARU -->
+<!-- MODAL KELOLA PJ IDE (CREATOR) -->
 <div class="overlay" id="creator-list-ov" onclick="if(event.target===this) closeCreatorList()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border); color:var(--text-main);">Kelola PJ Ide (Pencetus)</div>
@@ -805,33 +810,11 @@ let unsubscribeWs = null;
 let unsubscribeSharedWs = null;
 let unsubscribeBoard = null;
 
-// TAMBAHAN STATE: CREATORS (PJ IDE EKSKLUSIF)
+// STATE CREATORS (PJ IDE EKSKLUSIF)
 let brands=[], cards=[], columns=[], creators=[], themeSettings = { color: '#534AB7', bg: '', bgPos: '50% 50%' };
 let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
 let tempImgObj = new Image(); let imgRotation = 0; 
 let isRepoMode = false, startY, startPos;
-
-// FIX 1: PENGUNCI LAG KETIKA MENGETIK
-window.disableRender = false;
-
-let renderBoardRAF = null;
-window.executeRenderBoard = () => {
-    if(renderBoardRAF) return; 
-    renderBoardRAF = requestAnimationFrame(() => {
-        _renderBoardCore();
-        renderBoardRAF = null;
-    });
-};
-
-window.renderBoard = () => {
-    window.executeRenderBoard();
-};
-
-let searchDebounce;
-window.handleSearch = () => {
-    clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(renderBoard, 300);
-};
 
 // HELPER: UTILS & UI
 window.allowDrop = (e) => { e.preventDefault(); e.stopPropagation(); };
@@ -884,6 +867,13 @@ window.resetFilters = () => {
 };
 
 // ================= FILTER LOGIC UNTUK PDF & BOARD =================
+// DEBOUNCE SEARCH AGAR AMAN SAAT MENGETIK
+let searchDebounce;
+window.handleSearch = () => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(renderBoard, 300);
+};
+
 window.getFilteredCards = () => {
     const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, fAss = document.getElementById('filter-assignee') ? document.getElementById('filter-assignee').value : 'all', fCre = document.getElementById('filter-creator') ? document.getElementById('filter-creator').value : 'all', sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
     return cards.filter(c => { 
@@ -1117,7 +1107,6 @@ window.switchWorkspace = (wsId, ownerFlag) => {
     aB = 'all';
     document.getElementById('btn-edit-ws').style.display = isOwner ? 'flex' : 'none';
     
-    // Perbarui status Owner di database jika memang Owner
     if (isOwner && myUser) {
         update(ref(db, `board_members/${wsId}/${myUser.id}`), { role: 'owner' }).catch(()=>{});
     }
@@ -1145,11 +1134,10 @@ window.switchWorkspace = (wsId, ownerFlag) => {
     
     const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
     unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
-        if(window.disableRender) return; // PENGUNCI LAG: Jangan timpa DOM kalau user sedang mengetik
         const data = snapshot.val() || {};
         brands = data.brands || []; cards = data.cards || [];
         columns = (data.columns && data.columns.length > 0) ? data.columns : [{id:'review',lbl:'Review',c:'#534AB7', collapsed: false}];
-        creators = data.creators || []; // MUAT DATA CREATORS TERSENDIRI
+        creators = data.creators || []; 
         
         if(window.loadLocalTheme) window.loadLocalTheme();
         
@@ -1287,14 +1275,14 @@ function updateAssigneeDropdowns() {
     }
 }
 
-// FIX 1: Debounce syncToFirebase
+// DEBOUNCE SINKRONISASI KE FIREBASE (AMAN, TIDAK MERUSAK FITUR)
 let syncDebounce;
 window.syncToFirebase = function() { 
     clearTimeout(syncDebounce);
     syncDebounce = setTimeout(() => {
         if(!activeWsId) return; 
         const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`; 
-        update(ref(db, dbPath), { brands, cards, columns, creators }); // CREATORS IKUT DISIMPAN
+        update(ref(db, dbPath), { brands, cards, columns, creators }); 
     }, 500);
 }
 
@@ -1319,7 +1307,6 @@ function applyTheme() {
     }
 }
 
-// ================= FUNGSI THEME, REPO, DAN GAMBAR =================
 window.saveLocalTheme = () => { localStorage.setItem('cb_theme_' + activeWsId, JSON.stringify(themeSettings)); };
 window.loadLocalTheme = () => { const saved = localStorage.getItem('cb_theme_' + activeWsId); themeSettings = saved ? JSON.parse(saved) : { color: '#534AB7', bg: '', bgPos: '50% 50%' }; applyTheme(); };
 
@@ -1328,7 +1315,7 @@ window.closeThemeModal = () => document.getElementById('theme-ov').classList.rem
 window.setThemeColor = (c, el) => { themeSettings.color = c; document.querySelectorAll('.theme-option').forEach(x=>x.classList.remove('active')); if(el) el.classList.add('active'); applyTheme(); window.saveLocalTheme(); };
 window.removeBg = () => { themeSettings.bg = ''; applyTheme(); window.saveLocalTheme(); document.getElementById('file-bg-input').value = ''; };
 
-// --- FIX 5: REPOSITION WALLPAPER (Sangat Responsif & Cepat) ---
+// --- REPOSITION WALLPAPER ---
 window.startReposition = () => {
     if(!themeSettings.bg) return;
     isRepoMode = true;
@@ -1375,7 +1362,7 @@ window.addEventListener('touchmove', e => {
 }, {passive: true});
 window.addEventListener('touchend', () => { startY = undefined; });
 
-// --- EDITOR GAMBAR LOKAL (GIF SUPPORT & AUTO-CROP) ---
+// --- EDITOR GAMBAR LOKAL ---
 window.handleBgUpload = (input) => {
     if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -1511,8 +1498,6 @@ window.showCtxMenu = (e, type, id) => {
 window.cols = (t) => columns; 
 window.renderAll = () => { renderTabs(); renderBoard(); };
 
-// FIX 4: BRAND DRAG & DROP
-let draggedBrandIdx = null; 
 window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); };
 window.dropB = (e, targetIdx) => { 
     e.preventDefault(); e.stopPropagation(); 
@@ -1527,8 +1512,8 @@ window.dropB = (e, targetIdx) => {
 
 window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); const mBrand = document.getElementById('m-brand'); if(mBrand) mBrand.innerHTML = opts; const dpBrand = document.getElementById('dp-fbrand'); if(dpBrand) dpBrand.innerHTML = opts; };
 
-// FIX 1: FUNGSI RENDER BOARD (Dengan DOM Update untuk Anti-Lag)
-window._renderBoardCore = () => {
+// ================= RENDER BOARD & KARTU (KEMBALI KE ORIGINAL + BUG FIX TANGGAL) =================
+window.renderBoard = () => { 
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; 
     const sortBy = document.getElementById('sort-by').value; 
     const vis = window.getFilteredCards(); 
@@ -1547,10 +1532,10 @@ window._renderBoardCore = () => {
             return a.type.localeCompare(b.type); 
         }); 
         
-        // FIX 3: Event onClick ToggleCol
-        if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle" onclick="toggleCol(event, '${col.id}')">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; 
+        // BUG FIX COLLAPSE: Kembalikan fungsi klik persis seperti semula tanpa tambahan event/parameter yang salah
+        if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; 
         
-        return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="toggleCol(event, '${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; 
+        return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="event.stopPropagation(); toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; 
     }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`; 
 };
 
@@ -1580,7 +1565,6 @@ window.cardH = (c) => {
     const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; 
     const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; 
     
-    // Tampilan PIC di Kartu Luar
     let picHtml = ''; 
     if (c.assignee && wsMembers[c.assignee]) { 
         const picUser = wsMembers[c.assignee]; 
@@ -1594,6 +1578,14 @@ window.cardH = (c) => {
     } 
     
     return `<div class="card" data-id="${c.id}" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot" style="justify-content:space-between;"><div style="display:flex; align-items:center; gap:6px; overflow:hidden;">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;flex-shrink:0;"></span>`:''}<span class="cfoot-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.n || 'Umum'}</span></div>${picHtml}</div></div>`; 
+};
+
+window.setB = (id) => { aB=id; renderAll(); };
+
+// KEMBALI KE FUNGSI TOGGLE ORIGINAL
+window.toggleCol = (id) => { 
+    const col = columns.find(c=>c.id===id); 
+    if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } 
 };
 
 window.openAdd = (s) => { document.getElementById('add-ov').classList.add('show'); selType('Video'); renderMStatus('Video', s || columns[0].id); document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; document.getElementById('m-title').value = ''; document.getElementById('m-objective').value = 'Konten'; };
@@ -1657,25 +1649,15 @@ window.selCard = (id) => {
 
 window.closeDP = () => { selId=null; document.getElementById('dp').classList.remove('open'); document.getElementById('dp-ov').classList.remove('show'); };
 
-// FIX 1: dps (Database Property Setter) update DOM spesifik
+// KEMBALI KE FUNGSI ORIGINAL DPS
 window.dps = (f,v) => { 
     const c=cards.find(x=>x.id===selId); 
     if(c){
         c[f]=v; 
         syncToFirebase(); 
+        renderBoard(); // Murni render ulang board agar tidak ada bug ketik
         if(f==='assignee' || f==='creator') {
             selCard(selId);
-            renderBoard();
-        } else if (f === 'status' || f === 'urgency' || f === 'objective' || f === 'bId') {
-            renderBoard();
-        } else {
-            if (f === 'title') {
-                const cardEl = document.querySelector(`.card[data-id="${selId}"]`);
-                if (cardEl) {
-                    const titleEl = cardEl.querySelector('.card-title');
-                    if (titleEl) titleEl.textContent = v;
-                }
-            }
         }
     } 
 };
@@ -1687,7 +1669,7 @@ window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" targ
 window.editNotes = () => { document.getElementById('dp-notes-display').style.display='none'; const ta=document.getElementById('dp-notes'); ta.style.display='block'; ta.focus(); };
 window.saveNotes = (v) => { dps('notes',v); document.getElementById('dp-notes-display').innerHTML=v?linkify(v):'Klik tambah catatan...'; document.getElementById('dp-notes-display').style.display='block'; document.getElementById('dp-notes').style.display='none'; };
 
-window.renderSteps = (c) => { document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`<div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})"><span class="drag-handle">⠿</span><input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})"><input class="step-input" type="text" value="${s.text.replace(/"/g, '"')}" onfocus="window.disableRender=true" onblur="window.disableRender=false; updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:var(--text-light);':''}"><button class="step-del" onclick="delStep(${i})">×</button></div>`).join(''); };
+window.renderSteps = (c) => { document.getElementById('dp-steps-list').innerHTML = (c.steps||[]).map((s,i)=>`<div class="step-item" draggable="true" ondragstart="dragStep(event, ${i})" ondragend="dragEndStep(event)" ondragover="allowDrop(event); dragOverStep(event);" ondragleave="dragLeaveStep(event)" ondrop="dropStep(event, ${i})"><span class="drag-handle">⠿</span><input type="checkbox" ${s.done?'checked':''} onchange="toggleStep(${i})"><input class="step-input" type="text" value="${s.text.replace(/"/g, '&quot;')}" onblur="updateStepText(${i}, this.value)" style="${s.done?'text-decoration:line-through;color:var(--text-light);':''}"><button class="step-del" onclick="delStep(${i})">×</button></div>`).join(''); };
 window.updateStepText = (i, v) => { const c = cards.find(x => x.id === selId); if(c && v.trim()){ c.steps[i].text = v.trim(); syncToFirebase(); } else if(c) renderSteps(c); };
 window.toggleStep = (i) => { const c=cards.find(x=>x.id===selId); c.steps[i].done=!c.steps[i].done; syncToFirebase(); renderSteps(c); renderBoard(); };
 window.addStep = () => { const i=document.getElementById('new-step-input'); if(!i.value.trim())return; const c=cards.find(x=>x.id===selId); if(!c.steps)c.steps=[]; c.steps.push({text:i.value.trim(),done:false}); i.value=''; syncToFirebase(); renderSteps(c); renderBoard(); };
@@ -1734,8 +1716,6 @@ window.dropOnCard = (e, targetId) => {
     cards.splice(newIdx, 0, card); 
     document.getElementById('sort-by').value = 'manual'; 
     draggedCardId = null; 
-    
-    // TARGETED DOM MOVE (Meringankan lag akibat full render)
     renderBoard();
     syncToFirebase(); 
 };
@@ -1774,10 +1754,8 @@ window.dropCol = (e, targetId) => {
     renderBoard(); 
 };
 
-// FIX 3: MOBILE DRAG AND DROP (Dengan Sistem Tahan/Hold 0.4 Detik)
+// KEMBALI KE DRAG DROP MOBILE ORIGINAL
 let touchDragCard = null, touchDragClone = null, touchStartX = 0, touchStartY = 0;
-let touchDragTimer = null;
-let isLongPressed = false;
 
 document.addEventListener('touchstart', (e) => {
     const card = e.target.closest('.card');
@@ -1787,18 +1765,7 @@ document.addEventListener('touchstart', (e) => {
     touchDragCard = card;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
-    isLongPressed = false;
-
-    // Timer 0.4 detik (400ms) untuk mendeteksi user menahan kartu
-    touchDragTimer = setTimeout(() => {
-        isLongPressed = true;
-        if(touchDragCard) {
-            touchDragCard.style.transform = 'scale(1.03)';
-            touchDragCard.style.transition = 'transform 0.2s';
-            if(navigator.vibrate) navigator.vibrate(50); // Getaran halus di HP
-        }
-    }, 400); 
-}, {passive: true});
+}, {passive: false});
 
 document.addEventListener('touchmove', (e) => {
     if(!touchDragCard) return;
@@ -1806,36 +1773,22 @@ document.addEventListener('touchmove', (e) => {
     const dx = touch.clientX - touchStartX;
     const dy = touch.clientY - touchStartY;
     
-    // Jika user menggeser layar sebelum 0.4 detik, batalkan drag (berarti dia cuma mau scroll)
-    if(!isLongPressed) {
-        if(Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-            clearTimeout(touchDragTimer);
-            touchDragCard = null;
-        }
-        return;
-    }
-
-    e.preventDefault(); // Kunci scroll layar saat menyeret kartu
-
-    if(!touchDragClone) {
+    if(!touchDragClone && (Math.abs(dx) > 15 || Math.abs(dy) > 15)) {
         const dragAttr = touchDragCard.getAttribute('ondragstart');
         if(dragAttr) draggedCardId = dragAttr.match(/'([^']+)'/)[1];
-        
-        touchDragCard.style.transform = '';
-        touchDragCard.style.transition = '';
         
         touchDragClone = touchDragCard.cloneNode(true);
         touchDragClone.style.position = 'fixed';
         touchDragClone.style.zIndex = '9999';
         touchDragClone.style.opacity = '0.9';
-        touchDragClone.style.pointerEvents = 'none'; // Penting agar drop bekerja
+        touchDragClone.style.pointerEvents = 'none'; 
         touchDragClone.style.width = touchDragCard.offsetWidth + 'px';
-        touchDragClone.style.boxShadow = '0 15px 30px rgba(0,0,0,0.2)';
         document.body.appendChild(touchDragClone);
         touchDragCard.style.opacity = '0.3';
     }
 
     if(touchDragClone) {
+        e.preventDefault(); 
         touchDragClone.style.left = (touch.clientX - touchDragClone.offsetWidth/2) + 'px';
         touchDragClone.style.top = (touch.clientY - touchDragClone.offsetHeight/2) + 'px';
         
@@ -1849,13 +1802,6 @@ document.addEventListener('touchmove', (e) => {
 }, {passive: false});
 
 document.addEventListener('touchend', (e) => {
-    clearTimeout(touchDragTimer);
-    
-    if(touchDragCard && !touchDragClone && isLongPressed) {
-        touchDragCard.style.transform = '';
-        touchDragCard.style.transition = '';
-    }
-
     if(touchDragClone) {
         const touch = e.changedTouches[0];
         touchDragClone.remove();
@@ -1884,7 +1830,6 @@ document.addEventListener('touchend', (e) => {
         draggedCardId = null;
     }
     touchDragCard = null;
-    isLongPressed = false;
 });
 
 window.exportToPDF=()=>{ try { const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20); doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28); const visCards = window.getFilteredCards(); const data=visCards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]); doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } }); doc.save("Content_Plan.pdf"); } catch(err) { showMsg("Gagal membuat PDF."); } };
