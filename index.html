@@ -1481,6 +1481,7 @@ window.showCtxMenu = (e, type, id) => {
 window.cols = (t) => columns; 
 window.renderAll = () => { renderTabs(); renderBoard(); };
 
+let draggedBrandIdx = null;
 window.dragB = (e, idx) => { e.stopPropagation(); draggedBrandIdx = idx; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); };
 window.dropB = (e, targetIdx) => { 
     e.preventDefault(); e.stopPropagation(); 
