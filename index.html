@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0"/>
 <title>ContentBoard Pro</title>
 
-<!-- TAG PWA -->
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="pwa-apple-icon">
 <meta name="theme-color" content="#534AB7">
@@ -292,7 +291,7 @@ img.pic-avatar-mini { object-fit: cover; }
   .dp.open { transform: translateY(0); }
   .dp-pull-indicator { display: block; }
   
-  #music-panel, #filter-panel { position: fixed; top: 120px; left: 16px; right: 16px; width: auto; z-index: 6000; }
+  #filter-panel { position: fixed; top: 120px; left: 16px; right: 16px; width: auto; z-index: 6000; }
   .dp-pic-row-container { flex-direction: column; } 
 }
 </style>
@@ -304,7 +303,6 @@ img.pic-avatar-mini { object-fit: cover; }
     <button class="btn-s" style="margin-top: 20px;" onclick="stopReposition()">Simpan Posisi</button>
 </div>
 
-<!-- FORM LOGIN FULL VERSION -->
 <div class="overlay show" id="login-ov" style="z-index: 9999; background: var(--bg-app); opacity: 1; visibility: visible;">
   <div class="modal" style="padding: 30px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
     
@@ -384,8 +382,6 @@ img.pic-avatar-mini { object-fit: cover; }
             <button id="project-btn" class="proj-selector-btn" onclick="toggleMenu('proj-menu', event)">Project Utama ▾</button>
             <button class="share-btn" onclick="generateShareLink()" title="Undang anggota tim ke project ini">🤝 Bagikan</button>
             <button class="share-btn" style="border-color:var(--input-border); background:var(--card-bg); color:var(--text-main);" onclick="openTeamModal()" title="Edit Anggota Tim">👥 Tim</button>
-            
-            <button class="share-btn" style="border-color:var(--input-border); background:var(--card-bg); color:var(--text-main);" onclick="openCreatorList()" title="Edit Nama PJ Ide">💡 PJ Ide</button>
 
             <div id="proj-menu" class="custom-dropdown" style="top: 40px; left: 0; min-width: 260px; max-height: 400px; overflow-y: auto;">
                 <div style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: var(--text-light); letter-spacing: 0.5px;">PROJECT SAYA</div>
@@ -404,6 +400,9 @@ img.pic-avatar-mini { object-fit: cover; }
     </div>
 
     <div class="top-actions">
+      <div id="total-card-display" style="height: 36px; padding: 0 14px; display: inline-flex; align-items: center; border: 1px dashed var(--primary); border-radius: 8px; background: var(--primary-light); color: var(--primary); font-size: 13px; font-weight: 800; user-select: none;">
+          Total: 0
+      </div>
       <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="handleSearch()">
       
       <div style="position: relative;">
@@ -490,7 +489,7 @@ img.pic-avatar-mini { object-fit: cover; }
             <div class="pic-avatar-mini" id="dp-pj-avatar" style="width:32px; height:32px; font-size:14px; margin:0;">?</div>
             <div class="dp-pic-info" style="flex:1; overflow:hidden;">
                 <div class="dp-pic-label" style="font-size:9px; color:var(--text-light);">PJ IDE (CREATOR)</div>
-                <select id="dp-fcreator" style="background:transparent; border:none; font-weight:700; color:var(--text-main); font-size:13px; cursor:pointer; outline:none; width:100%; margin-top:2px; padding:0;" onchange="dps('creator', this.value)">
+                <select id="dp-fcreator" style="background:transparent; border:none; font-weight:700; color:var(--text-main); font-size:13px; cursor:pointer; outline:none; width:100%; margin-top:2px; padding:0;" onchange="if(this.value === 'manage_creator') { openCreatorList(); const c = cards.find(x=>x.id===selId); this.value=c?c.creator||'':''; } else { dps('creator', this.value); }">
                     <option value="">Pilih PJ</option>
                 </select>
             </div>
@@ -555,7 +554,6 @@ img.pic-avatar-mini { object-fit: cover; }
   </div>
 </div>
 
-<!-- MODAL TAMBAH KONTEN -->
 <div class="overlay" id="add-ov" onclick="if(event.target===this) closeAdd()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; font-size:18px; border-bottom:1px solid var(--input-border); color:var(--text-main);">Buat Konten Baru</div>
@@ -567,7 +565,7 @@ img.pic-avatar-mini { object-fit: cover; }
       </div>
       
       <div style="display:flex; gap:8px; margin-bottom:16px;">
-        <select class="fi" id="m-creator" style="margin-bottom:0; flex:1; background:var(--input-bg);" title="PJ Ide (Pencetus)">
+        <select class="fi" id="m-creator" style="margin-bottom:0; flex:1; background:var(--input-bg);" title="PJ Ide (Pencetus)" onchange="if(this.value === 'manage_creator') { openCreatorList(); this.value=''; }">
              <option value="">Pilih PJ Ide</option>
         </select>
         <select class="fi" id="m-assignee" style="margin-bottom:0; flex:1;" title="PIC Eksekusi">
@@ -644,7 +642,6 @@ img.pic-avatar-mini { object-fit: cover; }
   </div>
 </div>
 
-<!-- MODAL KELOLA PJ IDE (CREATOR) -->
 <div class="overlay" id="creator-list-ov" onclick="if(event.target===this) closeCreatorList()">
   <div class="modal">
     <div class="modal-head" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border); color:var(--text-main);">Kelola PJ Ide (Pencetus)</div>
@@ -1195,6 +1192,8 @@ function updateCreatorDropdowns() {
         fOpts += `<option value="${c.id}">${c.name}</option>`;
     });
 
+    opts += `<option disabled>──────────</option><option value="manage_creator">⚙️ Kelola Nama PJ...</option>`;
+
     const mCre = document.getElementById('m-creator'); if(mCre) mCre.innerHTML = opts;
     const dpCre = document.getElementById('dp-fcreator'); if(dpCre) dpCre.innerHTML = opts;
     const fCre = document.getElementById('filter-creator'); if(fCre) { const cur = fCre.value; fCre.innerHTML = fOpts; if(fOpts.includes(cur)) fCre.value = cur; }
@@ -1496,12 +1495,18 @@ window.dropB = (e, targetIdx) => {
 
 window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); const mBrand = document.getElementById('m-brand'); if(mBrand) mBrand.innerHTML = opts; const dpBrand = document.getElementById('dp-fbrand'); if(dpBrand) dpBrand.innerHTML = opts; };
 
-// ================= RENDER BOARD & KARTU (BUG TANGGAL DIPERBAIKI) =================
+// ================= RENDER BOARD & KARTU =================
 window.renderBoard = () => { 
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; 
     const sortBy = document.getElementById('sort-by').value; 
     const vis = window.getFilteredCards(); 
     
+    // UPDATE ANGKA TOTAL KONTEN
+    const totalCapsule = document.getElementById('total-card-display');
+    if (totalCapsule) totalCapsule.innerText = 'Total: ' + vis.length;
+
+    const collapsedState = JSON.parse(localStorage.getItem(`cb_collapsed_cols_${activeWsId}`)) || {};
+
     document.getElementById('board').innerHTML = columns.map((col, idx) => { 
         let cc = vis.filter(c => c.status===col.id); 
         if (sortBy !== 'manual') cc.sort((a, b) => { 
@@ -1516,7 +1521,9 @@ window.renderBoard = () => {
             return a.type.localeCompare(b.type); 
         }); 
         
-        if(col.collapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; 
+        const isCollapsed = collapsedState[col.id] || false;
+        
+        if(isCollapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; 
         
         return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="event.stopPropagation(); toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; 
     }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`; 
@@ -1566,8 +1573,11 @@ window.cardH = (c) => {
 window.setB = (id) => { aB=id; renderAll(); };
 
 window.toggleCol = (id) => { 
-    const col = columns.find(c=>c.id===id); 
-    if(col){ col.collapsed=!col.collapsed; syncToFirebase(); renderBoard(); } 
+    if(!activeWsId) return;
+    let state = JSON.parse(localStorage.getItem(`cb_collapsed_cols_${activeWsId}`)) || {};
+    state[id] = !state[id]; 
+    localStorage.setItem(`cb_collapsed_cols_${activeWsId}`, JSON.stringify(state)); 
+    renderBoard(); 
 };
 
 window.openAdd = (s) => { document.getElementById('add-ov').classList.add('show'); selType('Video'); renderMStatus('Video', s || columns[0].id); document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; document.getElementById('m-title').value = ''; document.getElementById('m-objective').value = 'Konten'; };
