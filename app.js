@@ -29,12 +29,19 @@ let wsMembers = {};
 let unsubscribeWs = null;
 let unsubscribeSharedWs = null;
 let unsubscribeBoard = null;
+let unsubscribeMembers = null;
+let membersLoadVersion = 0;
+let syncAuditReport = null;
+let syncAuditReviews = {};
+let syncAuditWorkspaceId = null;
+const syncAuditActionsInFlight = new Set();
 
 // STATE CREATORS (PJ IDE EKSKLUSIF)
 let brands=[], cards=[], columns=[], creators=[], themeSettings = { color: '#534AB7', bg: '', bgPos: '50% 50%' };
-let aB='all', selId=null, mType='Video', bCol="#534AB7", cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
+let aB='all', selId=null, mType='Video', cCol="#534AB7", editBrandId=null, editColId=null, editWsId=null, cardToMoveId=null;
 let tempImgObj = new Image(); let imgRotation = 0; 
 let isRepoMode = false, startY, startPos;
+const contentTypeLabel = (type) => type === 'Feed' ? 'Desain' : type;
 
 // HELPER: UTILS & UI
 window.allowDrop = (e) => { e.preventDefault(); e.stopPropagation(); };
@@ -96,7 +103,8 @@ window.handleSearch = () => {
 window.getFilteredCards = () => {
     const fMonth = document.getElementById('filter-month').value, fWeek = document.getElementById('filter-week').value, fUrg = document.getElementById('filter-urgency').value, fType = document.getElementById('filter-type').value, fObj = document.getElementById('filter-objective').value, fAss = document.getElementById('filter-assignee') ? document.getElementById('filter-assignee').value : 'all', fCre = document.getElementById('filter-creator') ? document.getElementById('filter-creator').value : 'all', sq = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
     return cards.filter(c => { 
-        let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || c.type===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mAss = (fAss === 'all' || (fAss === 'unassigned' ? (!c.assignee || c.assignee === '') : c.assignee === fAss)), mCre = (fCre === 'all' || (fCre === 'unassigned' ? (!c.creator || c.creator === '') : c.creator === fCre)), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; 
+        if (c.syncAuditArchived) return false;
+        let mB = (aB==='all' || c.bId===aB), mT = (fType==='semua' || contentTypeLabel(c.type)===fType), mM = true, mW = true, mU = (fUrg === 'all' || (c.urgency || 'normal') === fUrg), mObj = (fObj === 'all' || (c.objective || 'Konten') === fObj), mAss = (fAss === 'all' || (fAss === 'unassigned' ? (!c.assignee || c.assignee === '') : c.assignee === fAss)), mCre = (fCre === 'all' || (fCre === 'unassigned' ? (!c.creator || c.creator === '') : c.creator === fCre)), mS = sq ? (c.title.toLowerCase().includes(sq) || (c.notes && c.notes.toLowerCase().includes(sq))) : true; 
         if (c.type === 'Catatan' || c.type === 'To-Do') { mObj = true; } else { if (fMonth && c.date) mM = c.date.startsWith(fMonth); else if (fMonth && !c.date) mM = false; mW = (fWeek === 'all' || c.week === fWeek); } 
         return mB && mT && mM && mW && mU && mObj && mAss && mCre && mS; 
     });
@@ -155,7 +163,7 @@ window.loginGoogle = () => { signInWithPopup(auth, googleProvider).catch(e => sh
 window.loginEmail = () => {
     const email = document.getElementById('log-email').value.trim(), pass = document.getElementById('log-pass').value.trim();
     if(!email || !pass) return showMsg("Isi email dan kata sandi.");
-    const btn = document.querySelector('#form-login .btn-s'); const ori = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+    const btn = document.querySelector('#form-login .btn-s'); const ori = btn.innerText; btn.innerText = "Memuat..."; btn.disabled = true;
     signInWithEmailAndPassword(auth, email, pass).catch(e => { btn.innerText = ori; btn.disabled = false; showMsg("Gagal masuk. Periksa kembali data Anda."); });
 };
 
@@ -163,7 +171,7 @@ window.registerEmail = async () => {
     const name = document.getElementById('reg-name').value.trim(), email = document.getElementById('reg-email').value.trim(), pass = document.getElementById('reg-pass').value.trim();
     if(!name || !email || !pass) return showMsg("Semua kolom wajib diisi.");
     if(pass.length < 6) return showMsg("Sandi minimal 6 karakter.");
-    const btn = document.querySelector('#form-register .btn-s'); const ori = btn.innerText; btn.innerText = "⏳"; btn.disabled = true; window.isRegistering = true;
+    const btn = document.querySelector('#form-register .btn-s'); const ori = btn.innerText; btn.innerText = "Memuat..."; btn.disabled = true; window.isRegistering = true;
     try {
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
         await updateProfile(cred.user, { displayName: name });
@@ -180,7 +188,7 @@ window.registerEmail = async () => {
 window.resetPassword = async () => {
     const email = document.getElementById('res-email').value.trim();
     if(!email) return showMsg("Masukkan email Anda.");
-    const btn = document.querySelector('#form-reset .btn-s'); const ori = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+    const btn = document.querySelector('#form-reset .btn-s'); const ori = btn.innerText; btn.innerText = "Memuat..."; btn.disabled = true;
     try {
         await sendPasswordResetEmail(auth, email);
         showMsg(`Link reset dikirim ke <b>${email}</b>.`, () => toggleAuth('log'));
@@ -236,13 +244,38 @@ function checkAndRenderWs() {
     renderWsSelector();
     const e = document.getElementById('empty-state'), b = document.getElementById('board-wrap'), t = document.getElementById('brand-tabs'), f = document.getElementById('fab-add');
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) {
+        membersLoadVersion++;
+        if (unsubscribeBoard) {
+            unsubscribeBoard();
+            unsubscribeBoard = null;
+        }
+        if (unsubscribeMembers) {
+            unsubscribeMembers();
+            unsubscribeMembers = null;
+        }
+        activeWsId = null;
+        wsMembers = {};
         e.style.display = 'flex'; b.style.display = 'none'; t.style.display = 'none'; if(f) f.style.display = 'none';
     } else {
         e.style.display = 'none'; b.style.display = 'flex'; t.style.display = 'flex'; if(f) f.style.display = 'flex';
         const savedWs = localStorage.getItem('cb_active_ws');
-        if (workspaces.some(w => w.id === savedWs)) switchWorkspace(savedWs, true);
-        else if (sharedWorkspaces.some(w => w.id === savedWs)) switchWorkspace(savedWs, false);
-        else { if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true); else switchWorkspace(sharedWorkspaces[0].id, false); }
+        let targetWsId, targetIsOwner;
+        if (workspaces.some(w => w.id === savedWs)) {
+            targetWsId = savedWs;
+            targetIsOwner = true;
+        } else if (sharedWorkspaces.some(w => w.id === savedWs)) {
+            targetWsId = savedWs;
+            targetIsOwner = false;
+        } else if (workspaces.length > 0) {
+            targetWsId = workspaces[0].id;
+            targetIsOwner = true;
+        } else {
+            targetWsId = sharedWorkspaces[0].id;
+            targetIsOwner = false;
+        }
+        if (targetWsId !== activeWsId || targetIsOwner !== isOwner || !unsubscribeBoard) {
+            switchWorkspace(targetWsId, targetIsOwner);
+        }
     }
 }
 
@@ -262,13 +295,15 @@ window.leaveShared = (id, e) => {
 
 function renderWsSelector() {
     const btn = document.getElementById('project-btn'), cont = document.getElementById('proj-list-container'), sharedCont = document.getElementById('shared-proj-list'), sharedHead = document.getElementById('shared-proj-header');
+    const auditBtn = document.getElementById('sync-audit-btn');
+    if (auditBtn) auditBtn.style.display = activeWsId && isOwner ? 'inline-flex' : 'none';
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) { btn.innerHTML = 'Ruang Kosong ▾'; cont.innerHTML = ''; sharedHead.style.display = 'none'; sharedCont.innerHTML = ''; return; }
     let activeData = workspaces.find(w => w.id === activeWsId) || sharedWorkspaces.find(w => w.id === activeWsId);
     if (activeData) btn.innerHTML = `${activeData.name} ▾`;
     cont.innerHTML = workspaces.map((w, i) => `<div class="proj-item ${w.id === activeWsId ? 'active' : ''}" draggable="true" ondragstart="dragWs(event, ${i})" ondragover="allowDrop(event); dragOverWs(event);" ondragleave="dragLeaveWs(event)" ondrop="dropWs(event, ${i})" onclick="switchWorkspace('${w.id}', true)"><div><span class="proj-drag-handle">⠿</span> ${w.name}</div>${w.id === activeWsId ? '<span>✓</span>' : ''}</div>`).join('');
     if(sharedWorkspaces.length > 0) { 
         sharedHead.style.display = 'block'; 
-        sharedCont.innerHTML = sharedWorkspaces.map(w => `<div class="proj-item ${w.id === activeWsId ? 'active' : ''}" onclick="switchWorkspace('${w.id}', false)"><div>👥 ${w.name}</div><div style="display:flex; gap:8px; align-items:center;">${w.id === activeWsId ? '<span>✓</span>' : ''}<span class="leave-proj-btn" title="Keluar / Hapus dari daftar" onclick="leaveShared('${w.id}', event)">❌</span></div></div>`).join(''); 
+        sharedCont.innerHTML = sharedWorkspaces.map(w => `<div class="proj-item ${w.id === activeWsId ? 'active' : ''}" onclick="switchWorkspace('${w.id}', false)"><div>${w.name}</div><div style="display:flex; gap:8px; align-items:center;">${w.id === activeWsId ? '<span>✓</span>' : ''}<span class="leave-proj-btn" title="Keluar dari project" onclick="leaveShared('${w.id}', event)">Keluar</span></div></div>`).join(''); 
     } else { sharedHead.style.display = 'none'; sharedCont.innerHTML = ''; }
 }
 
@@ -320,8 +355,18 @@ window.saveWs = () => { const name = document.getElementById('ws-name').value.tr
 window.confirmDelWs = () => { showMsg("Hapus project ini beserta seluruh kontennya secara permanen?", () => { workspaces = workspaces.filter(w => w.id !== activeWsId); set(ref(db, `users/${myUser.id}/workspaces`), workspaces); remove(ref(db, `content_board_data_${activeWsId}`)); remove(ref(db, `board_members/${activeWsId}`)); closeWsModal(); if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true); }); };
 
 window.switchWorkspace = (wsId, ownerFlag) => {
-    if(unsubscribeBoard) unsubscribeBoard(); 
+    if (document.getElementById('sync-audit-ov')?.classList.contains('show')) window.closeSyncAudit();
+    if(unsubscribeBoard) {
+        unsubscribeBoard();
+        unsubscribeBoard = null;
+    }
+    if(unsubscribeMembers) {
+        unsubscribeMembers();
+        unsubscribeMembers = null;
+    }
+    membersLoadVersion++;
     activeWsId = wsId; isOwner = ownerFlag;
+    wsMembers = {};
     localStorage.setItem('cb_active_ws', wsId); 
     aB = 'all';
     document.getElementById('btn-edit-ws').style.display = isOwner ? 'flex' : 'none';
@@ -341,17 +386,24 @@ window.switchWorkspace = (wsId, ownerFlag) => {
         }
     };
 
-    onValue(ref(db, `board_members/${wsId}`), async (snap) => {
-        wsMembers = {};
-        if(snap.val()) {
-            const memIds = Object.keys(snap.val());
-            for(let id of memIds) { const uSnap = await get(ref(db, `public_users/${id}`)); if(uSnap.exists()) wsMembers[id] = { id: id, name: uSnap.val().name, photoURL: uSnap.val().photoURL }; }
+    unsubscribeMembers = onValue(ref(db, `board_members/${wsId}`), async (snap) => {
+        const loadVersion = ++membersLoadVersion;
+        const nextMembers = {};
+        const memberData = snap.val();
+        if(memberData) {
+            const memIds = Object.keys(memberData);
+            for(let id of memIds) {
+                const uSnap = await get(ref(db, `public_users/${id}`));
+                if(uSnap.exists()) nextMembers[id] = { id: id, name: uSnap.val().name, photoURL: uSnap.val().photoURL };
+            }
         }
+        if(activeWsId !== wsId || loadVersion !== membersLoadVersion) return;
+        wsMembers = nextMembers;
         updateAssigneeDropdowns(); renderBoard();
         if(document.getElementById('team-ov').classList.contains('show')) window.renderTeamList();
     }, handleKick);
     
-    const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
+    const dbPath = boardDataPath(wsId);
     unsubscribeBoard = onValue(ref(db, dbPath), (snapshot) => {
         const data = snapshot.val() || {};
         brands = data.brands || []; cards = data.cards || [];
@@ -430,7 +482,7 @@ function updateCreatorDropdowns() {
         fOpts += `<option value="${c.id}">${c.name}</option>`;
     });
 
-    opts += `<option disabled>──────────</option><option value="manage_creator">⚙️ Kelola Nama PJ...</option>`;
+    opts += `<option disabled>──────────</option><option value="manage_creator">Kelola Nama PJ...</option>`;
 
     const mCre = document.getElementById('m-creator'); if(mCre) mCre.innerHTML = opts;
     const dpCre = document.getElementById('dp-fcreator'); if(dpCre) dpCre.innerHTML = opts;
@@ -497,13 +549,414 @@ function updateAssigneeDropdowns() {
 }
 
 let syncDebounce;
-window.syncToFirebase = function() { 
+let pendingBoardWrite = Promise.resolve();
+let boardWritesInFlight = 0;
+
+function boardDataPath(wsId) {
+    return wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
+}
+
+function queueBoardWrite(wsId) {
+    boardWritesInFlight++;
+    const dbPath = boardDataPath(wsId);
+    const write = pendingBoardWrite.catch(() => {}).then(() => update(ref(db, dbPath), { brands, cards, columns, creators }));
+    pendingBoardWrite = write.finally(() => { boardWritesInFlight--; });
+    return pendingBoardWrite;
+}
+
+window.syncToFirebase = function() {
     clearTimeout(syncDebounce);
     syncDebounce = setTimeout(() => {
-        if(!activeWsId) return; 
-        const dbPath = activeWsId === 'default' ? 'content_board_data' : `content_board_data_${activeWsId}`; 
-        update(ref(db, dbPath), { brands, cards, columns, creators }); 
+        syncDebounce = null;
+        if(!activeWsId) return;
+        queueBoardWrite(activeWsId).catch(error => console.error('Board sync failed:', error));
     }, 500);
+};
+
+let isRefreshingBoard = false;
+window.refreshBoard = async () => {
+    if(isRefreshingBoard) return;
+    const wsId = activeWsId;
+    if(!wsId) return showMsg('Pilih project sebelum menyinkronkan board.');
+
+    const button = document.getElementById('refresh-board-btn');
+    isRefreshingBoard = true;
+    button.disabled = true;
+    button.classList.add('is-syncing');
+
+    try {
+        if(syncDebounce) {
+            clearTimeout(syncDebounce);
+            syncDebounce = null;
+            await queueBoardWrite(wsId);
+        } else if(boardWritesInFlight > 0) {
+            await pendingBoardWrite;
+        }
+
+        if(activeWsId !== wsId) return;
+        const dbPath = wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
+        const snapshot = await get(ref(db, dbPath));
+        if(activeWsId !== wsId) return;
+
+        const data = snapshot.val() || {};
+        brands = data.brands || [];
+        cards = data.cards || [];
+        columns = data.columns && data.columns.length > 0 ? data.columns : [{id:'review',lbl:'Review',c:'#534AB7',collapsed:false}];
+        creators = data.creators || [];
+
+        if(window.loadLocalTheme) window.loadLocalTheme();
+        renderAll();
+        renderWsSelector();
+        updateCreatorDropdowns();
+        showMsg('Board berhasil disinkronkan.');
+    } catch(error) {
+        console.error('Manual board sync failed:', error);
+        showMsg('Gagal menyinkronkan board: ' + error.message);
+    } finally {
+        isRefreshingBoard = false;
+        button.disabled = false;
+        button.classList.remove('is-syncing');
+    }
+};
+
+window.openSyncAudit = async () => {
+    if (!isOwner || !activeWsId) return showMsg('Tinjauan audit hanya tersedia untuk pemilik project.');
+    syncAuditWorkspaceId = activeWsId;
+    document.getElementById('sync-audit-ov').classList.add('show');
+    document.getElementById('sync-audit-last-run').textContent = 'Memuat laporan...';
+    document.getElementById('sync-audit-list').replaceChildren();
+    await window.refreshSyncAudit();
+};
+
+window.closeSyncAudit = () => {
+    document.getElementById('sync-audit-ov').classList.remove('show');
+    syncAuditWorkspaceId = null;
+};
+
+window.refreshSyncAudit = async () => {
+    const wsId = syncAuditWorkspaceId;
+    if (!isOwner || !wsId || activeWsId !== wsId) return showMsg('Pilih project milik Anda untuk memuat audit.');
+    const button = document.getElementById('sync-audit-refresh-btn');
+    button.disabled = true;
+    try {
+        const snapshot = await get(ref(db, `${boardDataPath(wsId)}/sync_audit`));
+        if (activeWsId !== wsId || syncAuditWorkspaceId !== wsId) return;
+        const auditData = snapshot.val() || {};
+        syncAuditReport = auditData.report || null;
+        syncAuditReviews = auditData.reviews || {};
+        renderSyncAudit();
+    } catch (error) {
+        console.error('Failed to load sync audit:', error);
+        document.getElementById('sync-audit-last-run').textContent = 'Gagal memuat laporan';
+        document.getElementById('sync-audit-list').textContent = error.message;
+        showMsg('Gagal memuat audit: ' + error.message);
+    } finally {
+        button.disabled = false;
+    }
+};
+
+function renderSyncAudit() {
+    const lastRun = document.getElementById('sync-audit-last-run');
+    const list = document.getElementById('sync-audit-list');
+    const generatedAt = syncAuditReport?.generatedAt;
+    lastRun.textContent = generatedAt
+        ? `Laporan terakhir: ${new Date(generatedAt).toLocaleString('id-ID')}`
+        : 'Belum ada laporan. Jalankan cbRunNightlyAudit dari Apps Script.';
+    list.replaceChildren();
+
+    const rawFindings = syncAuditReport?.findings;
+    const findings = Array.isArray(rawFindings) ? rawFindings : Object.values(rawFindings || {});
+    const pendingFindings = findings.filter(finding => !isSyncAuditFindingComplete(finding));
+    const completedFindings = findings.filter(isSyncAuditFindingComplete);
+    if (findings.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'sync-audit-empty';
+        empty.textContent = syncAuditReport ? 'Tidak ada temuan pada audit terakhir.' : 'Laporan belum tersedia. Pastikan Apps Script sudah dipasang, lalu jalankan audit pertama secara manual.';
+        list.append(empty);
+    } else if (pendingFindings.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'sync-audit-empty';
+        empty.textContent = 'Semua temuan sudah ditandai selesai. Riwayat tetap tersimpan di bawah.';
+        list.append(empty);
+    }
+    lastRun.textContent += findings.length ? ` · ${pendingFindings.length} belum selesai` : '';
+
+    const typeLabels = {
+        duplicate_sheet_identity: 'Kartu ganda dari baris Sheet',
+        missing_from_sheet: 'Kartu tidak cocok dengan Sheet',
+        missing_on_board: 'Baris Sheet belum ada di board'
+    };
+    pendingFindings.forEach(finding => {
+        const item = document.createElement('section');
+        item.className = 'sync-audit-item';
+        const heading = document.createElement('h3');
+        heading.textContent = typeLabels[finding.type] || 'Temuan sinkronisasi';
+        item.append(heading);
+        const message = document.createElement('p');
+        message.textContent = `${finding.message || 'Periksa data sebelum mengambil tindakan.'}${finding.presentInLatestAudit === false ? ' Temuan ini tidak muncul pada audit terbaru, tetapi tetap tersimpan sampai ditinjau.' : ''}`;
+        item.append(message);
+        if (finding.sheetName || finding.rowNumber || finding.title) {
+            const source = document.createElement('p');
+            source.textContent = [finding.sheetName, finding.rowNumber ? `baris ${finding.rowNumber}` : '', finding.title].filter(Boolean).join(' · ');
+            item.append(source);
+        }
+
+        const candidates = Array.isArray(finding.cards) ? finding.cards : Object.values(finding.cards || {});
+        if (candidates.length === 0) {
+            const review = syncAuditReviews[finding.id]?._finding;
+            const actions = document.createElement('div');
+            actions.className = 'sync-audit-actions';
+            const status = document.createElement('div');
+            status.className = 'sync-audit-status';
+            status.textContent = review?.status === 'reviewed' ? 'Sudah ditinjau' : 'Belum ditinjau';
+            item.append(status);
+            actions.append(makeSyncAuditButton(
+                review?.status === 'reviewed' ? 'Buka kembali' : 'Tandai ditinjau',
+                false,
+                () => saveSyncAuditReview(finding, '_finding', review?.status === 'reviewed' ? 'pending' : 'reviewed')
+            ));
+            item.append(actions);
+        } else {
+            candidates.forEach(candidate => {
+                const row = document.createElement('div');
+                row.className = 'sync-audit-candidate';
+                const info = document.createElement('div');
+                info.className = 'sync-audit-candidate-info';
+                const title = document.createElement('div');
+                title.className = 'sync-audit-candidate-title';
+                title.textContent = candidate.title || '(Tanpa judul)';
+                info.append(title);
+                const assigneeName = wsMembers[candidate.assignee]?.name || candidate.assignee || 'Belum ada PIC';
+                const metadata = document.createElement('div');
+                metadata.className = 'sync-audit-candidate-meta';
+                metadata.textContent = [assigneeName, candidate.date, candidate.sheetKey].filter(Boolean).join(' · ');
+                info.append(metadata);
+
+                const review = syncAuditReviews[finding.id]?.[candidate.id];
+                const liveCard = cards.find(card => card.id === candidate.id);
+                const archived = liveCard ? !!liveCard.syncAuditArchived : !!candidate.syncAuditArchived;
+                const status = document.createElement('div');
+                status.className = 'sync-audit-status';
+                status.textContent = review?.status === 'deleted' ? 'Dihapus permanen'
+                    : archived ? 'Diarsipkan'
+                    : review?.status === 'kept' ? 'Dipertahankan setelah ditinjau'
+                    : review?.status === 'reviewed' ? 'Ditandai selesai'
+                    : review?.status === 'restored' ? 'Dipulihkan'
+                    : liveCard ? 'Belum ditinjau'
+                    : 'Kartu sudah tidak ada di board';
+                info.append(status);
+                row.append(info);
+
+                const actions = document.createElement('div');
+                actions.className = 'sync-audit-actions';
+                const actionKey = `${finding.id}:${candidate.id}`;
+                const busy = syncAuditActionsInFlight.has(actionKey);
+                if (!['deleted', 'reviewed'].includes(review?.status)) {
+                    if (archived) {
+                        if (liveCard) actions.append(makeSyncAuditButton('Pulihkan', false, () => runSyncAuditAction(finding, candidate, 'restore'), busy));
+                    } else if (liveCard) {
+                        actions.append(makeSyncAuditButton('Pertahankan', false, () => runSyncAuditAction(finding, candidate, 'keep'), busy));
+                        actions.append(makeSyncAuditButton('Arsipkan', false, () => runSyncAuditAction(finding, candidate, 'archive'), busy));
+                    }
+                    if (liveCard) actions.append(makeSyncAuditButton('Hapus permanen', true, () => confirmSyncAuditDelete(finding, candidate), busy));
+                    else actions.append(makeSyncAuditButton('Tandai selesai', false, () => saveSyncAuditReview(finding, candidate.id, 'reviewed'), busy));
+                }
+                if (actions.childElementCount) row.append(actions);
+                item.append(row);
+            });
+        }
+        list.append(item);
+    });
+    if (completedFindings.length) {
+        const history = document.createElement('details');
+        history.className = 'sync-audit-item';
+        const summary = document.createElement('summary');
+        summary.textContent = `Selesai ditinjau (${completedFindings.length})`;
+        history.append(summary);
+        completedFindings.forEach(finding => {
+            const row = document.createElement('div');
+            row.className = 'sync-audit-candidate';
+            const info = document.createElement('div');
+            info.className = 'sync-audit-candidate-info';
+            const title = document.createElement('div');
+            title.className = 'sync-audit-candidate-title';
+            title.textContent = typeLabels[finding.type] || 'Temuan sinkronisasi';
+            info.append(title);
+            const message = document.createElement('div');
+            message.className = 'sync-audit-candidate-meta';
+            message.textContent = finding.message || 'Selesai ditinjau.';
+            info.append(message);
+            row.append(info);
+            row.append(makeSyncAuditButton('Buka kembali', false, () => reopenSyncAuditFinding(finding)));
+            history.append(row);
+        });
+        list.append(history);
+    }
+    renderSyncAuditArchives(list);
+}
+
+function isSyncAuditFindingComplete(finding) {
+    const candidates = Array.isArray(finding.cards) ? finding.cards : Object.values(finding.cards || {});
+    if (!candidates.length) return syncAuditReviews[finding.id]?._finding?.status === 'reviewed';
+    const completedStatuses = ['kept', 'archived', 'deleted', 'reviewed'];
+    return candidates.every(candidate =>
+        completedStatuses.includes(syncAuditReviews[finding.id]?.[candidate.id]?.status)
+    );
+}
+
+async function reopenSyncAuditFinding(finding) {
+    const candidates = Array.isArray(finding.cards) ? finding.cards : Object.values(finding.cards || {});
+    if (!candidates.length) return saveSyncAuditReview(finding, '_finding', 'pending');
+    for (const candidate of candidates) {
+        if (['kept', 'archived', 'deleted', 'reviewed'].includes(syncAuditReviews[finding.id]?.[candidate.id]?.status)) {
+            await saveSyncAuditReview(finding, candidate.id, 'pending');
+        }
+    }
+}
+
+function renderSyncAuditArchives(list) {
+    const archivedCards = cards.filter(card => card.syncAuditArchived);
+    if (archivedCards.length === 0) return;
+
+    const section = document.createElement('section');
+    section.className = 'sync-audit-item';
+    const heading = document.createElement('h3');
+    heading.textContent = 'Arsip sementara';
+    section.append(heading);
+    const description = document.createElement('p');
+    description.textContent = 'Kartu yang diarsipkan tetap dapat dipulihkan di sini, meskipun sudah tidak muncul pada laporan audit berikutnya.';
+    section.append(description);
+
+    archivedCards.forEach(candidate => {
+        const row = document.createElement('div');
+        row.className = 'sync-audit-candidate';
+        const info = document.createElement('div');
+        info.className = 'sync-audit-candidate-info';
+        const title = document.createElement('div');
+        title.className = 'sync-audit-candidate-title';
+        title.textContent = candidate.title || '(Tanpa judul)';
+        info.append(title);
+        const assigneeName = wsMembers[candidate.assignee]?.name || candidate.assignee || 'Belum ada PIC';
+        const metadata = document.createElement('div');
+        metadata.className = 'sync-audit-candidate-meta';
+        metadata.textContent = [assigneeName, candidate.date, candidate.sheetKey].filter(Boolean).join(' · ');
+        info.append(metadata);
+        const status = document.createElement('div');
+        status.className = 'sync-audit-status';
+        status.textContent = 'Diarsipkan';
+        info.append(status);
+        row.append(info);
+
+        const actions = document.createElement('div');
+        actions.className = 'sync-audit-actions';
+        const finding = { id: 'audit_archive' };
+        const busy = syncAuditActionsInFlight.has(`${finding.id}:${candidate.id}`);
+        actions.append(makeSyncAuditButton('Pulihkan', false, () => runSyncAuditAction(finding, candidate, 'restore'), busy));
+        actions.append(makeSyncAuditButton('Hapus permanen', true, () => confirmSyncAuditDelete(finding, candidate), busy));
+        row.append(actions);
+        section.append(row);
+    });
+    list.append(section);
+}
+
+function makeSyncAuditButton(label, danger, action, disabled = false) {
+    const button = document.createElement('button');
+    button.className = danger ? 'btn-c danger-action' : 'btn-c';
+    button.textContent = label;
+    button.disabled = disabled;
+    button.addEventListener('click', action);
+    return button;
+}
+
+async function saveSyncAuditReview(finding, cardId, status) {
+    const wsId = syncAuditWorkspaceId;
+    if (!isOwner || !wsId || activeWsId !== wsId) return showMsg('Project berubah. Buka kembali tinjauan audit sebelum melanjutkan.');
+    const key = `${finding.id}:${cardId}`;
+    if (syncAuditActionsInFlight.has(key)) return;
+    syncAuditActionsInFlight.add(key);
+    renderSyncAudit();
+    try {
+        const reviewPath = `${boardDataPath(wsId)}/sync_audit/reviews/${finding.id}/${cardId}`;
+        await update(ref(db, reviewPath), { status, reviewedAt: new Date().toISOString(), reviewedBy: myUser.id });
+        syncAuditReviews[finding.id] ||= {};
+        syncAuditReviews[finding.id][cardId] = { status, reviewedAt: new Date().toISOString(), reviewedBy: myUser.id };
+    } catch (error) {
+        console.error('Failed to save sync audit review:', error);
+        showMsg('Gagal menyimpan tinjauan: ' + error.message);
+    } finally {
+        syncAuditActionsInFlight.delete(key);
+        renderSyncAudit();
+    }
+}
+
+function confirmSyncAuditDelete(finding, candidate) {
+    const title = candidate.title || 'kartu ini';
+    showMsg(`Hapus permanen <b>${title.replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}</b> dari board? Tindakan ini tidak dapat dibatalkan.`, () => {
+        runSyncAuditAction(finding, candidate, 'delete');
+    });
+}
+
+async function runSyncAuditAction(finding, candidate, action) {
+    const wsId = syncAuditWorkspaceId;
+    if (!isOwner || !wsId || activeWsId !== wsId) return showMsg('Project berubah. Buka kembali tinjauan audit sebelum melanjutkan.');
+    const key = `${finding.id}:${candidate.id}`;
+    if (syncAuditActionsInFlight.has(key)) return;
+    const cardIndex = cards.findIndex(card => card.id === candidate.id);
+    if (cardIndex < 0) return showMsg('Kartu tidak lagi tersedia di board. Muat ulang laporannya.');
+    const previousCard = cards[cardIndex];
+    if (!['keep', 'archive', 'restore', 'delete'].includes(action)) return;
+    syncAuditActionsInFlight.add(key);
+    renderSyncAudit();
+    let boardWriteSucceeded = false;
+    try {
+        if (action === 'archive') {
+            cards[cardIndex] = {
+                ...previousCard,
+                syncAuditArchived: true,
+                syncAuditArchiveFindingId: finding.id
+            };
+        }
+        if (action === 'restore') {
+            cards[cardIndex] = { ...previousCard, syncAuditArchived: false };
+            delete cards[cardIndex].syncAuditArchiveFindingId;
+        }
+        if (action === 'delete') cards = cards.filter(card => card.id !== candidate.id);
+        if (action !== 'keep') {
+            renderAll();
+            if (syncDebounce) {
+                clearTimeout(syncDebounce);
+                syncDebounce = null;
+            }
+            if (boardWritesInFlight > 0) await pendingBoardWrite;
+            await queueBoardWrite(wsId);
+            boardWriteSucceeded = true;
+        }
+
+        const status = action === 'archive' ? 'archived'
+            : action === 'delete' ? 'deleted'
+            : action === 'restore' ? 'restored'
+            : 'kept';
+        const reviewFindingId = ['restore', 'delete'].includes(action)
+            ? previousCard.syncAuditArchiveFindingId || finding.id
+            : finding.id;
+        const reviewPath = `${boardDataPath(wsId)}/sync_audit/reviews/${reviewFindingId}/${candidate.id}`;
+        await update(ref(db, reviewPath), { status, reviewedAt: new Date().toISOString(), reviewedBy: myUser.id });
+        syncAuditReviews[reviewFindingId] ||= {};
+        syncAuditReviews[reviewFindingId][candidate.id] = { status, reviewedAt: new Date().toISOString(), reviewedBy: myUser.id };
+    } catch (error) {
+        if (!boardWriteSucceeded) {
+            if (action === 'archive' || action === 'restore') cards[cardIndex] = previousCard;
+            if (action === 'delete' && !cards.some(card => card.id === candidate.id)) cards.splice(cardIndex, 0, previousCard);
+            renderAll();
+        }
+        console.error('Failed to apply sync audit action:', error);
+        showMsg(boardWriteSucceeded
+            ? 'Tindakan pada board berhasil, tetapi status tinjauan audit gagal disimpan: ' + error.message
+            : 'Gagal menyimpan tindakan audit: ' + error.message);
+    } finally {
+        syncAuditActionsInFlight.delete(key);
+        renderSyncAudit();
+    }
 }
 
 function applyTheme() {
@@ -596,7 +1049,7 @@ window.handleBgUpload = (input) => {
                 themeSettings.bg = e.target.result;
                 themeSettings.bgPos = '50% 50%';
                 applyTheme(); window.saveLocalTheme();
-                showMsg("GIF Berhasil Terpasang! 🎞️ Gunakan tombol 'Atur Posisi' untuk menggeser.");
+                showMsg("GIF berhasil dipasang. Gunakan tombol 'Atur Posisi' untuk menggeser.");
                 input.value = '';
             } else {
                 tempImgObj.onload = function() {
@@ -703,11 +1156,11 @@ window.showCtxMenu = (e, type, id) => {
     e.preventDefault(); e.stopPropagation(); 
     const ctx = document.getElementById('ctx-menu'); 
     ctx.style.display = 'flex'; 
-    if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">✏️ Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">🗑️ Hapus Status</button>`; 
-    else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">✏️ Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">🗑️ Hapus Brand</button>`; 
+    if (type === 'col') ctx.innerHTML = `<button class="ctx-item" onclick="openCol('${id}'); hideCtxMenu()">Edit Status</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelCol('${id}'); hideCtxMenu()">Hapus Status</button>`; 
+    else if (type === 'brand') ctx.innerHTML = `<button class="ctx-item" onclick="openEditBrand('${id}'); hideCtxMenu()">Edit Brand</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="confirmDelBrand('${id}'); hideCtxMenu()">Hapus Brand</button>`; 
     else if (type === 'card') {
         selId = id; 
-        ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">✏️ Edit Konten</button><button class="ctx-item" onclick="dupCard();hideCtxMenu()">📄 Duplikat Konten</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">📦 Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="delCurCard();hideCtxMenu()">🗑️ Hapus Konten</button>`; 
+        ctx.innerHTML = `<button class="ctx-item" onclick="selCard('${id}'); hideCtxMenu()">Edit Konten</button><button class="ctx-item" onclick="openMoveWsModal('${id}'); hideCtxMenu()">Pindah Project</button><div class="ctx-hr"></div><button class="ctx-item danger" onclick="delCurCard();hideCtxMenu()">Hapus Konten</button>`; 
     }
     let x = e.clientX, y = e.clientY; 
     if (x + ctx.offsetWidth > window.innerWidth) x = window.innerWidth - ctx.offsetWidth - 10; 
@@ -731,13 +1184,19 @@ window.dropB = (e, targetIdx) => {
     draggedBrandIdx = null; 
 };
 
-window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')"><span class="bdot" style="background:${b.c}"></span>${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); const mBrand = document.getElementById('m-brand'); if(mBrand) mBrand.innerHTML = opts; const dpBrand = document.getElementById('dp-fbrand'); if(dpBrand) dpBrand.innerHTML = opts; };
+window.renderTabs = () => { document.getElementById('brand-tabs').innerHTML = `<div class="btab${aB==='all'?' active':''}" onclick="setB('all')">Semua Brand</div>` + brands.map((b, i) => `<div class="btab${aB===b.id?' active':''}" draggable="true" ondragstart="dragB(event, ${i})" ondragover="allowDrop(event)" ondrop="dropB(event, ${i})" onclick="setB('${b.id}')" oncontextmenu="showCtxMenu(event, 'brand', '${b.id}')">${b.n}</div>`).join('') + `<div class="add-btab" onclick="openBrand()" title="Tambah Klien/Brand Baru">+</div>`; const opts = `<option value="">Umum (Tanpa Brand)</option>` + brands.map(b => `<option value="${b.id}">${b.n}</option>`).join(''); const mBrand = document.getElementById('m-brand'); if(mBrand) mBrand.innerHTML = opts; const dpBrand = document.getElementById('dp-fbrand'); if(dpBrand) dpBrand.innerHTML = opts; };
 
 // ================= RENDER BOARD & KARTU =================
 window.renderBoard = () => { 
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) return; 
     const sortBy = document.getElementById('sort-by').value; 
     const vis = window.getFilteredCards(); 
+    const boardWrap = document.getElementById('board-wrap');
+    const board = document.getElementById('board');
+    const boardScrollLeft = boardWrap.scrollLeft;
+    const columnScrollTops = new Map(
+        [...board.querySelectorAll('.col-body')].map(body => [body.dataset.colId, body.scrollTop])
+    );
     
     // UPDATE ANGKA TOTAL KONTEN
     const totalCapsule = document.getElementById('total-card-display');
@@ -745,7 +1204,7 @@ window.renderBoard = () => {
 
     const collapsedState = JSON.parse(localStorage.getItem(`cb_collapsed_cols_${activeWsId}`)) || {};
 
-    document.getElementById('board').innerHTML = columns.map((col, idx) => { 
+    board.innerHTML = columns.map((col, idx) => { 
         let cc = vis.filter(c => c.status===col.id); 
         if (sortBy !== 'manual') cc.sort((a, b) => { 
             if (sortBy === 'date-asc') return new Date(a.date||'9999') - new Date(b.date||'9999'); 
@@ -763,35 +1222,40 @@ window.renderBoard = () => {
         
         if(isCollapsed) return `<div class="col collapsed" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="collapsed-head" style="--col-color:${col.c}" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" onclick="toggleCol('${col.id}')" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><button class="col-toggle">▶</button><span class="col-lbl-vert">${col.lbl}</span><span class="col-cnt" style="transform:rotate(90deg); margin-top:8px; margin-bottom:12px;">${cc.length}</span></div></div>`; 
         
-        return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="event.stopPropagation(); toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; 
+        return `<div class="col" ondragover="allowDrop(event)" ondrop="dropCard(event, '${col.id}')"><div class="col-head" draggable="true" ondragstart="dragCol(event, '${col.id}')" ondragend="dragEndCol(event)" ondragover="allowDrop(event); dragOverCol(event, '${col.id}')" ondragleave="dragLeaveCol(event)" ondrop="dropCol(event, '${col.id}')" style="border-top:4px solid ${col.c}; cursor:grab;" oncontextmenu="showCtxMenu(event, 'col', '${col.id}')"><span class="col-drag-handle" style="color:var(--text-light); margin-right:4px;">⠿</span><span class="col-lbl">${col.lbl}</span><span class="col-cnt">${cc.length}</span><button class="col-toggle" onclick="event.stopPropagation(); toggleCol('${col.id}')" style="margin-left:auto;">◀</button></div><div class="col-body" data-col-id="${col.id}">${cc.length?cc.map(c=>cardH(c)).join(''):'<div class="empty">Kosong</div>'}</div></div>`; 
     }).join('') + `<div class="col" style="justify-content:center; width:280px;"><button class="add-col-btn" style="height:120px;" onclick="openCol()">+ Tambah Status/Kolom</button></div>`; 
+    board.querySelectorAll('.col-body').forEach(body => {
+        const scrollTop = columnScrollTops.get(body.dataset.colId);
+        if (scrollTop !== undefined) body.scrollTop = scrollTop;
+    });
+    boardWrap.scrollLeft = boardScrollLeft;
 };
 
 window.cardH = (c) => { 
-    const b = brands.find(x=>x.id===c.bId) || {n:'', c:'transparent'}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status); 
+    const b = brands.find(x=>x.id===c.bId) || {n:''}, cl = cols(c.type), ci = cl.findIndex(x=>x.id===c.status); 
     let urgBadge = ''; 
-    if (c.urgency === 'high') urgBadge = `<span class="tbadge" style="background:#FEECEB;color:#E24B4A;">🔥 Mendesak</span>`; 
-    else if (c.urgency === 'med') urgBadge = `<span class="tbadge" style="background:#FEF5E7;color:#BA7517;">⚡ Penting</span>`; 
-    else if (c.urgency === 'low') urgBadge = `<span class="tbadge" style="background:#E1F5EE;color:#1D9E75;">🐢 Santai</span>`; 
+    if (c.urgency === 'high') urgBadge = `<span class="tbadge priority-badge">Mendesak</span>`; 
+    else if (c.urgency === 'med') urgBadge = `<span class="tbadge priority-badge">Penting</span>`; 
+    else if (c.urgency === 'low') urgBadge = `<span class="tbadge priority-badge">Santai</span>`; 
     
     let objBadge = ''; 
     if (c.type !== 'Catatan' && c.type !== 'To-Do') { 
         const obj = c.objective || 'Konten'; 
-        if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">📢 Ads</span>`; 
-        else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">🎪 Campaign</span>`; 
-        else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">🚀 Boost</span>`; 
+        if (obj === 'Ads') objBadge = `<span class="tbadge" style="background:#FFF3CD;color:#D85A30;">Ads</span>`; 
+        else if (obj === 'Campaign') objBadge = `<span class="tbadge" style="background:#FCE4EC;color:#D81B60;">Campaign</span>`; 
+        else if (obj === 'Boost') objBadge = `<span class="tbadge" style="background:#E3F2FD;color:#1976D2;">Boost</span>`; 
     } 
     
     let dateStyle="color:var(--text-light);", alert=""; 
     if (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date && ci < cl.length-1) { 
         const diff = (new Date(c.date+'T'+(c.time||'23:59')) - new Date()) / 36e5; 
-        if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">⚠️ Overdue</span>`; } 
-        else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">⏳ H-1</span>`; } 
+        if (diff<0) { dateStyle="color:#e24b4a;font-weight:700;"; alert=`<span style="color:#e24b4a;font-size:10px;margin-left:4px;">Terlambat</span>`; } 
+        else if (diff<=24) { dateStyle="color:#D85A30;font-weight:700;"; alert=`<span style="color:#D85A30;font-size:10px;margin-left:4px;">H-1</span>`; } 
     } 
     
     const dt = (c.type !== 'Catatan' && c.type !== 'To-Do' && c.date) ? `<div style="display:flex;align-items:center; margin-bottom:10px;">${c.week?`<span style="font-size:10px;background:var(--input-bg);color:var(--text-main);padding:3px 6px;border-radius:4px;margin-right:6px;font-weight:600; border:1px solid var(--input-border);">P${c.week}</span>`:''}<span style="font-size:11px;${dateStyle}">${new Date(c.date).getDate()}/${new Date(c.date).getMonth()+1}</span><span style="font-size:11px;${dateStyle};margin-left:4px;">${c.time||''}</span>${alert}</div>` : ''; 
     const prog = (c.steps && c.steps.length) ? `<div class="c-prog-bg"><div class="c-prog-fill" style="width:${Math.round(c.steps.filter(s=>s.done).length/c.steps.length*100)}%"></div></div><div class="c-prog-text">${c.steps.filter(s=>s.done).length}/${c.steps.length} Sub-task Selesai</div>` : ''; 
-    const typeClass = c.type==='Video' ? 'tv' : c.type==='Feed' ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; 
+    const typeClass = c.type==='Video' ? 'tv' : (c.type==='Feed' || c.type==='Desain') ? 'tf' : c.type==='Catatan' ? 'tc' : c.type==='To-Do' ? 'tt' : 'ts'; 
     
     let picHtml = ''; 
     if (c.assignee && wsMembers[c.assignee]) { 
@@ -805,7 +1269,7 @@ window.cardH = (c) => {
         picHtml = `<div style="display:flex; align-items:center; gap:6px;">${avaImg} <span style="font-size:11px; font-weight:700; color:var(--text-muted);">${picUser.name}</span></div>`;
     } 
     
-    return `<div class="card" data-id="${c.id}" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${c.type}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot" style="justify-content:space-between;"><div style="display:flex; align-items:center; gap:6px; overflow:hidden;">${c.bId?`<span class="cfoot-dot" style="background:${b.c};width:10px;height:10px;border-radius:50%;flex-shrink:0;"></span>`:''}<span class="cfoot-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.n || 'Umum'}</span></div>${picHtml}</div></div>`; 
+    return `<div class="card" data-id="${c.id}" draggable="true" ondragstart="dragCard(event,'${c.id}')" ondragend="dragEndCard(event)" ondragover="allowDrop(event); dragOverCard(event,'${c.id}')" ondragleave="dragLeaveCard(event)" ondrop="dropOnCard(event,'${c.id}')" onclick="selCard('${c.id}')" oncontextmenu="showCtxMenu(event,'card','${c.id}')"><div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"><span class="tbadge ${typeClass}">${contentTypeLabel(c.type)}</span>${objBadge}${urgBadge}</div>${dt}<div class="card-title">${c.title}</div>${prog}<div class="card-foot" style="justify-content:space-between;"><div style="display:flex; align-items:center; gap:0; overflow:hidden;"><span class="cfoot-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.n || 'Umum'}</span></div>${picHtml}</div></div>`; 
 };
 
 window.setB = (id) => { aB=id; renderAll(); };
@@ -820,7 +1284,7 @@ window.toggleCol = (id) => {
 
 window.openAdd = (s) => { document.getElementById('add-ov').classList.add('show'); selType('Video'); renderMStatus('Video', s || columns[0].id); document.getElementById('m-date').value = new Date().toISOString().split('T')[0]; document.getElementById('m-title').value = ''; document.getElementById('m-objective').value = 'Konten'; };
 window.closeAdd = () => document.getElementById('add-ov').classList.remove('show');
-window.selType = (t) => { mType=t; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); document.getElementById('btn-' + (t==='To-Do' ? 't' : t[0].toLowerCase())).style.background='var(--primary-light)'; document.getElementById('m-datetime-container').style.display=(t==='Catatan'||t==='To-Do')?'none':'block'; document.getElementById('m-objective').parentElement.style.display=(t==='Catatan'||t==='To-Do')?'none':'flex'; renderMStatus(t,''); };
+window.selType = (t) => { mType=t; const buttonIds = {Video:'v', Desain:'d', Catatan:'c', 'To-Do':'t'}; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); document.getElementById('btn-' + buttonIds[t]).style.background='var(--primary-light)'; document.getElementById('m-datetime-container').style.display=(t==='Catatan'||t==='To-Do')?'none':'block'; document.getElementById('m-objective').parentElement.style.display=(t==='Catatan'||t==='To-Do')?'none':'flex'; renderMStatus(t,''); };
 window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); if(s) { s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; } };
 
 window.saveCard = () => { 
@@ -841,7 +1305,19 @@ window.selCard = (id) => {
     document.getElementById('dp-fdate').value=c.date||''; 
     document.getElementById('dp-ftime').value=c.time||''; 
     document.getElementById('dp-fweek').value=c.week||'1'; 
-    document.getElementById('dp-ftype').value=c.type; 
+    const dpType = document.getElementById('dp-ftype');
+    let legacyStoryOption = dpType.querySelector('option[data-legacy-story]');
+    if (c.type === 'Story' && !legacyStoryOption) {
+        legacyStoryOption = document.createElement('option');
+        legacyStoryOption.value = 'Story';
+        legacyStoryOption.textContent = 'Story (tersimpan)';
+        legacyStoryOption.disabled = true;
+        legacyStoryOption.dataset.legacyStory = 'true';
+        dpType.append(legacyStoryOption);
+    } else if (c.type !== 'Story' && legacyStoryOption) {
+        legacyStoryOption.remove();
+    }
+    dpType.value = c.type === 'Feed' ? 'Desain' : c.type;
     document.getElementById('dp-fbrand').value=c.bId; 
     document.getElementById('dp-furgency').value=c.urgency||'normal'; 
     document.getElementById('dp-fobjective').value=c.objective||'Konten'; 
@@ -872,7 +1348,7 @@ window.selCard = (id) => {
     if(s) { s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); s.value=c.status; }
     document.getElementById('dp-notes').value=c.notes||''; 
     document.getElementById('dp-notes-display').innerHTML=c.notes?linkify(c.notes):'Klik tambah catatan...'; 
-    renderSteps(c); renderAtt(c.images); 
+    renderSteps(c);
     document.getElementById('dp').classList.add('open'); 
     document.getElementById('dp-ov').classList.add('show'); 
 };
@@ -892,7 +1368,6 @@ window.dps = (f,v) => {
 };
 
 window.dpChType = (v) => { const c=cards.find(x=>x.id===selId); if(c){c.type=v; if(v==='Catatan' || v==='To-Do'){c.date='';c.time='';c.week=''; c.objective='';} syncToFirebase(); selCard(selId);} };
-window.dupCard = () => { const c = cards.find(x=>x.id===selId); if(!c) return; const newC = JSON.parse(JSON.stringify(c)); newC.id = 'c'+Date.now(); newC.title += " (Copy)"; cards.unshift(newC); closeDP(); syncToFirebase(); renderBoard(); };
 window.delCurCard = () => { if(!selId) return; showMsg("Hapus konten ini secara permanen?",()=>{cards=cards.filter(x=>x.id!==selId); closeDP(); syncToFirebase(); renderBoard(); }); };
 window.linkify = (t) => t.replace(/(https?:\/\/[^\s]+)/g,u=>`<a href="${u}" target="_blank" style="color:var(--primary);font-weight:600;">${u}</a>`);
 window.editNotes = () => { document.getElementById('dp-notes-display').style.display='none'; const ta=document.getElementById('dp-notes'); ta.style.display='block'; ta.focus(); };
@@ -911,13 +1386,9 @@ window.dragOverStep = (e) => { e.preventDefault(); e.stopPropagation(); if(dragg
 window.dragLeaveStep = (e) => { const el = e.target.closest('.step-item'); if(el) el.style.boxShadow = ''; };
 window.dropStep = (e, t) => { e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.step-item').forEach(el => el.style.boxShadow = ''); if (draggedStepIdx === null || draggedStepIdx === t) return; const c = cards.find(x => x.id === selId); if (!c) return; const dropBelow = e.clientY - (e.target.closest('.step-item').getBoundingClientRect().y + e.target.closest('.step-item').getBoundingClientRect().height/2) > 0; const step = c.steps.splice(draggedStepIdx, 1)[0]; let nt = t; if (draggedStepIdx < t) nt--; if (dropBelow) nt++; c.steps.splice(nt, 0, step); draggedStepIdx = null; syncToFirebase(); renderSteps(c); };
 
-window.addImageUrl = () => { const url = prompt("Paste link gambar di sini (contoh dari Pinterest, Google Drive, atau Web):"); if (url && url.trim() !== '' && selId) { const c = cards.find(x => x.id === selId); if (!c.images) c.images = []; c.images.push(url.trim()); syncToFirebase(); renderAtt(c.images); } };
-window.renderAtt = (imgs) => { document.getElementById('dp-attachments').innerHTML=(imgs||[]).map((u,i)=>`<div class="att-item"><img src="${u}" onclick="window.open('${u}','_blank')" onerror="this.src='https://via.placeholder.com/60?text=Gagal+Dimuat'"><button class="att-del" onclick="event.stopPropagation();delImg(${i})">×</button></div>`).join(''); };
-window.delImg = (i) => { const c=cards.find(x=>x.id===selId); c.images.splice(i,1); syncToFirebase(); renderAtt(c.images); };
-
-window.openBrand = () => { editBrandId=null; document.getElementById('bm-name').value=''; bCol='#534AB7'; document.getElementById('bm-color-wheel').value=bCol; document.getElementById('bm-color-hex').value=bCol; document.getElementById('brand-ov').classList.add('show'); };
-window.openEditBrand = (id) => { const b=brands.find(x=>x.id===id); editBrandId=id; document.getElementById('bm-name').value=b.n; bCol=b.c||'#534AB7'; document.getElementById('bm-color-wheel').value=bCol; document.getElementById('bm-color-hex').value=bCol; document.getElementById('brand-ov').classList.add('show'); };
-window.saveBrand = () => { const n=document.getElementById('bm-name').value.trim(); if(!n)return; if(editBrandId){ const b=brands.find(x=>x.id===editBrandId); b.n=n; b.c=bCol; } else { brands.push({id:'b'+Date.now(),n,c:bCol}); } document.getElementById('brand-ov').classList.remove('show'); syncToFirebase(); renderAll(); };
+window.openBrand = () => { editBrandId=null; document.getElementById('bm-name').value=''; document.getElementById('bm-title').textContent='Klien / Brand Baru'; document.getElementById('bm-save-btn').textContent='Simpan Brand'; document.getElementById('brand-ov').classList.add('show'); };
+window.openEditBrand = (id) => { const b=brands.find(x=>x.id===id); if(!b) return; editBrandId=id; document.getElementById('bm-name').value=b.n; document.getElementById('bm-title').textContent='Ubah Nama Brand'; document.getElementById('bm-save-btn').textContent='Simpan Perubahan'; document.getElementById('brand-ov').classList.add('show'); };
+window.saveBrand = () => { const n=document.getElementById('bm-name').value.trim(); if(!n)return; if(editBrandId){ const b=brands.find(x=>x.id===editBrandId); if(!b) return; b.n=n; } else { brands.push({id:'b'+Date.now(),n}); } document.getElementById('brand-ov').classList.remove('show'); syncToFirebase(); renderAll(); };
 window.confirmDelBrand = (id) => { showMsg("Hapus brand ini?",()=>{brands=brands.filter(x=>x.id!==id); syncToFirebase(); renderAll();}); };
 window.closeBrand = () => document.getElementById('brand-ov').classList.remove('show');
 
@@ -1094,9 +1565,9 @@ document.addEventListener('touchend', (e) => {
     isLongPressed = false;
 });
 
-window.exportToPDF=()=>{ try { const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20); doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28); const visCards = window.getFilteredCards(); const data=visCards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', c.type, (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]); doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } }); doc.save("Content_Plan.pdf"); } catch(err) { showMsg("Gagal membuat PDF."); } };
+window.exportToPDF=()=>{ try { const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20); doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28); const visCards = window.getFilteredCards(); const data=visCards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', contentTypeLabel(c.type), (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]); doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } }); doc.save("Content_Plan.pdf"); } catch(err) { showMsg("Gagal membuat PDF."); } };
 
-window.syncColor = (v, idS, p='bm') => { if(p==='bm') bCol=v; else cCol=v; const el = document.getElementById(p + '-color-' + idS); if(el) el.value = v; };
+window.syncColor = (v, idS) => { cCol=v; const el = document.getElementById('cm-color-' + idS); if(el) el.value = v; };
 
 let dpTx = 0, dpTy = 0; const dpEl = document.getElementById('dp'), dpBody = document.querySelector('.dp-body');
 dpEl.addEventListener('touchstart', e => { dpTx = e.changedTouches[0].screenX; dpTy = e.changedTouches[0].screenY; }, {passive: true});
@@ -1146,6 +1617,4 @@ const setupPWA = () => {
     manifestLink.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(manifestStr);
 };
 setupPWA();
-
-window.addToGCal = () => { const c = cards.find(x => x.id === selId); if(!c) return; const b = brands.find(x=>x.id===c.bId); const bName = b ? b.n : 'Umum'; const title = encodeURIComponent(`[${bName}] ${c.title}`), details = encodeURIComponent(`Jenis: ${c.type}\nJalur: ${c.objective || 'Organik'}\nPrioritas: ${c.urgency || 'Normal'}\n\nCatatan:\n${c.notes||''}`); let dates = ""; if (c.date) { const d = new Date(`${c.date}T${c.time||'09:00'}:00`), d2 = new Date(d.getTime() + 36e5), f = x => x.toISOString().replace(/-|:|\.\d\d\d/g, ''); dates = `&dates=${f(d)}/${f(d2)}`; } window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}${dates}`, '_blank'); };
 

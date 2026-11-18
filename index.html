@@ -3,12 +3,16 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0"/>
-<title>ContentBoard Pro</title>
+<title>Content Board</title>
 
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="pwa-apple-icon">
 <meta name="theme-color" content="#534AB7">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL,GRAD,opsz,wght@0,0,20,400" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <link rel="stylesheet" href="./styles.css">
@@ -16,7 +20,7 @@
 <body>
 
 <div id="repo-overlay">
-    <p>🖱️ Geser ke atas/bawah untuk atur posisi wallpaper</p>
+    <p>Geser ke atas/bawah untuk mengatur posisi wallpaper</p>
     <button class="btn-s" style="margin-top: 20px;" onclick="stopReposition()">Simpan Posisi</button>
 </div>
 
@@ -24,14 +28,13 @@
   <div class="modal" style="padding: 30px; text-align: center; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 340px;">
     
     <div id="auth-loading" style="display: block; padding: 20px 0;">
-        <div style="font-size: 40px; animation: pulse 1.5s infinite;">⏳</div>
-        <h3 style="color: var(--text-main); margin-top: 16px; font-weight: 800;">Memuat Sesi...</h3>
+        <h3 style="color: var(--text-main); font-weight: 800;">Memuat Sesi...</h3>
         <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">Mengecek kredensial Anda yang tersimpan</p>
     </div>
 
     <div id="auth-content" style="display: none;">
         <div style="width: 64px; height: 64px; background: var(--primary); color: #fff; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; margin: 0 auto 20px; box-shadow: 0 10px 20px var(--primary-light);">C</div>
-        <h2 id="auth-title" style="margin-bottom: 8px; color: var(--text-main); font-weight: 800;">ContentBoard Pro</h2>
+        <h2 id="auth-title" style="margin-bottom: 8px; color: var(--text-main); font-weight: 800;">Content Board</h2>
         <p id="auth-desc" style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5;">Kolaborasi cerdas untuk tim kreatif.</p>
         
         <div id="form-login" style="display: block;">
@@ -86,19 +89,23 @@
                     <div style="font-weight: 700; color: var(--text-main); font-size: 14px;" id="user-menu-name">Nama</div>
                     <div style="font-size: 11px; color: var(--text-light); word-break: break-all;" id="user-menu-email">user@email.com</div>
                 </div>
-                <button class="ctx-item" onclick="toggleDarkMode()">🌓 Mode Terang/Gelap</button>
-                <button class="ctx-item" onclick="openThemeModal()">🎨 Tema & Wallpaper</button>
-                <button class="ctx-item" onclick="changeUsername()">✏️ Ubah Nama Profil</button>
-                <button class="ctx-item" onclick="changeAvatar()">🖼️ Ubah Foto Profil</button>
+                <button class="ctx-item" onclick="toggleDarkMode()">Mode Terang/Gelap</button>
+                <button class="ctx-item" onclick="openThemeModal()">Tema & Wallpaper</button>
+                <button class="ctx-item" onclick="changeUsername()">Ubah Nama Profil</button>
+                <button class="ctx-item" onclick="changeAvatar()">Ubah Foto Profil</button>
                 <div class="ctx-hr"></div>
-                <button class="ctx-item danger" onclick="showLogoutMenu()">🚪 Keluar (Logout)</button>
+                <button class="ctx-item danger" onclick="showLogoutMenu()">Keluar</button>
             </div>
         </div>
         
         <div style="position: relative; display: flex; align-items:center;">
             <button id="project-btn" class="proj-selector-btn" onclick="toggleMenu('proj-menu', event)">Project Utama ▾</button>
-            <button class="share-btn" onclick="generateShareLink()" title="Undang anggota tim ke project ini">🤝 Bagikan</button>
-            <button class="share-btn" style="border-color:var(--input-border); background:var(--card-bg); color:var(--text-main);" onclick="openTeamModal()" title="Edit Anggota Tim">👥 Tim</button>
+            <button class="icon-btn project-icon-btn" onclick="generateShareLink()" aria-label="Bagikan project" title="Bagikan project">
+                <span class="material-symbols-outlined" aria-hidden="true">share</span>
+            </button>
+            <button class="icon-btn project-icon-btn" onclick="openTeamModal()" aria-label="Kelola tim" title="Kelola tim">
+                <span class="material-symbols-outlined" aria-hidden="true">group</span>
+            </button>
 
             <div id="proj-menu" class="custom-dropdown" style="top: 40px; left: 0; min-width: 260px; max-height: 400px; overflow-y: auto;">
                 <div style="padding: 8px 12px; font-size: 11px; font-weight: 700; color: var(--text-light); letter-spacing: 0.5px;">PROJECT SAYA</div>
@@ -108,8 +115,8 @@
                 <div id="shared-proj-list" style="display:flex; flex-direction:column; gap:2px; margin-bottom: 8px;"></div>
 
                 <div style="border-top: 1px solid var(--input-border); padding-top: 6px;">
-                    <button class="ctx-item" onclick="openWsModal(false)">➕ Buat Project Baru</button>
-                    <button class="ctx-item" id="btn-edit-ws" onclick="openWsModal(true)">✏️ Edit Nama Project Ini</button>
+                    <button class="ctx-item" onclick="openWsModal(false)">Buat Project Baru</button>
+                    <button class="ctx-item" id="btn-edit-ws" onclick="openWsModal(true)">Edit Nama Project Ini</button>
                 </div>
             </div>
         </div>
@@ -117,19 +124,33 @@
     </div>
 
     <div class="top-actions">
-      <div id="total-card-display" style="height: 36px; padding: 0 14px; display: inline-flex; align-items: center; border: 1px dashed var(--primary); border-radius: 8px; background: var(--primary-light); color: var(--primary); font-size: 13px; font-weight: 800; user-select: none;">
+      <div id="total-card-display" class="total-count">
           Total: 0
       </div>
       <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="handleSearch()">
+      <button class="icon-btn" id="refresh-board-btn" onclick="refreshBoard()" aria-label="Sinkronkan board" title="Sinkronkan board">
+          <span class="material-symbols-outlined" aria-hidden="true">sync</span>
+      </button>
+      <button class="icon-btn" id="sync-audit-btn" onclick="openSyncAudit()" aria-label="Tinjau audit sinkronisasi" title="Tinjau audit sinkronisasi" style="display:none;">
+          <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
+      </button>
       
       <div style="position: relative;">
-          <button class="topbtn" onclick="toggleMenu('filter-panel', event)" id="filter-btn">
-              <span style="font-size: 14px;">⚙️</span> Filter
+          <button class="icon-btn" onclick="toggleMenu('filter-panel', event)" id="filter-btn" aria-label="Filter" title="Filter">
+              <span class="material-symbols-outlined" aria-hidden="true">filter_alt</span>
           </button>
           
           <div id="filter-panel" onclick="event.stopPropagation()">
-              <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--input-border); padding-bottom: 10px;">Pengaturan Tampilan</div>
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px; border-bottom: 1px solid var(--input-border); padding-bottom: 10px;">Filter</div>
               <div style="display:flex; flex-direction:column; gap:12px; max-height: 60vh; overflow-y: auto; padding-right: 4px;">
+                  <div class="filter-row">
+                      <span class="filter-lbl">Urutkan Kartu</span>
+                      <select id="sort-by" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="manual">Manual (Geser)</option><option value="newest">Paling Baru</option><option value="date-asc">Tanggal Terdekat</option><option value="date-desc">Tanggal Terjauh</option></select>
+                  </div>
+                  <div class="filter-row">
+                      <span class="filter-lbl">PIC EKSEKUSI</span>
+                      <select id="filter-assignee" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua PIC</option><option value="unassigned">Belum Ada PIC</option></select>
+                  </div>
                   <div class="filter-row">
                       <span class="filter-lbl">Waktu Tayang (Bulan)</span>
                       <input type="month" id="filter-month" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()">
@@ -140,35 +161,29 @@
                   </div>
                   <div class="filter-row">
                       <span class="filter-lbl">Jenis Konten</span>
-                      <select id="filter-type" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="semua">Semua Jenis</option><option value="Video">Video</option><option value="Feed">Feed</option><option value="Story">Story</option><option value="Catatan">Catatan</option><option value="To-Do">To-Do</option></select>
+                      <select id="filter-type" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="semua">Semua Jenis</option><option value="Video">Video</option><option value="Desain">Desain</option><option value="Catatan">Catatan</option><option value="To-Do">To-Do</option></select>
                   </div>
                   <div class="filter-row">
                       <span class="filter-lbl">Jalur Distribusi</span>
-                      <select id="filter-objective" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua Jalur</option><option value="Konten">🪴 Organik</option><option value="Boost">🚀 Boost</option><option value="Campaign">🎪 Campaign</option><option value="Ads">📢 Ads</option></select>
+                      <select id="filter-objective" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua Jalur</option><option value="Konten">Organik</option><option value="Boost">Boost</option><option value="Campaign">Campaign</option><option value="Ads">Ads</option></select>
                   </div>
                   <div class="filter-row">
                       <span class="filter-lbl">Prioritas</span>
-                      <select id="filter-urgency" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua</option><option value="high">🔥 Mendesak</option><option value="med">⚡ Penting</option><option value="normal">⚪ Normal</option><option value="low">🐢 Santai</option></select>
+                      <select id="filter-urgency" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua</option><option value="high">Mendesak</option><option value="med">Penting</option><option value="normal">Normal</option><option value="low">Santai</option></select>
                   </div>
                   <div class="filter-row">
-                      <span class="filter-lbl">PJ IDE / PENCETUS</span>
+                      <span class="filter-lbl">PJ IDE</span>
                       <select id="filter-creator" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua PJ Ide</option><option value="unassigned">Belum Ada PJ</option></select>
-                  </div>
-                  <div class="filter-row">
-                      <span class="filter-lbl">PIC EKSEKUSI</span>
-                      <select id="filter-assignee" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="all">Semua PIC</option><option value="unassigned">Belum Ada PIC</option></select>
-                  </div>
-                  <div class="filter-row">
-                      <span class="filter-lbl">Urutkan Kartu</span>
-                      <select id="sort-by" class="fi" style="margin:0; padding:10px; width:100%;" onchange="renderBoard()"><option value="manual">↕️ Manual (Geser)</option><option value="newest">✨ Paling Baru</option><option value="date-asc">📅 Tanggal Terdekat</option><option value="date-desc">📆 Tanggal Terjauh</option></select>
                   </div>
               </div>
               <div style="border-top: 1px solid var(--input-border); margin-top: 12px; padding-top: 12px;">
-                  <button class="btn-c" style="width: 100%; padding: 10px; font-size: 13px;" onclick="resetFilters()">🔄 Reset Semua Filter</button>
+                  <button class="btn-c" style="width: 100%; padding: 10px; font-size: 13px;" onclick="resetFilters()">Reset Semua Filter</button>
               </div>
           </div>
       </div>
-      <button class="export-btn" onclick="exportToPDF()">📑 PDF</button>
+      <button class="icon-btn" onclick="exportToPDF()" aria-label="Ekspor PDF" title="Ekspor PDF">
+          <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+      </button>
     </div>
   </div>
   
@@ -194,9 +209,9 @@
   <div class="dp-pull-indicator"></div>
   <div class="dp-head" style="padding:20px 24px; border-bottom:1px solid var(--input-border); display:flex; align-items:center;">
     <div class="dp-title" id="dp-title" style="flex:1; font-weight:800; font-size:16px; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
-    <button onclick="addToGCal()" style="border:none; background:var(--input-bg); border-radius:8px; width:32px; height:32px; cursor:pointer; color:#1D9E75; margin-right:8px; font-size:14px; transition:all 0.2s;" title="Tambahkan ke Google Calendar">📅</button>
-    <button onclick="dupCard()" style="border:none; background:var(--input-bg); border-radius:8px; width:32px; height:32px; cursor:pointer; color:#185FA5; margin-right:8px; font-size:14px; transition:all 0.2s;" title="Duplikat Konten">📄</button>
-    <button onclick="delCurCard()" style="border:none; background:var(--input-bg); border-radius:8px; width:32px; height:32px; cursor:pointer; color:#e24b4a; margin-right:12px; font-size:14px; transition:all 0.2s;" title="Hapus Konten">🗑️</button>
+    <button onclick="delCurCard()" aria-label="Hapus Konten" style="border:none; background:var(--input-bg); border-radius:8px; width:32px; height:32px; cursor:pointer; color:#e24b4a; margin-right:12px; display:grid; place-items:center; transition:all 0.2s;" title="Hapus Konten">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg>
+    </button>
     <button onclick="closeDP()" style="border:none; background:none; cursor:pointer; font-size:28px; color:var(--text-light); line-height:1; transition:color 0.2s;">×</button>
   </div>
   <div class="dp-body">
@@ -227,7 +242,7 @@
     <div class="dp-field"><span class="dp-fl">Prioritas</span>
       <div class="dp-fv">
         <select id="dp-furgency" onchange="dps('urgency',this.value)">
-          <option value="normal">⚪ Normal</option><option value="low">🐢 Santai</option><option value="med">⚡ Penting</option><option value="high">🔥 Mendesak</option>
+          <option value="normal">Normal</option><option value="low">Santai</option><option value="med">Penting</option><option value="high">Mendesak</option>
         </select>
       </div>
     </div>
@@ -238,11 +253,11 @@
       <div class="dp-field"><span class="dp-fl">Pekan Ke</span><div class="dp-fv"><select id="dp-fweek" onchange="dps('week',this.value)"><option value="1">Pekan 1</option><option value="2">Pekan 2</option><option value="3">Pekan 3</option><option value="4">Pekan 4</option><option value="5">Pekan 5</option></select></div></div>
     </div>
 
-    <div class="dp-field"><span class="dp-fl">Jenis</span><div class="dp-fv"><select id="dp-ftype" onchange="dpChType(this.value)"><option value="Video">Video</option><option value="Feed">Feed</option><option value="Story">Story</option><option value="Catatan">Catatan</option><option value="To-Do">To-Do</option></select></div></div>
+    <div class="dp-field"><span class="dp-fl">Jenis</span><div class="dp-fv"><select id="dp-ftype" onchange="dpChType(this.value)"><option value="Video">Video</option><option value="Desain">Desain</option><option value="Catatan">Catatan</option><option value="To-Do">To-Do</option></select></div></div>
     
     <div class="dp-field" id="dp-obj-container"><span class="dp-fl">Jalur</span>
       <div class="dp-fv">
-        <select id="dp-fobjective" onchange="dps('objective',this.value)"><option value="Konten">🪴 Konten Organik</option><option value="Boost">🚀 Boost</option><option value="Campaign">🎪 Campaign</option><option value="Ads">📢 Ads</option></select>
+        <select id="dp-fobjective" onchange="dps('objective',this.value)"><option value="Konten">Konten Organik</option><option value="Boost">Boost</option><option value="Campaign">Campaign</option><option value="Ads">Ads</option></select>
       </div>
     </div>
 
@@ -262,12 +277,6 @@
     <div id="dp-notes-display" style="width:100%; min-height:100px; margin-top:12px; border:1px solid transparent; border-radius:12px; padding:14px; font-size:14px; background:var(--input-bg); white-space:pre-wrap; word-break:break-word; cursor:text; transition:all 0.2s; line-height:1.6;" onclick="editNotes()" title="Klik untuk mengedit naskah/catatan"></div>
     <textarea id="dp-notes" style="display:none; width:100%; height:150px; margin-top:12px; border:1px solid var(--primary); border-radius:12px; padding:14px; outline:none; font-family:inherit; font-size:14px; resize:vertical; background:var(--modal-bg); color:var(--text-main); line-height:1.6; box-shadow: 0 0 0 3px var(--primary-light);" onblur="saveNotes(this.value)" placeholder="Ketik narasi, catatan kreatif, atau paste link di sini..."></textarea>
     
-    <div style="margin-top:28px; font-size:11px; color:var(--text-light); font-weight:800; letter-spacing:1px; border-bottom: 1px solid var(--input-border); padding-bottom:6px;">LAMPIRAN VISUAL</div>
-    <div id="dp-attachments" class="att-list"></div>
-    <button class="add-col-btn" style="margin-top:16px; border-style:solid;" onclick="addImageUrl()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px; margin-top:-2px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-      Tempel Link Gambar (Gratis)
-    </button>
   </div>
 </div>
 
@@ -293,8 +302,7 @@
       <div style="font-size:11px; color:var(--text-light); font-weight:700; margin-bottom:8px; letter-spacing:0.5px;">PILIH FORMAT</div>
       <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
         <button class="fi" id="btn-v" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('Video')">Video</button>
-        <button class="fi" id="btn-f" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('Feed')">Feed</button>
-        <button class="fi" id="btn-s" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('Story')">Story</button>
+        <button class="fi" id="btn-d" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('Desain')">Desain</button>
         <button class="fi" id="btn-c" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('Catatan')">Catatan</button>
         <button class="fi" id="btn-t" style="flex:1; cursor:pointer; margin-bottom:0; font-weight:600; padding:10px 0;" onclick="selType('To-Do')">To-Do</button>
       </div>
@@ -307,12 +315,12 @@
         </div>
         <div style="display:flex; gap:10px; margin-bottom:20px;">
           <select class="fi" id="m-week" style="flex:1; margin-bottom:0;" title="Pekan Ke"><option value="1">Pekan 1</option><option value="2">Pekan 2</option><option value="3">Pekan 3</option><option value="4">Pekan 4</option><option value="5">Pekan 5</option></select>
-          <select class="fi" id="m-urgency" style="flex:1; margin-bottom:0;" title="Prioritas"><option value="normal">⚪ Normal</option><option value="low">🐢 Santai</option><option value="med">⚡ Penting</option><option value="high">🔥 Mendesak</option></select>
+          <select class="fi" id="m-urgency" style="flex:1; margin-bottom:0;" title="Prioritas"><option value="normal">Normal</option><option value="low">Santai</option><option value="med">Penting</option><option value="high">Mendesak</option></select>
         </div>
       </div>
       
       <div style="display:flex; gap:10px; margin-bottom:8px;">
-        <select class="fi" id="m-objective" style="flex:1; margin-bottom:0;" title="Jalur Distribusi"><option value="Konten">🪴 Konten Organik</option><option value="Boost">🚀 Boost</option><option value="Campaign">🎪 Campaign</option><option value="Ads">📢 Ads</option></select>
+        <select class="fi" id="m-objective" style="flex:1; margin-bottom:0;" title="Jalur Distribusi"><option value="Konten">Konten Organik</option><option value="Boost">Boost</option><option value="Campaign">Campaign</option><option value="Ads">Ads</option></select>
         <select class="fi" id="m-status" style="flex:1; margin-bottom:0; font-weight:700;" title="Status Awal"></select>
       </div>
     </div>
@@ -328,11 +336,6 @@
     <div class="modal-head" id="bm-title" style="padding:20px 24px; font-weight:800; border-bottom:1px solid var(--input-border);">Klien / Brand Baru</div>
     <div class="modal-body" style="padding:24px;">
       <input class="fi" type="text" id="bm-name" placeholder="Ketik nama Brand..." style="font-size:16px; font-weight:600;"/>
-      <div style="font-size:11px; color:var(--text-light); font-weight:700; margin-bottom:8px; margin-top:8px; letter-spacing:0.5px;">WARNA IDENTITAS</div>
-      <div style="display:flex; align-items:center; gap:16px; background:var(--input-bg); padding:16px; border-radius:12px; border:1px solid var(--input-border);">
-        <input type="color" id="bm-color-wheel" style="width:44px; height:44px; border:none; cursor:pointer; border-radius:50%; padding:0; background:none;" oninput="syncColor(this.value, 'hex', 'bm')">
-        <input type="text" id="bm-color-hex" style="flex:1; border:none; background:transparent; font-family:monospace; font-weight:700; font-size:16px; outline:none; color:var(--text-main); text-transform:uppercase;" maxlength="7" oninput="syncColor(this.value, 'wheel', 'bm')">
-      </div>
     </div>
     <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
       <button class="btn-c" onclick="closeBrand()">Batal</button>
@@ -348,8 +351,8 @@
       <input class="fi" type="text" id="cm-name" placeholder="Ketik nama status (cth: Revisi)..." style="font-size:16px; font-weight:600;"/>
       <div style="font-size:11px; color:var(--text-light); font-weight:700; margin-bottom:8px; margin-top:8px; letter-spacing:0.5px;">WARNA KOLOM</div>
       <div style="display:flex; align-items:center; gap:16px; background:var(--input-bg); padding:16px; border-radius:12px; border:1px solid var(--input-border);">
-        <input type="color" id="cm-color-wheel" style="width:44px; height:44px; border:none; cursor:pointer; border-radius:50%; padding:0; background:none;" oninput="syncColor(this.value, 'hex', 'cm')">
-        <input type="text" id="cm-color-hex" style="flex:1; border:none; background:transparent; font-family:monospace; font-weight:700; font-size:16px; outline:none; color:var(--text-main); text-transform:uppercase;" maxlength="7" oninput="syncColor(this.value, 'wheel', 'cm')">
+        <input type="color" id="cm-color-wheel" style="width:44px; height:44px; border:none; cursor:pointer; border-radius:50%; padding:0; background:none;" oninput="syncColor(this.value, 'hex')">
+        <input type="text" id="cm-color-hex" style="flex:1; border:none; background:transparent; font-family:monospace; font-weight:700; font-size:16px; outline:none; color:var(--text-main); text-transform:uppercase;" maxlength="7" oninput="syncColor(this.value, 'wheel')">
       </div>
     </div>
     <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
@@ -410,12 +413,12 @@
               Upload Lokal (Max 5MB / GIF Support)
               <input type="file" accept="image/*" style="display:none;" id="file-bg-input" onchange="handleBgUpload(this)">
           </label>
-          <button class="btn-c" id="btn-repo" style="display:none;" onclick="startReposition()">📏 Atur Posisi (Drag)</button>
+          <button class="btn-c" id="btn-repo" style="display:none;" onclick="startReposition()">Atur Posisi (Geser)</button>
           <button class="btn-c" onclick="removeBg()">Hapus Wallpaper</button>
       </div>
     </div>
     <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; gap:12px; background:var(--input-bg); border-top:1px solid var(--input-border);">
-        <button class="btn-s" onclick="closeThemeModal()">Tutup Pengaturan</button>
+        <button class="btn-s" onclick="closeThemeModal()">Tutup</button>
     </div>
   </div>
 </div>
@@ -460,6 +463,27 @@
     <div class="modal-body" id="team-list" style="padding:24px; max-height:400px; overflow-y:auto;"></div>
     <div class="modal-foot" style="padding:16px 24px; display:flex; justify-content:flex-end; background:var(--input-bg); border-top:1px solid var(--input-border);">
         <button class="btn-s" onclick="closeTeamModal()">Selesai</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="sync-audit-ov" onclick="if(event.target===this) closeSyncAudit()">
+  <div class="modal sync-audit-modal">
+    <div class="sync-audit-header">
+      <div>
+        <div class="sync-audit-title">Tinjauan Sinkronisasi</div>
+        <div id="sync-audit-last-run" class="sync-audit-meta">Audit belum dimuat</div>
+      </div>
+      <button class="icon-btn" onclick="closeSyncAudit()" aria-label="Tutup tinjauan audit" title="Tutup">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    </div>
+    <div class="sync-audit-body">
+      <p class="sync-audit-intro">Temuan hanya berupa saran. Tidak ada kartu yang dihapus otomatis. Arsip dan penghapusan permanen hanya berlaku setelah Anda memilihnya.</p>
+      <div class="sync-audit-toolbar">
+        <button class="btn-c" id="sync-audit-refresh-btn" onclick="refreshSyncAudit()">Muat ulang laporan</button>
+      </div>
+      <div id="sync-audit-list" class="sync-audit-list" aria-live="polite"></div>
     </div>
   </div>
 </div>
