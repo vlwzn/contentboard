@@ -350,7 +350,43 @@ window.joinProject = async (joinId) => {
 window.openWsModal = (isEdit = false) => { const titleEl = document.getElementById('ws-title'), inputEl = document.getElementById('ws-name'), delBtn = document.getElementById('ws-del-btn'); if (isEdit) { if(!isOwner) return showMsg("Hanya pemilik yang dapat mengubah nama/menghapus project."); editWsId = activeWsId; titleEl.textContent = "Edit Project"; const w = workspaces.find(w => w.id === activeWsId); inputEl.value = w ? w.name : ''; delBtn.style.display = "block"; } else { editWsId = null; titleEl.textContent = "Project Baru"; inputEl.value = ''; delBtn.style.display = "none"; } document.getElementById('ws-ov').classList.add('show'); };
 window.closeWsModal = () => document.getElementById('ws-ov').classList.remove('show');
 
-window.saveWs = () => { const name = document.getElementById('ws-name').value.trim(); if(!name) return; if (editWsId) { const ws = workspaces.find(w => w.id === editWsId); if(ws) ws.name = name; set(ref(db, `users/${myUser.id}/workspaces`), workspaces); set(ref(db, `content_board_data_${editWsId}/meta/name`), name); closeWsModal(); } else { const customId = 'ws_' + Date.now(); workspaces.push({id: customId, name: name}); set(ref(db, `users/${myUser.id}/workspaces`), workspaces); set(ref(db, `content_board_data_${customId}/meta`), { name: name, owner: myUser.id }); set(ref(db, `board_members/${customId}/${myUser.id}`), { role: 'owner' }); closeWsModal(); localStorage.setItem('cb_active_ws', customId); switchWorkspace(customId, true); } };
+window.saveWs = async () => {
+    const name = document.getElementById('ws-name').value.trim();
+    if(!name || !myUser) return;
+
+    const button = document.querySelector('#ws-ov .btn-s');
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Menyimpan...';
+
+    try {
+        if (editWsId) {
+            const ws = workspaces.find(w => w.id === editWsId);
+            if (!ws) throw new Error('Project yang akan diubah tidak ditemukan.');
+            const updatedWorkspaces = workspaces.map(w => w.id === editWsId ? {...w, name} : w);
+            await set(ref(db, `content_board_data_${editWsId}/meta/name`), name);
+            await set(ref(db, `users/${myUser.id}/workspaces`), updatedWorkspaces);
+            workspaces = updatedWorkspaces;
+            closeWsModal();
+        } else {
+            const customId = 'ws_' + Date.now();
+            const updatedWorkspaces = [...workspaces, {id: customId, name}];
+            await set(ref(db, `board_members/${customId}/${myUser.id}`), { role: 'owner' });
+            await set(ref(db, `content_board_data_${customId}/meta`), { name, owner: myUser.id });
+            await set(ref(db, `users/${myUser.id}/workspaces`), updatedWorkspaces);
+            workspaces = updatedWorkspaces;
+            closeWsModal();
+            localStorage.setItem('cb_active_ws', customId);
+            switchWorkspace(customId, true);
+        }
+    } catch(error) {
+        console.error('Project save failed:', error);
+        showMsg('Gagal menyimpan project: ' + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+    }
+};
 
 window.confirmDelWs = () => { showMsg("Hapus project ini beserta seluruh kontennya secara permanen?", () => { workspaces = workspaces.filter(w => w.id !== activeWsId); set(ref(db, `users/${myUser.id}/workspaces`), workspaces); remove(ref(db, `content_board_data_${activeWsId}`)); remove(ref(db, `board_members/${activeWsId}`)); closeWsModal(); if(workspaces.length > 0) switchWorkspace(workspaces[0].id, true); }); };
 
@@ -549,6 +585,7 @@ function updateAssigneeDropdowns() {
 }
 
 let syncDebounce;
+let scheduledBoardWrite = null;
 let pendingBoardWrite = Promise.resolve();
 let boardWritesInFlight = 0;
 
@@ -556,20 +593,34 @@ function boardDataPath(wsId) {
     return wsId === 'default' ? 'content_board_data' : `content_board_data_${wsId}`;
 }
 
-function queueBoardWrite(wsId) {
+function getBoardDataSnapshot() {
+    return JSON.parse(JSON.stringify({ brands, cards, columns, creators }));
+}
+
+function queueBoardWrite(wsId, boardData = getBoardDataSnapshot()) {
     boardWritesInFlight++;
     const dbPath = boardDataPath(wsId);
-    const write = pendingBoardWrite.catch(() => {}).then(() => update(ref(db, dbPath), { brands, cards, columns, creators }));
+    const write = pendingBoardWrite.catch(() => {}).then(() => update(ref(db, dbPath), boardData));
     pendingBoardWrite = write.finally(() => { boardWritesInFlight--; });
     return pendingBoardWrite;
 }
 
 window.syncToFirebase = function() {
     clearTimeout(syncDebounce);
+    if(!activeWsId) {
+        scheduledBoardWrite = null;
+        return;
+    }
+    scheduledBoardWrite = { wsId: activeWsId, data: getBoardDataSnapshot() };
     syncDebounce = setTimeout(() => {
         syncDebounce = null;
-        if(!activeWsId) return;
-        queueBoardWrite(activeWsId).catch(error => console.error('Board sync failed:', error));
+        const pending = scheduledBoardWrite;
+        scheduledBoardWrite = null;
+        if(!pending) return;
+        queueBoardWrite(pending.wsId, pending.data).catch(error => {
+            console.error('Board sync failed:', error);
+            showMsg('Gagal menyinkronkan board: ' + error.message);
+        });
     }, 500);
 };
 
@@ -588,7 +639,9 @@ window.refreshBoard = async () => {
         if(syncDebounce) {
             clearTimeout(syncDebounce);
             syncDebounce = null;
-            await queueBoardWrite(wsId);
+            const pending = scheduledBoardWrite;
+            scheduledBoardWrite = null;
+            if(pending) await queueBoardWrite(pending.wsId, pending.data);
         } else if(boardWritesInFlight > 0) {
             await pendingBoardWrite;
         }
@@ -1287,10 +1340,11 @@ window.closeAdd = () => document.getElementById('add-ov').classList.remove('show
 window.selType = (t) => { mType=t; const buttonIds = {Video:'v', Desain:'d', Catatan:'c', 'To-Do':'t'}; document.querySelectorAll('#add-ov .fi[id^="btn-"]').forEach(x=>x.style.background='transparent'); document.getElementById('btn-' + buttonIds[t]).style.background='var(--primary-light)'; document.getElementById('m-datetime-container').style.display=(t==='Catatan'||t==='To-Do')?'none':'block'; document.getElementById('m-objective').parentElement.style.display=(t==='Catatan'||t==='To-Do')?'none':'flex'; renderMStatus(t,''); };
 window.renderMStatus = (t,cur) => { const s=document.getElementById('m-status'); if(s) { s.innerHTML=columns.map(x=>`<option value="${x.id}">${x.lbl}</option>`).join(''); if(cur)s.value=cur; } };
 
-window.saveCard = () => { 
-    const t=document.getElementById('m-title').value.trim(); 
-    if(!t)return; 
-    cards.unshift({ id:'c'+Date.now(), title:t, bId:document.getElementById('m-brand').value, type:mType, date:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-date').value, time:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-time').value, week:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-week').value, urgency:document.getElementById('m-urgency').value, objective:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-objective').value, status:document.getElementById('m-status').value, creator: document.getElementById('m-creator').value, assignee: document.getElementById('m-assignee').value, notes:'',images:[],steps:[] }); 
+window.saveCard = () => {
+    const t = document.getElementById('m-title').value.trim();
+    if (!t) return showMsg('Masukkan judul konten terlebih dahulu.');
+    if (!activeWsId) return showMsg('Pilih project sebelum membuat konten.');
+    cards.unshift({ id:'c'+Date.now(), title:t, bId:document.getElementById('m-brand').value, type:mType, date:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-date').value, time:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-time').value, week:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-week').value, urgency:document.getElementById('m-urgency').value, objective:(mType==='Catatan'||mType==='To-Do')?'':document.getElementById('m-objective').value, status:document.getElementById('m-status').value, creator: document.getElementById('m-creator').value, assignee: document.getElementById('m-assignee').value, notes:'',images:[],steps:[] });
     closeAdd(); 
     syncToFirebase(); 
     renderBoard(); 
@@ -1575,17 +1629,7 @@ dpEl.addEventListener('touchend', e => { let dx = e.changedTouches[0].screenX - 
 
 // --- SETUP PWA INSTAN ---
 const setupPWA = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512; canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#534AB7';
-    ctx.fillRect(0, 0, 512, 512);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 300px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('C', 256, 280);
-    const iconBase64 = canvas.toDataURL('image/png');
+    const iconUrl = new URL('./assets/contentboard-icon.png', window.location.href).href;
     
     let appleIcon = document.getElementById('pwa-apple-icon');
     if (!appleIcon) {
@@ -1594,7 +1638,7 @@ const setupPWA = () => {
         appleIcon.id = 'pwa-apple-icon';
         document.head.appendChild(appleIcon);
     }
-    appleIcon.href = iconBase64;
+    appleIcon.href = iconUrl;
     
     const manifest = {
         name: "ContentBoard Pro",
@@ -1602,8 +1646,8 @@ const setupPWA = () => {
         start_url: window.location.pathname,
         display: "standalone",
         background_color: "#f5f5f3",
-        theme_color: "#534AB7",
-        icons: [{ src: iconBase64, sizes: "512x512", type: "image/png" }]
+        theme_color: "#666666",
+        icons: [{ src: iconUrl, sizes: "512x512", type: "image/png" }]
     };
     const manifestStr = JSON.stringify(manifest);
     
