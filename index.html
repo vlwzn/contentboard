@@ -14,8 +14,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL,GRAD,opsz,wght@0,0,20,400" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -79,7 +77,7 @@
   </div>
 </div>
 
-<div class="app" id="main-app">
+<div class="app" id="main-app" data-page="board">
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand">
@@ -125,10 +123,10 @@
     </div>
 
     <div class="top-actions">
-      <div id="total-card-display" class="total-count">
+      <div id="total-card-display" class="total-count board-only">
           Total: 0
       </div>
-      <input type="text" id="search-input" class="search-input topbtn" placeholder="Cari konten..." oninput="handleSearch()">
+      <input type="text" id="search-input" class="search-input topbtn board-only" placeholder="Cari konten..." oninput="handleSearch()">
       <button class="icon-btn" id="refresh-board-btn" onclick="refreshBoard()" aria-label="Sinkronkan board" title="Sinkronkan board">
           <span class="material-symbols-outlined" aria-hidden="true">sync</span>
       </button>
@@ -136,7 +134,7 @@
           <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
       </button>
       
-      <div style="position: relative;">
+      <div class="board-only" style="position: relative;">
           <button class="icon-btn" onclick="toggleMenu('filter-panel', event)" id="filter-btn" aria-label="Filter" title="Filter">
               <span class="material-symbols-outlined" aria-hidden="true">filter_alt</span>
           </button>
@@ -182,14 +180,81 @@
               </div>
           </div>
       </div>
-      <button class="icon-btn" onclick="exportToPDF()" aria-label="Ekspor PDF" title="Ekspor PDF">
-          <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+      <button id="dashboard-nav-btn" class="topbtn page-nav-btn" onclick="showPage('dashboard')">
+          <span class="material-symbols-outlined" aria-hidden="true">analytics</span>
+          Dashboard
+      </button>
+      <button id="board-nav-btn" class="topbtn page-nav-btn" onclick="showPage('board')">
+          <span class="material-symbols-outlined" aria-hidden="true">view_kanban</span>
+          Papan Konten
       </button>
     </div>
   </div>
   
   <div class="brand-tabs" id="brand-tabs"></div>
   <div class="board-wrap" id="board-wrap"><div class="board" id="board"></div></div>
+
+  <main id="dashboard-page" class="dashboard-page" aria-labelledby="dashboard-title">
+    <div class="dashboard-content">
+      <header class="dashboard-heading">
+        <div>
+          <div class="dashboard-eyebrow">RINGKASAN PROJECT</div>
+          <h1 id="dashboard-title">Dashboard Konten</h1>
+          <p id="dashboard-project-name">Memuat project...</p>
+        </div>
+        <div class="dashboard-heading-actions">
+          <select id="dashboard-pic-filter" class="fi dashboard-pic-filter" aria-label="Filter PIC" title="Filter PIC" onchange="renderDashboard()">
+            <option value="all">Semua PIC</option>
+          </select>
+        </div>
+      </header>
+
+      <section class="dashboard-stat-grid" aria-label="Ringkasan konten">
+        <article class="dashboard-stat">
+          <span id="dashboard-total-label" class="dashboard-stat-label">Total Konten Aktif</span>
+          <strong id="dashboard-total">0</strong>
+        </article>
+        <article class="dashboard-stat">
+          <span class="dashboard-stat-label">Brand dengan Konten</span>
+          <strong id="dashboard-brand-total">0</strong>
+        </article>
+        <article class="dashboard-stat">
+          <span class="dashboard-stat-label">PIC Terlibat</span>
+          <strong id="dashboard-pic-total">0</strong>
+        </article>
+      </section>
+
+      <section class="dashboard-breakdown-grid" aria-label="Ringkasan berdasarkan brand, PIC, dan status">
+        <article class="dashboard-panel">
+          <div class="dashboard-panel-heading">
+            <div>
+              <h2>Konten per Brand</h2>
+              <p>Jumlah konten aktif di setiap brand</p>
+            </div>
+          </div>
+          <div id="dashboard-brand-list" class="dashboard-breakdown-list"></div>
+        </article>
+        <article class="dashboard-panel">
+          <div class="dashboard-panel-heading">
+            <div>
+              <h2>Konten per PIC</h2>
+              <p>Berdasarkan PIC yang ditugaskan</p>
+            </div>
+          </div>
+          <div id="dashboard-pic-list" class="dashboard-breakdown-list"></div>
+        </article>
+        <article class="dashboard-panel">
+          <div class="dashboard-panel-heading">
+            <div>
+              <h2>Status Konten</h2>
+              <p>Distribusi konten berdasarkan status saat ini</p>
+            </div>
+          </div>
+          <div id="dashboard-status-list" class="dashboard-breakdown-list"></div>
+        </article>
+      </section>
+    </div>
+  </main>
 
   <div id="empty-state" style="display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px;">
     <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.8; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">✨</div>

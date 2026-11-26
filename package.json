@@ -1,0 +1,11 @@
+{
+  "name": "contentboard",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --open \"/?view=dashboard\""
+  },
+  "devDependencies": {
+    "vite": "^8.3.8"
+  }
+}

@@ -25,6 +25,7 @@ let sharedWorkspaces = [];
 let activeWsId = null;
 let isOwner = true; 
 let wsMembers = {}; 
+let currentPage = new URLSearchParams(window.location.search).get('view') === 'dashboard' ? 'dashboard' : 'board';
 
 let unsubscribeWs = null;
 let unsubscribeSharedWs = null;
@@ -244,6 +245,13 @@ function checkAndRenderWs() {
     renderWsSelector();
     const e = document.getElementById('empty-state'), b = document.getElementById('board-wrap'), t = document.getElementById('brand-tabs'), f = document.getElementById('fab-add');
     if (workspaces.length === 0 && sharedWorkspaces.length === 0) {
+        if (currentPage === 'dashboard') {
+            currentPage = 'board';
+            const url = new URL(window.location.href);
+            url.searchParams.delete('view');
+            window.history.replaceState({ view: 'board' }, '', url);
+            renderPageView();
+        }
         membersLoadVersion++;
         if (unsubscribeBoard) {
             unsubscribeBoard();
@@ -257,7 +265,7 @@ function checkAndRenderWs() {
         wsMembers = {};
         e.style.display = 'flex'; b.style.display = 'none'; t.style.display = 'none'; if(f) f.style.display = 'none';
     } else {
-        e.style.display = 'none'; b.style.display = 'flex'; t.style.display = 'flex'; if(f) f.style.display = 'flex';
+        e.style.display = 'none'; b.style.display = 'flex'; t.style.display = 'flex'; if(f) f.style.display = currentPage === 'dashboard' ? 'none' : 'flex';
         const savedWs = localStorage.getItem('cb_active_ws');
         let targetWsId, targetIsOwner;
         if (workspaces.some(w => w.id === savedWs)) {
@@ -1222,6 +1230,117 @@ window.showCtxMenu = (e, type, id) => {
 };
 
 window.cols = (t) => columns; 
+function renderPageView() {
+    const appShell = document.getElementById('main-app');
+    if (!appShell) return;
+    appShell.dataset.page = currentPage;
+    const addButton = document.getElementById('fab-add');
+    if (addButton) addButton.style.display = currentPage === 'dashboard' || (!workspaces.length && !sharedWorkspaces.length) ? 'none' : 'flex';
+    if (currentPage === 'dashboard' && window.closeDP) window.closeDP();
+    if (currentPage === 'dashboard' && window.renderDashboard) window.renderDashboard();
+}
+
+window.showPage = (page) => {
+    if (page !== 'board' && page !== 'dashboard') return;
+    currentPage = page;
+    const url = new URL(window.location.href);
+    if (page === 'dashboard') url.searchParams.set('view', 'dashboard');
+    else url.searchParams.delete('view');
+    window.history.pushState({ view: page }, '', url);
+    renderPageView();
+};
+
+window.addEventListener('popstate', () => {
+    currentPage = new URLSearchParams(window.location.search).get('view') === 'dashboard' ? 'dashboard' : 'board';
+    renderPageView();
+});
+
+renderPageView();
+
+function dashboardEscape(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+}
+
+window.renderDashboard = () => {
+    const activeCards = cards.filter(card => !card.syncAuditArchived);
+    const picFilter = document.getElementById('dashboard-pic-filter');
+    const previousPic = picFilter.value || 'all';
+    const picOptions = new Map();
+    activeCards.forEach(card => {
+        if (card.assignee && !picOptions.has(card.assignee)) {
+            picOptions.set(card.assignee, wsMembers[card.assignee]?.name || card.assignee);
+        }
+    });
+    picFilter.innerHTML = '<option value="all">Semua PIC</option>' + [...picOptions.entries()]
+        .sort((a, b) => a[1].localeCompare(b[1], 'id'))
+        .map(([id, name]) => `<option value="${dashboardEscape(id)}">${dashboardEscape(name)}</option>`)
+        .join('');
+    picFilter.value = picOptions.has(previousPic) ? previousPic : 'all';
+
+    const selectedPic = picFilter.value;
+    const filteredCards = selectedPic === 'all'
+        ? activeCards
+        : activeCards.filter(card => card.assignee === selectedPic);
+    const knownBrands = new Map(brands.map(brand => [brand.id, brand.n]));
+    const brandCounts = new Map(brands.map(brand => [brand.id, 0]));
+    const picCounts = new Map();
+    const statusCounts = new Map();
+    const knownStatuses = new Set(columns.map(column => column.id));
+
+    filteredCards.forEach(card => {
+        if (knownBrands.has(card.bId)) brandCounts.set(card.bId, (brandCounts.get(card.bId) || 0) + 1);
+        if (card.assignee) picCounts.set(card.assignee, (picCounts.get(card.assignee) || 0) + 1);
+
+        const statusId = card.status && knownStatuses.has(card.status) ? card.status : '';
+        statusCounts.set(statusId, (statusCounts.get(statusId) || 0) + 1);
+    });
+
+    document.getElementById('dashboard-total-label').textContent = selectedPic === 'all' ? 'Total Konten Aktif' : 'Konten PIC Terpilih';
+    document.getElementById('dashboard-total').textContent = filteredCards.length.toLocaleString('id-ID');
+    document.getElementById('dashboard-brand-total').textContent = [...brandCounts.values()].filter(count => count > 0).length.toLocaleString('id-ID');
+    document.getElementById('dashboard-pic-total').textContent = picCounts.size.toLocaleString('id-ID');
+
+    const activeWorkspace = workspaces.find(workspace => workspace.id === activeWsId)
+        || sharedWorkspaces.find(workspace => workspace.id === activeWsId);
+    document.getElementById('dashboard-project-name').textContent = activeWorkspace?.name || 'Project Utama';
+
+    const brandEntries = brands.map(brand => ({ label: brand.n || 'Tanpa nama', count: brandCounts.get(brand.id) || 0 }));
+
+    const picEntries = [...picCounts.entries()].map(([id, count]) => ({
+        label: wsMembers[id]?.name || id,
+        count
+    })).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'id'));
+
+    const statusEntries = columns.map(column => ({
+        label: column.lbl || 'Tanpa nama',
+        count: statusCounts.get(column.id) || 0
+    }));
+    const unknownStatusCount = statusCounts.get('') || 0;
+    if (unknownStatusCount || statusEntries.length === 0) statusEntries.push({ label: 'Tanpa status', count: unknownStatusCount });
+
+    const renderBreakdown = (elementId, entries) => {
+        const element = document.getElementById(elementId);
+        if (!entries.length) {
+            element.innerHTML = '<div class="dashboard-breakdown-empty">Belum ada data</div>';
+            return;
+        }
+        const maxCount = Math.max(...entries.map(entry => entry.count), 1);
+        element.innerHTML = entries.map(entry => `
+            <div class="dashboard-breakdown-row">
+                <span class="dashboard-breakdown-name" title="${dashboardEscape(entry.label)}">${dashboardEscape(entry.label)}</span>
+                <span class="dashboard-breakdown-count">${entry.count.toLocaleString('id-ID')}</span>
+                <div class="dashboard-bar-track" aria-hidden="true"><div class="dashboard-bar-fill" style="width:${Math.round(entry.count / maxCount * 100)}%"></div></div>
+            </div>
+        `).join('');
+    };
+
+    renderBreakdown('dashboard-brand-list', brandEntries);
+    renderBreakdown('dashboard-pic-list', picEntries);
+    renderBreakdown('dashboard-status-list', statusEntries);
+};
+
 window.renderAll = () => { renderTabs(); renderBoard(); };
 
 let draggedBrandIdx = null;
@@ -1282,6 +1401,7 @@ window.renderBoard = () => {
         if (scrollTop !== undefined) body.scrollTop = scrollTop;
     });
     boardWrap.scrollLeft = boardScrollLeft;
+    if (currentPage === 'dashboard') window.renderDashboard();
 };
 
 window.cardH = (c) => { 
@@ -1618,8 +1738,6 @@ document.addEventListener('touchend', (e) => {
     touchDragCard = null;
     isLongPressed = false;
 });
-
-window.exportToPDF=()=>{ try { const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.setFontSize(16); doc.text("ContentPlan - Pro", 14, 20); doc.setFontSize(10); doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 28); const visCards = window.getFilteredCards(); const data=visCards.map(c=>[ c.title, brands.find(b=>b.id===c.bId)?.n||'-', contentTypeLabel(c.type), (c.objective || '-'), columns.find(x=>x.id === c.status)?.lbl || c.status, (c.date ? new Date(c.date).toLocaleDateString('id-ID') : '-') ]); doc.autoTable({ head:[['Judul Konten','Brand','Jenis','Jalur','Status', 'Jadwal']], body:data, startY:35, theme: 'grid', headStyles: { fillColor: [83, 74, 183] } }); doc.save("Content_Plan.pdf"); } catch(err) { showMsg("Gagal membuat PDF."); } };
 
 window.syncColor = (v, idS) => { cCol=v; const el = document.getElementById('cm-color-' + idS); if(el) el.value = v; };
 
